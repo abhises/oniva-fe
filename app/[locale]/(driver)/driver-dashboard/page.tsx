@@ -48,11 +48,11 @@ export default function DriverDashboard({ params }: { params: { locale: string }
     return () => clearInterval(interval)
   }, [isOnline, request])
 
-  const handleAccept = async (requestId: number) => {
+  const handleAccept = async (requestId: string) => {
     await request(() => apiClient.acceptRequest(requestId))
   }
 
-  const handleReject = async (requestId: number) => {
+  const handleReject = async (requestId: string) => {
     await request(() => apiClient.rejectRequest(requestId, 'Too far away'))
   }
 

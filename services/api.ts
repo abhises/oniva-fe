@@ -6,7 +6,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
-  messageKey?: string; // Backend returns messageKey
+  messageKey?: string;
   data?: T;
   code?: string;
 }
@@ -15,6 +15,19 @@ interface ApiError {
   messageKey?: string;
   message?: string;
   statusCode?: number;
+}
+
+interface FareEstimateData {
+  bookingType: 'point-to-point' | 'hourly';
+  distance?: number;
+  hours?: number;
+  pickupTime: string;
+  date?: string;
+}
+
+interface RateTripData {
+  rating: number;
+  review?: string;
 }
 
 class ApiClient {
@@ -43,86 +56,202 @@ class ApiClient {
       (error: AxiosError<ApiResponse>) => {
         if (error.response?.status === 401) {
           useAuthStore.getState().logout();
-          window.location.href = '/en/login'; // Redirect to login
+          if (typeof window !== 'undefined') {
+            window.location.href = '/en/login';
+          }
         }
         return Promise.reject(error);
       }
     );
   }
 
-  // Auth endpoints
-  async register(phone: string, fullName: string, password: string, role: string) {
-    const { data } = await this.instance.post<ApiResponse>('/api/auth/register', {
-      phone,
-      fullName,
-      password,
-      role,
-    });
-    return data;
+  // ============================================================================
+  // AUTH ENDPOINTS
+  // ============================================================================
+
+  async register(data: {
+    phone: string;
+    fullName: string;
+    password: string;
+    role: 'client' | 'driver';
+    language?: string;
+  }) {
+    const { data: response } = await this.instance.post<ApiResponse>(
+      '/api/auth/register',
+      data
+    );
+    return response;
   }
 
-  async login(phone: string, password: string) {
-    const { data } = await this.instance.post<ApiResponse>('/api/auth/login', {
-      phone,
-      password,
-    });
-    return data;
+  async login(data: { phone: string; password: string }) {
+    const { data: response } = await this.instance.post<ApiResponse>(
+      '/api/auth/login',
+      data
+    );
+    return response;
   }
 
-  // Client endpoints
-  async getProfile() {
+  async verifyToken(token: string) {
+    const { data: response } = await this.instance.post<ApiResponse>(
+      '/api/auth/verify-token',
+      { token }
+    );
+    return response;
+  }
+
+  // ============================================================================
+  // CLIENT ENDPOINTS
+  // ============================================================================
+
+  async getClientProfile() {
     const { data } = await this.instance.get<ApiResponse>('/api/client/profile');
     return data;
   }
 
-  async estimateFare(bookingType: string, distance: number, pickupTime: string) {
-    const { data } = await this.instance.post<ApiResponse>('/api/client/estimate-fare', {
-      bookingType,
-      distance,
-      pickupTime,
-    });
+  async estimateFare(fareData: FareEstimateData) {
+    const { data } = await this.instance.post<ApiResponse>(
+      '/api/client/estimate-fare',
+      fareData
+    );
     return data;
   }
 
   async bookTrip(tripData: any) {
-    const { data } = await this.instance.post<ApiResponse>('/api/client/book-trip', tripData);
+    const { data } = await this.instance.post<ApiResponse>(
+      '/api/client/book-trip',
+      tripData
+    );
     return data;
   }
 
-  async getTrips() {
-    const { data } = await this.instance.get<ApiResponse>('/api/client/trips');
+  async getTrips(params?: { limit?: number; offset?: number }) {
+    const { data } = await this.instance.get<ApiResponse>(
+      '/api/client/trips',
+      { params }
+    );
     return data;
   }
 
-  // Driver endpoints
+  async getTripDetails(tripId: string) {
+    const { data } = await this.instance.get<ApiResponse>(
+      `/api/client/trips/${tripId}`
+    );
+    return data;
+  }
+
+  async rateTrip(tripId: string, ratingData: RateTripData) {
+    const { data } = await this.instance.post<ApiResponse>(
+      `/api/client/trips/${tripId}/rate`,
+      ratingData
+    );
+    return data;
+  }
+
+  async cancelTrip(tripId: string, reason?: string) {
+    const { data } = await this.instance.post<ApiResponse>(
+      `/api/client/trips/${tripId}/cancel`,
+      { reason }
+    );
+    return data;
+  }
+
+  // ============================================================================
+  // DRIVER ENDPOINTS
+  // ============================================================================
+
   async createDriverProfile(profileData: any) {
-    const { data } = await this.instance.post<ApiResponse>('/api/driver/profile', profileData);
+    const { data } = await this.instance.post<ApiResponse>(
+      '/api/driver/profile',
+      profileData
+    );
     return data;
   }
 
-  async updateLocation(latitude: number, longitude: number) {
-    const { data } = await this.instance.post<ApiResponse>('/api/driver/location', {
-      latitude,
-      longitude,
-    });
+  async getDriverProfile() {
+    const { data } = await this.instance.get<ApiResponse>(
+      '/api/driver/profile'
+    );
+    return data;
+  }
+
+  async updateLocation(locationData: { latitude: number; longitude: number }) {
+    const { data } = await this.instance.post<ApiResponse>(
+      '/api/driver/location',
+      locationData
+    );
     return data;
   }
 
   async setOnlineStatus(isOnline: boolean) {
-    const { data } = await this.instance.post<ApiResponse>('/api/driver/status', {
-      isOnline,
-    });
+    const { data } = await this.instance.post<ApiResponse>(
+      '/api/driver/status',
+      { isOnline }
+    );
     return data;
   }
 
-  // Admin endpoints
+  async getPendingRequests() {
+    const { data } = await this.instance.get<ApiResponse>(
+      '/api/driver/pending-requests'
+    );
+    return data;
+  }
+
+  async acceptRequest(requestId: string) {
+    const { data } = await this.instance.post<ApiResponse>(
+      `/api/driver/requests/${requestId}/accept`,
+      {}
+    );
+    return data;
+  }
+
+  async rejectRequest(requestId: string, reason?: string) {
+    const { data } = await this.instance.post<ApiResponse>(
+      `/api/driver/requests/${requestId}/reject`,
+      { reason }
+    );
+    return data;
+  }
+
+  async startTrip(tripId: string) {
+    const { data } = await this.instance.post<ApiResponse>(
+      `/api/driver/trips/${tripId}/start`,
+      {}
+    );
+    return data;
+  }
+
+  async endTrip(tripId: string, tripData: any) {
+    const { data } = await this.instance.post<ApiResponse>(
+      `/api/driver/trips/${tripId}/end`,
+      tripData
+    );
+    return data;
+  }
+
+  async getEarnings(params: { startDate: string; endDate: string }) {
+    const { data } = await this.instance.get<ApiResponse>(
+      '/api/driver/earnings',
+      { params }
+    );
+    return data;
+  }
+
+  // ============================================================================
+  // ADMIN ENDPOINTS
+  // ============================================================================
+
   async getAdminDashboard() {
-    const { data } = await this.instance.get<ApiResponse>('/api/admin/dashboard');
+    const { data } = await this.instance.get<ApiResponse>(
+      '/api/admin/dashboard'
+    );
     return data;
   }
 
-  async getDrivers() {
-    const { data } = await this.instance.get<ApiResponse>('/api/admin/drivers');
+  async getAdminDrivers() {
+    const { data } = await this.instance.get<ApiResponse>(
+      '/api/admin/drivers'
+    );
     return data;
   }
 
@@ -132,6 +261,47 @@ class ApiClient {
       {}
     );
     return data;
+  }
+
+  async rejectDriver(driverId: number, reason?: string) {
+    const { data } = await this.instance.post<ApiResponse>(
+      `/api/admin/drivers/${driverId}/reject`,
+      { reason }
+    );
+    return data;
+  }
+
+  async suspendDriver(driverId: number, reason?: string) {
+    const { data } = await this.instance.post<ApiResponse>(
+      `/api/admin/drivers/${driverId}/suspend`,
+      { reason }
+    );
+    return data;
+  }
+
+  // ============================================================================
+  // UTILITY METHODS
+  // ============================================================================
+
+  /**
+   * Get axios instance for custom requests
+   */
+  getInstance() {
+    return this.instance;
+  }
+
+  /**
+   * Set authorization token manually
+   */
+  setToken(token: string) {
+    this.instance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
+
+  /**
+   * Clear authorization token
+   */
+  clearToken() {
+    delete this.instance.defaults.headers.common['Authorization'];
   }
 }
 

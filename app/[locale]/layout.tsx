@@ -10,7 +10,7 @@ export default function LocaleLayout({
 }) {
   return (
     <div>
-      <Header />
+      <Header locale={params.locale} />
       <main className="min-h-screen bg-gray-50">
         {children}
       </main>
