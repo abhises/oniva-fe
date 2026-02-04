@@ -1,0 +1,73 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "logout": "Déconnexion"
+  },
+  "errors": {
+    "INVALID_CREDENTIALS": "Numéro de téléphone ou mot de passe invalide",
+    "USER_EXISTS": "L'utilisateur existe déjà",
+    "USER_NOT_FOUND": "Utilisateur non trouvé",
+    "UNAUTHORIZED": "Accès non autorisé",
+    "SERVER_ERROR": "Une erreur serveur s'est produite",
+    "NETWORK_ERROR": "Erreur réseau",
+    "INVALID_TOKEN": "Token invalide ou expiré",
+    "INSUFFICIENT_PERMISSIONS": "Permissions insuffisantes"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "phone": "Numéro de Téléphone",
+    "password": "Mot de Passe",
+    "confirmPassword": "Confirmer le Mot de Passe",
+    "fullName": "Nom Complet",
+    "role": "Type d'Utilisateur",
+    "client": "Client",
+    "driver": "Chauffeur",
+    "admin": "Administrateur",
+    "noAccount": "Vous n'avez pas de compte?",
+    "hasAccount": "Vous avez déjà un compte?",
+    "LOGIN_SUCCESS": "Connexion réussie!",
+    "REGISTER_SUCCESS": "Compte créé avec succès!",
+    "LOGOUT_SUCCESS": "Déconnecté avec succès"
+  },
+  "client": {
+    "bookTrip": "Réserver un Trajet",
+    "estimateFare": "Estimer le Tarif",
+    "myTrips": "Mes Trajets",
+    "pickupLocation": "Lieu de Départ",
+    "destination": "Destination",
+    "estimatedFare": "Tarif Estimé",
+    "tripCancelled": "Trajet Annulé",
+    "rateDriver": "Évaluer le Chauffeur",
+    "TRIP_BOOKED": "Trajet réservé avec succès!",
+    "TRIP_CANCELLED": "Trajet annulé avec succès!",
+    "FARE_ESTIMATED": "Tarif estimé avec succès!"
+  },
+  "driver": {
+    "goOnline": "Aller en Ligne",
+    "goOffline": "Se Déconnecter",
+    "pendingRequests": "Demandes en Attente",
+    "accept": "Accepter",
+    "reject": "Rejeter",
+    "earnings": "Gains",
+    "TRIP_ACCEPTED": "Trajet accepté!",
+    "TRIP_STARTED": "Trajet commencé!",
+    "TRIP_COMPLETED": "Trajet terminé!"
+  },
+  "admin": {
+    "dashboard": "Tableau de Bord",
+    "drivers": "Chauffeurs",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "suspend": "Suspendre",
+    "DRIVER_APPROVED": "Chauffeur approuvé avec succès!",
+    "DRIVER_REJECTED": "Chauffeur rejeté avec succès!"
+  }
+}
