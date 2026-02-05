@@ -15,14 +15,15 @@ export const useTranslation = () => {
 
   // Initialize i18n with current locale
   useEffect(() => {
-    if (i18n.language !== locale) {
-      i18n.changeLanguage(locale).then(() => {
-        setIsReady(true)
-      })
-    } else {
+  if (i18n.resolvedLanguage !== locale) {
+    i18n.changeLanguage(locale).then(() => {
       setIsReady(true)
-    }
-  }, [locale, i18n])
+    })
+  } else {
+    setIsReady(true)
+  }
+}, [locale, i18n])
+
 
   // Change language and update URL
   const changeLocale = useCallback(
