@@ -7,15 +7,18 @@ import { apiClient } from '@/services/api';
 import { useLocale } from './useLocale';
 import toast from 'react-hot-toast';
 
+type UserRole = "client" | "driver";
+
+
 export const useAuth = () => {
   const router = useRouter();
   const { user, token, setAuth, logout: storeLogout } = useAuthStore();
   const { t, locale } = useLocale();
 
   const register = useCallback(
-    async (phone: string, fullName: string, password: string, role: string) => {
+    async (phone: string, fullName: string, password: string, role: UserRole) => {
       try {
-        const response = await apiClient.register(phone, fullName, password, role);
+        const response = await apiClient.register({phone, fullName, password, role});
 
         if (response.success && response.data) {
           setAuth(response.data.user, response.data.token);
@@ -38,7 +41,7 @@ export const useAuth = () => {
   const login = useCallback(
     async (phone: string, password: string) => {
       try {
-        const response = await apiClient.login(phone, password);
+        const response = await apiClient.login({phone, password});
 
         if (response.success && response.data) {
           setAuth(response.data.user, response.data.token);
@@ -47,7 +50,7 @@ export const useAuth = () => {
           const message = response.messageKey ? t(response.messageKey) : response.message;
           toast.success(message || 'Login successful!');
           
-          router.push(`/${locale}/${response.data.user.role}/dashboard`);
+          router.push(`/${locale}/${response.data.user.role}/client-dashboard`);
         }
       } catch (error: any) {
         const errorKey = error.response?.data?.messageKey || 'errors.INVALID_CREDENTIALS';
