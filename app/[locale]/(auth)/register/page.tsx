@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
+import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/hooks/useAuth';
 import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
@@ -19,7 +19,7 @@ type SignupFormData = {
 };
 
 export default function SignupPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useLocale();
   const { register } = useAuth();
   const [formData, setFormData] = useState<SignupFormData>({
     phone: '',
