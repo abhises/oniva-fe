@@ -175,6 +175,7 @@ button:focus {
   @apply bg-gradient-to-r from-gray-100 to-gray-50;
 }
 
+
 /* Loading Animation */
 @keyframes spin {
   to {
