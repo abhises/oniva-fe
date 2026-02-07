@@ -17,8 +17,8 @@ export const LanguageSwitcher = ({ locale }: { locale: string }) => {
         href={getPathWithLocale('en')}
         className={`px-3 py-1 rounded text-sm font-semibold transition ${
           locale === 'en'
-            ? ' bg-gray-200 text-gray-700 hover:bg-gray-300'
-            : 'bg-primary text-white'
+            ?'bg-primary text-white' 
+            : ' bg-gray-200 text-gray-700 hover:bg-gray-300'
         }`}
       >
         EN
@@ -27,8 +27,8 @@ export const LanguageSwitcher = ({ locale }: { locale: string }) => {
         href={getPathWithLocale('fr')}
         className={`px-3 py-1 rounded text-sm font-semibold transition ${
           locale === 'fr'
-            ? ' bg-gray-200 text-gray-700 hover:bg-gray-300'
-            : 'bg-primary text-white'
+            ?'bg-primary text-white' 
+            : ' bg-gray-200 text-gray-700 hover:bg-gray-300'
         }`}
       >
         FR
