@@ -50,7 +50,7 @@ export const useAuth = () => {
           const message = response.messageKey ? t(response.messageKey) : response.message;
           toast.success(message || 'Login successful!');
           
-          router.push(`/${locale}/${response.data.user.role}/client-dashboard`);
+          router.push(`/${locale}/${response.data.user.role}/dashboard`);
         }
       } catch (error: any) {
         const errorKey = error.response?.data?.messageKey || 'errors.INVALID_CREDENTIALS';

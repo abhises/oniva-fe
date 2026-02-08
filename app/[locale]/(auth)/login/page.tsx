@@ -24,11 +24,11 @@ export default function LoginPage() {
     setMounted(true);
   }, []);
   // FIX: Redirect if authenticated
-  useEffect(() => {
-    if (mounted && isAuthenticated) {
-      router.push(`/${locale}/dashboard`);
-    }
-  }, [mounted, isAuthenticated, locale, router]);
+  // useEffect(() => {
+  //   if (mounted && isAuthenticated) {
+  //     router.push(`/${locale}/dashboard`);
+  //   }
+  // }, [mounted, isAuthenticated, locale, router]);
   // FIX: Show loading while translations are loading
   if (!mounted || !isReady) {
     return (
