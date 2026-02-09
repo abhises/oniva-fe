@@ -102,6 +102,13 @@
     "activeDrivers": "Chauffeurs Actifs",
     "completedTrips": "Trajets Complétés",
     "totalRevenue": "Revenus Totals",
-    "pendingApprovals": "Approbations de Chauffeurs en Attente"
+    "pendingApprovals": "Approbations de Chauffeurs en Attente",
+    "earnings":"Gains",
+    "totalUsers": "Utilisateurs Totals",
+    "totalDrivers": "Chauffeurs Totals",
+    "totalEarnings": "Gains Totals",
+    "totalTrips": "Trajets Totals",
+    "activeTrips": "Trajets Actifs",
+    "tool": "Outils"
   }
 }

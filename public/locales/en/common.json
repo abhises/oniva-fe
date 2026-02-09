@@ -102,6 +102,13 @@
     "activeDrivers": "Active Drivers",
     "completedTrips": "Completed Trips",
     "totalRevenue": "Total Revenue",
-    "pendingApprovals": "Pending Driver Approvals"
+    "pendingApprovals": "Pending Driver Approvals",
+    "earnings":"Earnings",
+    "totalUsers": "Total Users",
+    "totalDrivers": "Total Drivers",
+    "totalEarnings": "Total Earnings",
+    "totalTrips": "Total Trips",
+    "activeTrips": "Active Trips",
+    "tool": "Tools"
   }
 }
