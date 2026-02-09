@@ -29,7 +29,7 @@ export default function AdminDriversPage() {
 
   useEffect(() => {
     const fetchDrivers = async () => {
-      const result = await request<Driver[]>(() => apiClient.getDrivers())
+      const result = await request<Driver[]>(() => apiClient.getAdminDrivers())
       if (result) {
         setDrivers(result)
       }

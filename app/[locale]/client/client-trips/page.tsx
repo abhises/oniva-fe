@@ -1,72 +1,79 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
-import { Card } from '@/components/common/Card'
-import { Badge } from '@/components/common/Badge'
-import { Loader } from '@/components/common/Loader'
-import { useApi } from '@/hooks/useApi'
-import { apiClient } from '@/services/api'
-import Link from 'next/link'
-import { FiMapPin, FiClock, FiDollarSign, FiStar } from 'react-icons/fi'
+import { useEffect, useState } from "react";
+import { use } from "react";  // ← Add this import!
+import { useTranslation } from "react-i18next";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { Card } from "@/components/common/Card";
+import { Badge } from "@/components/common/Badge";
+import { Loader } from "@/components/common/Loader";
+import { useApi } from "@/hooks/useApi";
+import { apiClient } from "@/services/api";
+import Link from "next/link";
+import { FiMapPin, FiClock, FiDollarSign, FiStar } from "react-icons/fi";
 
 interface Trip {
-  id: number
-  pickup_address: string
-  destination_address: string
-  status: string
-  total_price: number
-  created_at: string
+  id: number;
+  pickup_address: string;
+  destination_address: string;
+  status: string;
+  total_price: number;
+  created_at: string;
   driver?: {
-    fullName: string
-    rating: number
-  }
+    fullName: string;
+    rating: number;
+  };
 }
 
-export default function TripsPage({ params }: { params: { locale: string } }) {
-  const { t } = useTranslation()
-  const { isLoading, request } = useApi({ showError: true })
-  const [trips, setTrips] = useState<Trip[]>([])
+interface TripsPageProps {
+  params: Promise<{ locale: string }>;  // ← Change this!
+}
+
+export default function TripsPage({ params }: TripsPageProps) {
+  const { locale } = use(params);  // ← Add this!
+  
+  const { t } = useTranslation();
+  const { isLoading, request } = useApi({ showError: true });
+  const [trips, setTrips] = useState<Trip[]>([]);
 
   useEffect(() => {
     const fetchTrips = async () => {
-      const result = await request<Trip[]>(() => apiClient.getTrips())
+      const result = await request<Trip[]>(() => apiClient.getTrips());
       if (result) {
-        setTrips(result)
+        setTrips(result);
       }
-    }
-    fetchTrips()
-  }, [request])
+    };
+    fetchTrips();
+  }, [request]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
-        return 'success'
-      case 'cancelled':
-        return 'danger'
-      case 'in_progress':
-        return 'info'
+      case "completed":
+        return "success";
+      case "cancelled":
+        return "danger";
+      case "in_progress":
+        return "info";
       default:
-        return 'warning'
+        return "warning";
     }
-  }
+  };
 
   return (
-    <ProtectedRoute allowedRoles={['client']}>
+    <ProtectedRoute allowedRoles={["client"]}>
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">{t('client.myTrips')}</h1>
+        <h1 className="text-3xl font-bold mb-8">{t("client.myTrips")}</h1>
 
         {isLoading ? (
           <Loader />
         ) : trips.length === 0 ? (
           <Card className="text-center py-12">
-            <p className="text-gray-600">{t('client.noTrips')}</p>
+            <p className="text-gray-600">{t("client.noTrips")}</p>
             <Link
-              href={`/${params.locale}/client/book-trip`}
+              href={`/${locale}/client/book-trip`}
               className="text-primary font-semibold hover:underline mt-4 inline-block"
             >
-              {t('client.bookTrip')}
+              {t("client.bookTrip")}
             </Link>
           </Card>
         ) : (
@@ -79,9 +86,14 @@ export default function TripsPage({ params }: { params: { locale: string } }) {
                       <FiMapPin size={16} />
                       {trip.pickup_address}
                     </h3>
-                    <p className="text-sm text-gray-600 ml-6">→ {trip.destination_address}</p>
+                    <p className="text-sm text-gray-600 ml-6">
+                      → {trip.destination_address}
+                    </p>
                   </div>
-                  <Badge variant={getStatusColor(trip.status)} label={trip.status} />
+                  <Badge
+                    variant={getStatusColor(trip.status)}
+                    label={trip.status}
+                  />
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 border-t pt-4">
@@ -102,10 +114,10 @@ export default function TripsPage({ params }: { params: { locale: string } }) {
                 </div>
 
                 <Link
-                  href={`/${params.locale}/client/trips/${trip.id}`}
+                  href={`/${locale}/client/trips/${trip.id}`}
                   className="text-primary text-sm font-semibold hover:underline block mt-4"
                 >
-                  {t('common.viewDetails')}
+                  {t("common.viewDetails")}
                 </Link>
               </Card>
             ))}
@@ -113,5 +125,5 @@ export default function TripsPage({ params }: { params: { locale: string } }) {
         )}
       </div>
     </ProtectedRoute>
-  )
+  );
 }

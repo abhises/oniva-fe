@@ -11,11 +11,17 @@ import { useApi } from '@/hooks/useApi'
 import { apiClient } from '@/services/api'
 import Link from 'next/link'
 import { FiMapPin, FiDollarSign, FiStar, FiTrendingUp } from 'react-icons/fi'
+import { use } from 'react'
 
-export default function DriverDashboard({ params }: { params: { locale: string } }) {
+export default function DriverDashboard({ 
+  params 
+}: { 
+  params: Promise<{ locale: string }>  // Now it's a Promise!
+}) {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { isLoading, request } = useApi({ showSuccess: true })
+  const { locale } = use(params)  // Must unwrap with use()
 
   const [isOnline, setIsOnline] = useState(false)
   const [stats, setStats] = useState({
@@ -148,19 +154,19 @@ export default function DriverDashboard({ params }: { params: { locale: string }
 
       {/* Quick Links */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-        <Link href={`/${params.locale}/driver/trips`}>
+        <Link href={`/${locale}/driver/driver-trips`}>
           <Card className="hover:shadow-lg cursor-pointer">
             <FiMapPin className="text-primary text-4xl mb-2" />
             <h3 className="font-bold text-lg">{t('driver.trips')}</h3>
-            <p className="text-gray-600 text-sm">View all your trips</p>
+            <p className="text-gray-600 text-sm">{t("driver.viewAllYourTrips")}</p>
           </Card>
         </Link>
 
-        <Link href={`/${params.locale}/driver/earnings`}>
+        <Link href={`/${locale}/driver/earnings`}>
           <Card className="hover:shadow-lg cursor-pointer">
             <FiDollarSign className="text-primary text-4xl mb-2" />
             <h3 className="font-bold text-lg">{t('driver.earnings')}</h3>
-            <p className="text-gray-600 text-sm">View your earnings details</p>
+            <p className="text-gray-600 text-sm">{t("driver.viewEarningsDetails")}</p>
           </Card>
         </Link>
       </div>

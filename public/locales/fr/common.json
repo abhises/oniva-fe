@@ -8,8 +8,23 @@
     "submit": "Soumettre",
     "cancel": "Annuler",
     "save": "Enregistrer",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "welcome": "Bienvenue",
+    "language": "Langue",
+    "edit": "Modifier",
+    "breakdown": "Répartition",
+    "recentActivity": "Activité Récente",
+    "all": "Tout",
+    "pending": "En Attente",
+    "approved": "Approuvé",
+    "rejected": "Rejeté"
   },
+  "navigation": {
+    "home": "Accueil",
+    "profile": "Profil",
+    "bookTrip": "Réserver un Trajet"
+  },
+
   "errors": {
     "INVALID_CREDENTIALS": "Numéro de téléphone ou mot de passe invalide",
     "USER_EXISTS": "L'utilisateur existe déjà",
@@ -48,7 +63,12 @@
     "rateDriver": "Évaluer le Chauffeur",
     "TRIP_BOOKED": "Trajet réservé avec succès!",
     "TRIP_CANCELLED": "Trajet annulé avec succès!",
-    "FARE_ESTIMATED": "Tarif estimé avec succès!"
+    "FARE_ESTIMATED": "Tarif estimé avec succès!",
+    "noTrips": "Aucun trajet trouvé",
+    "tripDetails": "Détails du Trajet",
+    "pointToPoint": "Point à Point",
+    "hourly": "Horaire",
+    "distance": "Distance"
   },
   "driver": {
     "goOnline": "Aller en Ligne",
@@ -59,7 +79,16 @@
     "earnings": "Gains",
     "TRIP_ACCEPTED": "Trajet accepté!",
     "TRIP_STARTED": "Trajet commencé!",
-    "TRIP_COMPLETED": "Trajet terminé!"
+    "TRIP_COMPLETED": "Trajet terminé!",
+    "totalTrips": "Total des Trajets",
+    "totalEarnings": "Gains Totals",
+    "rating": "Note",
+    "dashboard": "Tableau de Bord",
+    "trips": "Trajets",
+    "viewAllYourTrips": "Voir tous vos trajets",
+    "viewEarningsDetails": "Voir les détails de vos gains",
+    "completedTrips": "Trajets Complétés",
+    "averagePerTrip": "Gains Moyens par Trajet"
   },
   "admin": {
     "dashboard": "Tableau de Bord",
@@ -68,6 +97,11 @@
     "reject": "Rejeter",
     "suspend": "Suspendre",
     "DRIVER_APPROVED": "Chauffeur approuvé avec succès!",
-    "DRIVER_REJECTED": "Chauffeur rejeté avec succès!"
+    "DRIVER_REJECTED": "Chauffeur rejeté avec succès!",
+    "reports": "Rapports",
+    "activeDrivers": "Chauffeurs Actifs",
+    "completedTrips": "Trajets Complétés",
+    "totalRevenue": "Revenus Totals",
+    "pendingApprovals": "Approbations de Chauffeurs en Attente"
   }
 }

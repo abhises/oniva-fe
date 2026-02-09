@@ -32,6 +32,19 @@ export const Header = ({ locale }: { locale: string }) => {
                 {t('navigation.home')}
               </Link>
             )}
+            {user && user.role === 'client' && (
+              <>
+              <Link href={`/${locale}/${user.role}/profile`}>
+                {t('navigation.profile')}
+              </Link>
+              <Link href={`/${locale}/${user.role}/book-trip`}>
+                {t('client.bookTrip')}
+              </Link>
+               <Link href={`/${locale}/${user.role}/client-trips`}>
+                {t('client.myTrips')}
+              </Link>
+              </>
+            )}
 
             <LanguageSwitcher locale={locale} />
 

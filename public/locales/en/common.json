@@ -8,7 +8,21 @@
     "submit": "Submit",
     "cancel": "Cancel",
     "save": "Save",
-    "logout": "Logout"
+    "logout": "Logout",
+    "welcome": "Welcome",
+    "language": "Language",
+    "edit": "Edit",
+    "breakdown": "Breakdown",
+    "recentActivity": "Recent Activity",
+    "all": "All",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "navigation": {
+    "home": "Home",
+    "profile": "Profile",
+    "bookTrip": "Book Trip"
   },
   "errors": {
     "INVALID_CREDENTIALS": "Invalid phone number or password",
@@ -48,7 +62,12 @@
     "rateDriver": "Rate Driver",
     "TRIP_BOOKED": "Trip booked successfully!",
     "TRIP_CANCELLED": "Trip cancelled successfully!",
-    "FARE_ESTIMATED": "Fare estimated successfully!"
+    "FARE_ESTIMATED": "Fare estimated successfully!",
+    "noTrips": "No trips found",
+    "tripDetails": "Trip Details",
+    "pointToPoint": "Point-to-Point",
+    "hourly": "Hourly",
+    "distance": "Distance"
   },
   "driver": {
     "goOnline": "Go Online",
@@ -59,7 +78,17 @@
     "earnings": "Earnings",
     "TRIP_ACCEPTED": "Trip accepted!",
     "TRIP_STARTED": "Trip started!",
-    "TRIP_COMPLETED": "Trip completed!"
+    "TRIP_COMPLETED": "Trip completed!",
+    "totalTrips": "Total Trips",
+    "totalEarnings": "Total Earnings",
+    "rating": "Rating",
+    "dashboard": "Dashboard",
+    "trips": "Trips",
+    "viewAllYourTrips": "View all your trips",
+    "viewEarningsDetails": "View your earnings details",
+    "completedTrips": "Completed Trips",
+    "averagePerTrip": "Average Earnings per Trip"
+
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -68,6 +97,11 @@
     "reject": "Reject",
     "suspend": "Suspend",
     "DRIVER_APPROVED": "Driver approved successfully!",
-    "DRIVER_REJECTED": "Driver rejected successfully!"
+    "DRIVER_REJECTED": "Driver rejected successfully!",
+    "reports": "Reports",
+    "activeDrivers": "Active Drivers",
+    "completedTrips": "Completed Trips",
+    "totalRevenue": "Total Revenue",
+    "pendingApprovals": "Pending Driver Approvals"
   }
 }
