@@ -49,7 +49,10 @@
     "hasAccount": "Already have an account?",
     "LOGIN_SUCCESS": "Login successful!",
     "REGISTER_SUCCESS": "Account created successfully!",
-    "LOGOUT_SUCCESS": "Logged out successfully"
+    "LOGOUT_SUCCESS": "Logged out successfully",
+    "phoneRequired": "Phone number is required",
+    "fullNameRequired": "Full name is required",
+    "passwordRequired": "Password is required"
   },
   "client": {
     "bookTrip": "Book Trip",

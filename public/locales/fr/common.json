@@ -50,7 +50,11 @@
     "hasAccount": "Vous avez déjà un compte?",
     "LOGIN_SUCCESS": "Connexion réussie!",
     "REGISTER_SUCCESS": "Compte créé avec succès!",
-    "LOGOUT_SUCCESS": "Déconnecté avec succès"
+    "LOGOUT_SUCCESS": "Déconnecté avec succès",
+    "phoneRequired": "Le numéro de téléphone est requis",
+    "fullNameRequired": "Le nom complet est requis",
+    "passwordRequired": "Le mot de passe est requis"
+  
   },
   "client": {
     "bookTrip": "Réserver un Trajet",

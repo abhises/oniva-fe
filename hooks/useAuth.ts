@@ -9,35 +9,60 @@ import toast from 'react-hot-toast';
 
 type UserRole = "client" | "driver";
 
+type ApiResult = {
+  success: boolean;
+  message?: string;
+  messageKey?: string;
+  data?: {
+    user: any;
+    token: string;
+  };
+};
+
+
 
 export const useAuth = () => {
   const router = useRouter();
   const { user, token, setAuth, logout: storeLogout } = useAuthStore();
   const { t, locale } = useLocale();
 
-  const register = useCallback(
-    async (phone: string, fullName: string, password: string, role: UserRole) => {
-      try {
-        const response = await apiClient.register({phone, fullName, password, role});
+ const register = useCallback(
+  async (
+    phone: string,
+    fullName: string,
+    password: string,
+    role: UserRole
+  ): Promise<ApiResult> => {
+    const response = await apiClient.register({
+      phone,
+      fullName,
+      password,
+      role,
+    });
 
-        if (response.success && response.data) {
-          setAuth(response.data.user, response.data.token);
-          
-          // Use messageKey from response
-          const message = response.messageKey ? t(response.messageKey) : response.message;
-          toast.success(message || 'Registration successful!');
-          
-          router.push(`/${locale}/${role}/dashboard`);
-        }
-      } catch (error: any) {
-        const errorKey = error.response?.data?.messageKey || 'errors.SERVER_ERROR';
-        const errorMessage = t(errorKey) || error.response?.data?.message || 'Registration failed';
-        toast.error(errorMessage);
-      }
-    },
-    [setAuth, router, locale, t]
-  );
+    // 🔥 MANUAL ERROR THROW
+    if (!response.success) {
+      throw {
+        response: {
+          data: response,
+        },
+      };
+    }
 
+    // success path
+    setAuth(response.data!.user, response.data!.token);
+
+    const message = response.messageKey
+      ? t(response.messageKey)
+      : response.message;
+
+    toast.success(message || 'Registration successful!');
+    router.push(`/${locale}/${role}/dashboard`);
+
+    return response;
+  },
+  [setAuth, router, locale, t]
+);
   const login = useCallback(
     async (phone: string, password: string) => {
       try {
