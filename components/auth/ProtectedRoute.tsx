@@ -14,18 +14,27 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
   const router = useRouter()
   const params = useParams()
   const locale = params.locale as string
-  const { isAuthenticated, user } = useAuth()
+
+  const { isAuthenticated, user, loading } = useAuth()
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push(`/${locale}/login`)
-    } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-      router.push(`/${locale}/`)
-    }
-  }, [isAuthenticated, user, allowedRoles, router, locale])
+    if (loading) return // 🛑 WAIT until auth finishes
 
-  if (!isAuthenticated || (allowedRoles && user && !allowedRoles.includes(user.role))) {
+    if (!isAuthenticated) {
+      router.replace(`/${locale}`)
+    } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+      router.replace(`/${locale}/`)
+    }
+  }, [loading, isAuthenticated, user, allowedRoles, router, locale])
+
+  if (loading) {
     return <Loader fullScreen />
+  }
+
+  if (!isAuthenticated) return null
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return null
   }
 
   return <>{children}</>

@@ -1,11 +1,12 @@
-'use client';
+ 'use client'
 
-import { useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
-import { apiClient } from '@/services/api';
-import { useLocale } from './useLocale';
-import toast from 'react-hot-toast';
+import { useCallback,useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/store/authStore'
+import { apiClient } from '@/services/api'
+import { useTranslation } from './useTranslation'
+import toast from 'react-hot-toast'
+
 
 type UserRole = "client" | "driver";
 
@@ -20,13 +21,18 @@ type ApiResult = {
 };
 
 
-
 export const useAuth = () => {
-  const router = useRouter();
-  const { user, token, setAuth, logout: storeLogout } = useAuthStore();
-  const { t, locale } = useLocale();
+  const router = useRouter()
+  const { t ,locale} = useTranslation()
+  const { user, token, isInitialized, setAuth, logout: storeLogout } = useAuthStore()
+  const [loading, setLoading] = useState(false)
 
- const register = useCallback(
+  // ← NEW: Helper to set token in cookie (for middleware)
+  const setTokenCookie = (token: string) => {
+    document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}`
+  }
+
+  const register = useCallback(
   async (
     phone: string,
     fullName: string,
@@ -86,19 +92,37 @@ export const useAuth = () => {
     [setAuth, router, locale, t]
   );
 
+
+
+
   const logout = useCallback(() => {
-    storeLogout();
-    const message = t('auth.LOGOUT_SUCCESS');
-    toast.success(message);
-    router.push(`/${locale}/login`);
-  }, [storeLogout, router, locale, t]);
+    storeLogout()
+    // ← NEW: Clear cookie on logout
+    document.cookie = 'token=; path=/; max-age=0'
+    toast.success(t('common.logout'))
+    router.push('/')
+  }, [storeLogout, router, t])
+
+  const hasRole = useCallback(
+    (role: string | string[]) => {
+      if (!user) return false
+      if (Array.isArray(role)) {
+        return role.includes(user.role)
+      }
+      return user.role === role
+    },
+    [user]
+  )
 
   return {
     user,
     token,
     isAuthenticated: !!token,
+    isInitialized,  // ← NEW: Return this for Header/ProtectedRoute
     register,
     login,
     logout,
-  };
-};
+    hasRole,
+    loading, setLoading
+  }
+}

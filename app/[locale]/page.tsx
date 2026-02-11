@@ -45,13 +45,13 @@ export default function LandingPage() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href={`/${locale}/register?role=client`}>
-                  <button className="btn btn-primary btn-lg w-full sm:w-auto flex items-center justify-center gap-2">
+                  <button className="bg-blue-600 text-white rounded-lg p-2 hover:scale-105 hover:bg-blue-800 btn-lg w-full border-none sm:w-auto flex items-center justify-center gap-2">
                     {locale === 'en' ? 'Book a Ride' : 'Réserver un Trajet'}
                     <FiArrowRight />
                   </button>
                 </Link>
                 <Link href={`/${locale}/login`}>
-                  <button className="btn btn-outline btn-lg w-full sm:w-auto">
+                  <button className="bg-blue-600 text-white rounded-lg p-2 hover:scale-105 hover:bg-blue-800  border-none btn-lg w-full sm:w-auto">
                     {locale === 'en' ? 'Sign In' : 'Se Connecter'}
                   </button>
                 </Link>
