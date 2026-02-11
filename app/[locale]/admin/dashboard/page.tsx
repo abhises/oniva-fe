@@ -42,80 +42,41 @@ const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS)
 const [error, setError] = useState<string | null>(null)
 const [pageLoading, setPageLoading] = useState(true)
 useEffect(() => {
-const fetchStats = async () => {
-try {
-setError(null)
-setPageLoading(true)
-    // Call API
-    const result = await request<any>(() =>
-      apiClient.getAdminDashboard()
-    )
+  const fetchStats = async () => {
+    try {
+      setError(null)
+      setPageLoading(true)
 
-    console.log('API Response:', result)
-    console.log('Response Type:', typeof result)
+      // Call API
+      const result = await request<any>(() => apiClient.getAdminDashboard())
 
-    // FIX: Check if result exists and has data
-    if (result && typeof result === 'object' && Object.keys(result).length > 0) {
-      // FIX: Handle nested data structure (result.data or result.payload)
-      let data = result.data || result.payload || result
+      if (result && typeof result === 'object') {
+        const data = result.data || result.payload || result
 
-      console.log('Extracted Data:', data)
-      console.log('Data Keys:', Object.keys(data || {}))
-
-      // FIX: Check if data is a proper object with content
-      if (
-        data &&
-        typeof data === 'object' &&
-        Object.keys(data).length > 0 &&
-        (
-          'totalUsers' in data ||
-          'totalDrivers' in data ||
-          'totalEarnings' in data ||
-          'totalTrips' in data ||
-          'pendingDriverApprovals' in data ||
-          'activeTrips' in data
-        )
-      ) {
-        // FIX: Validate and convert each field with defaults
+        // Convert string numbers to actual numbers
         const validatedStats: DashboardStats = {
-          totalUsers: typeof data.totalUsers === 'number' ? data.totalUsers : (typeof data.total_users === 'number' ? data.total_users : 0),
-          totalDrivers: typeof data.totalDrivers === 'number' ? data.totalDrivers : (typeof data.total_drivers === 'number' ? data.total_drivers : 0),
-          totalEarnings: typeof data.totalEarnings === 'number' ? data.totalEarnings : (typeof data.total_earnings === 'number' ? data.total_earnings : 0),
-          totalTrips: typeof data.totalTrips === 'number' ? data.totalTrips : (typeof data.total_trips === 'number' ? data.total_trips : 0),
-          pendingDriverApprovals: typeof data.pendingDriverApprovals === 'number' ? data.pendingDriverApprovals : (typeof data.pending_driver_approvals === 'number' ? data.pending_driver_approvals : 0),
-          activeTrips: typeof data.activeTrips === 'number' ? data.activeTrips : (typeof data.active_trips === 'number' ? data.active_trips : 0),
+          totalUsers: Number(data.totalusers || 0),
+          totalDrivers: Number(data.total_drivers || 0),
+          totalEarnings: Number(data.total_revenue || 0),
+          totalTrips: Number(data.completed_trips || 0),
+          pendingDriverApprovals: Number(data.pending_driver_approvals || 0),
+          activeTrips: Number(data.active_drivers || 0),
         }
 
-        console.log('Validated Stats:', validatedStats)
         setStats(validatedStats)
       } else {
-        // FIX: Data structure is empty or invalid
-        console.warn('Dashboard data is empty or missing required fields:', data)
-        setError(
-          'Backend API returned empty data. Please contact your backend team to implement the /api/admin/dashboard endpoint.'
-        )
+        setError('Backend API returned empty data')
         setStats(DEFAULT_STATS)
       }
-    } else {
-      // FIX: API returned nothing
-      console.warn('API returned null or empty response')
-      setError(
-        'Backend API not responding. Using default values. Make sure /api/admin/dashboard endpoint is implemented.'
-      )
+    } catch (err) {
+      setError('Failed to load dashboard data')
       setStats(DEFAULT_STATS)
+    } finally {
+      setPageLoading(false)
     }
-  } catch (err) {
-    console.error('Failed to fetch dashboard stats:', err)
-    setError(
-      'Failed to load dashboard data. Check browser console (F12) for details.'
-    )
-    setStats(DEFAULT_STATS)
-  } finally {
-    setPageLoading(false)
   }
-}
 
-fetchStats()
+  fetchStats()
 }, [request])
 return (
 <ProtectedRoute allowedRoles={['admin']}>
