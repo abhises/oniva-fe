@@ -17,7 +17,9 @@ const bounds: LatLngBoundsExpression = [
 
 // Check Pin marker
 const pinCheckMarker = L.divIcon({
-  html: renderToStaticMarkup(<MapPinCheckInside stroke="blue" fill="blue" size={32} />),
+  html: renderToStaticMarkup(
+    <MapPinCheckInside stroke="blue" fill="blue" size={32} />,
+  ),
   className: "",
   iconSize: [32, 32],
   iconAnchor: [16, 32],
@@ -31,50 +33,79 @@ const carIcon = L.divIcon({
   iconAnchor: [16, 32],
 });
 
-// Route from Dakar to Bambilor
+// Full route (coordinates unchanged)
 const route: LatLngExpression[] = [
   [14.7167, -17.4677], // Dakar
   [14.7175, -17.4665],
   [14.7185, -17.4652],
-  [14.7195, -17.4640],
-  [14.7205, -17.4630],
-  [14.7215, -17.4620],
-  [14.7225, -17.4610],
-  [14.7235, -17.4600],
-  [14.7245, -17.4590],
-  [14.7255, -17.4580],
-  [14.7265, -17.4570],
-  [14.7275, -17.4560],
-  [14.7285, -17.4550],
-  [14.7295, -17.4540],
-  [14.7305, -17.4530], // Bambilor
-  [14.7167, -17.4677], // Dakar
-  [14.7200, -17.4660],
-  [14.7230, -17.4640],
-  [14.7260, -17.4620],
-  [14.7290, -17.4600],
-  [14.7320, -17.4580],
-  [14.7350, -17.4560],
-  [14.7380, -17.4540],
-  [14.7410, -17.4520],
-  [14.7440, -17.4500],
-  [14.7470, -17.4480],
-  [14.7500, -17.4460],
-  [14.7530, -17.4440],
-  [14.7560, -17.4420],
-  [14.7590, -17.4400],
-  [14.7620, -17.4380],
-  [14.7650, -17.4360],
-  [14.7680, -17.4340],
-  [14.7710, -17.4320],
-  [14.7740, -17.4300],
-  [14.7770, -17.4280],
-  [14.7800, -17.4260],
-  [14.7830, -17.4240],
-  [14.7860, -17.4220],
-  [14.7890, -17.4200],
-  [14.7920, -17.4180],
- 
+  [14.7195, -17.464],
+  [14.7205, -17.463],
+  [14.7215, -17.462],
+  [14.7225, -17.461],
+  [14.7235, -17.46],
+  [14.7245, -17.459],
+  [14.7255, -17.458],
+  [14.7265, -17.457],
+  [14.7275, -17.456],
+  [14.7285, -17.455],
+  [14.7295, -17.454],
+  [14.7305, -17.453], // Bambilor
+  [14.7315, -17.452],
+  [14.7325, -17.451],
+  [14.7167, -17.4677],
+
+  // Ngor
+  [14.718, -17.471],
+  [14.719, -17.474],
+  [14.7205, -17.476],
+  [14.722, -17.478],
+
+  // Medina
+  [14.7235, -17.4745],
+  [14.724, -17.4715],
+  [14.7245, -17.4685],
+  [14.725, -17.4655],
+
+  // Bambilor
+  [14.7265, -17.462],
+  [14.728, -17.4605],
+  [14.73, -17.459],
+  [14.732, -17.4575],
+  [14.734, -17.456],
+  [14.7442, -17.5121],
+  [14.744, -17.51],
+  [14.7435, -17.508],
+  [14.7425, -17.5065],
+  // Almadies & Les Mamelles
+  [14.741, -17.5055],
+  [14.74, -17.504],
+  [14.7385, -17.502],
+  [14.737, -17.5],
+  [14.735, -17.498],
+  [14.7325, -17.496],
+  [14.73, -17.4935],
+  [14.7275, -17.4915],
+
+  // Route de la Corniche Ouest
+  [14.725, -17.489],
+  [14.722, -17.487],
+  [14.718, -17.484],
+  [14.714, -17.4825],
+  [14.71, -17.481],
+  [14.705, -17.4795],
+  [14.7, -17.478],
+  [14.696, -17.476],
+  [14.692, -17.474],
+  [14.688, -17.4715],
+  [14.685, -17.469],
+  [14.684, -17.465],
+
+  // Medina (Avenue Blaise Diagne area)
+  [14.6835, -17.462],
+  [14.683, -17.459],
+  [14.6825, -17.456],
+  [14.6823, -17.453],
+  [14.6822, -17.451],
 ];
 
 function FlyToDakar() {
@@ -86,18 +117,32 @@ function FlyToDakar() {
 }
 
 export default function SenegalMap() {
-  const [carPosIndex, setCarPosIndex] = useState(0);
+  const numCars = 3; // Number of moving cars
+  const [positions, setPositions] = useState<number[]>(
+    Array.from({ length: numCars }, (_, i) => i * 5),
+  ); // Start cars at different indices
+  const [directions, setDirections] = useState<number[]>(
+    Array(numCars).fill(1),
+  );
 
-  // Animate car along the route and loop
   useEffect(() => {
     const interval = setInterval(() => {
-      setCarPosIndex((prev) => {
-        if (prev < route.length - 1) return prev + 1;
-        return 0; // loop back to start
-      });
-    }, 200); // speed: 200ms per step
+      setPositions((prev) =>
+        prev.map((pos, i) => {
+          let next = pos + directions[i];
+          if (next >= route.length) {
+            directions[i] = -1;
+            next = pos - 1;
+          } else if (next < 0) {
+            directions[i] = 1;
+            next = pos + 1;
+          }
+          return next;
+        }),
+      );
+    }, 150); // speed
     return () => clearInterval(interval);
-  }, []);
+  }, [directions]);
 
   return (
     <MapContainer
@@ -117,10 +162,12 @@ export default function SenegalMap() {
         <Popup>Dakar</Popup>
       </Marker>
 
-      {/* Moving car */}
-      <Marker position={route[carPosIndex]} icon={carIcon}>
-        <Popup>Car moving to Bambilor</Popup>
-      </Marker>
+      {/* Moving cars */}
+      {positions.map((posIndex, i) => (
+        <Marker key={i} position={route[posIndex]} icon={carIcon}>
+          <Popup>Car {i + 1}</Popup>
+        </Marker>
+      ))}
 
       <FlyToDakar />
     </MapContainer>
