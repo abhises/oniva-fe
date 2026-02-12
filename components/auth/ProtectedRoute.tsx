@@ -22,7 +22,7 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
 
     if (!isAuthenticated) {
       router.replace(`/${locale}`)
-    } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    } else if (allowedRoles && user &&!allowedRoles.includes(user.role)) {
       router.replace(`/${locale}/`)
     }
   }, [loading, isAuthenticated, user, allowedRoles, router, locale])
