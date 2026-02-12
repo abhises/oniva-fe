@@ -6,6 +6,12 @@ import { useAuth } from '@/hooks/useAuth'
 import { useTranslation } from '@/hooks/useTranslation'
 import Link from 'next/link'
 import { FiMapPin, FiCheck, FiSmartphone, FiAward, FiArrowRight } from 'react-icons/fi'
+import dynamic from "next/dynamic";
+
+const SenegalMap = dynamic(
+  () => import("@/components/common/SenegalMap"),
+  { ssr: false }
+);
 
 export default function LandingPage() {
   const router = useRouter()
@@ -86,7 +92,8 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl opacity-10 blur-3xl"></div>
                 <div className="relative bg-white rounded-2xl p-8 shadow-xl">
                   <div className="aspect-square bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                    <FiMapPin className="w-32 h-32 text-blue-600" />
+                    {/* <FiMapPin className="w-32 h-32 text-blue-600" /> */}
+                    <SenegalMap/>
                   </div>
                 </div>
               </div>

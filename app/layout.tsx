@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from '@/components/providers';
+import "leaflet/dist/leaflet.css";
+
 
 export const metadata: Metadata = {
   title: 'ONIVA - Your Personal Driver',
