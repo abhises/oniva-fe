@@ -18,7 +18,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   trendValue,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6 hover:shadow-md cursor-pointer hover:scale-105 ">
       <div className="flex justify-between items-start">
         <div>
           <p className="text-gray-600 text-sm font-medium">{label}</p>

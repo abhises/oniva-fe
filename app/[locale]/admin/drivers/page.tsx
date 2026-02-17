@@ -52,7 +52,7 @@ export default function AdminDriversPage() {
   };
 
   const handleReject = async (driverId: number) => {
-    // await request(() => apiClient.rejectDriver(driverId, 'Documents not verified'))
+    await request(() => apiClient.rejectDriver(driverId, 'Documents not verified'))
     setDrivers((prev) =>
       prev.map((d) =>
         d.id === driverId ? { ...d, verification_status: "rejected" } : d,
