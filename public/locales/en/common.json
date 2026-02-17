@@ -91,7 +91,6 @@
     "viewEarningsDetails": "View your earnings details",
     "completedTrips": "Completed Trips",
     "averagePerTrip": "Average Earnings per Trip"
-
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -106,12 +105,14 @@
     "completedTrips": "Completed Trips",
     "totalRevenue": "Total Revenue",
     "pendingApprovals": "Pending Driver Approvals",
-    "earnings":"Earnings",
+    "earnings": "Earnings",
     "totalUsers": "Total Users",
     "totalDrivers": "Total Drivers",
     "totalEarnings": "Total Earnings",
     "totalTrips": "Total Trips",
     "activeTrips": "Active Trips",
-    "tool": "Tools"
+    "tool": "Tools",
+    "approveDriver": "Approve Driver",
+    "rejectDriver": "Reject Driver"
   }
 }

@@ -113,6 +113,8 @@
     "totalEarnings": "Gains Totals",
     "totalTrips": "Trajets Totals",
     "activeTrips": "Trajets Actifs",
-    "tool": "Outils"
+    "tool": "Outils",
+    "approveDriver": "Approuver le Chauffeur",
+    "rejectDriver": "Rejeter le Chauffeur"
   }
 }
