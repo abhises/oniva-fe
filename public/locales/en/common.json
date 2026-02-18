@@ -17,7 +17,11 @@
     "all": "All",
     "pending": "Pending",
     "approved": "Approved",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "noData": "No data available",
+    "completed": "Completed",
+    "in_progress": "In Progress",
+    "accepted": "Accepted"
   },
   "navigation": {
     "home": "Home",
@@ -90,7 +94,9 @@
     "viewAllYourTrips": "View all your trips",
     "viewEarningsDetails": "View your earnings details",
     "completedTrips": "Completed Trips",
-    "averagePerTrip": "Average Earnings per Trip"
+    "averagePerTrip": "Average Earnings per Trip",
+    "myTrips": "My Trips",
+    "noTrips": "No trips found"
   },
   "admin": {
     "dashboard": "Dashboard",

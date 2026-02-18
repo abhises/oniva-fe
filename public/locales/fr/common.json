@@ -17,7 +17,11 @@
     "all": "Tout",
     "pending": "En Attente",
     "approved": "Approuvé",
-    "rejected": "Rejeté"
+    "rejected": "Rejeté",
+    "noData": "Aucune donnée disponible",
+    "completed": "Terminé",
+    "in_progress": "En Cours",
+    "accepted": "Accepté"
   },
   "navigation": {
     "home": "Accueil",
@@ -92,7 +96,9 @@
     "viewAllYourTrips": "Voir tous vos trajets",
     "viewEarningsDetails": "Voir les détails de vos gains",
     "completedTrips": "Trajets Complétés",
-    "averagePerTrip": "Gains Moyens par Trajet"
+    "averagePerTrip": "Gains Moyens par Trajet",
+    "myTrips": "Mes Trajets",
+    "noTrips": "Aucun trajet trouvé"
   },
   "admin": {
     "dashboard": "Tableau de Bord",

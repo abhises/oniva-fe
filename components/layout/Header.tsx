@@ -46,6 +46,40 @@ export const Header = ({ locale }: { locale: string }) => {
               </>
             )}
 
+             {user && user.role === 'driver' && (
+              <>
+              <Link href={`/${locale}/${user.role}/profile`}>
+                {t('navigation.profile')}
+              </Link>
+
+               <Link href={`/${locale}/${user.role}/driver-trips`}>
+                {t('driver.myTrips')}
+              </Link>
+
+               <Link href={`/${locale}/${user.role}/earnings`}>
+                {t('driver.earnings')}
+              </Link>
+             
+              </>
+            )}
+
+             {user && user.role === 'admin' && (
+              <>
+              <Link href={`/${locale}/${user.role}/drivers`}>
+                {t('admin.drivers')}
+              </Link>
+
+               <Link href={`/${locale}/${user.role}/earnings`}>
+                {t('admin.earnings')}
+              </Link>
+
+               <Link href={`/${locale}/${user.role}/reports`}>
+                {t('admin.reports')}
+              </Link>
+             
+              </>
+            )}
+
             <LanguageSwitcher locale={locale} />
 
             {user ? (

@@ -65,7 +65,7 @@ export default function DriverDashboard({
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">{t('driver.dashboard')}</h1>
+        <h1 className="text-3xl font-bold">{t('common.welcome')} {user?.fullName}!</h1>
         <Button
           variant={isOnline ? 'danger' : 'success'}
           onClick={() => setIsOnline(!isOnline)}
