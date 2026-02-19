@@ -1,160 +1,158 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
   useMapEvents,
-} from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import { FiMapPin, FiX, FiLoader } from 'react-icons/fi'
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { FiMapPin, FiX, FiLoader } from "react-icons/fi";
 
 interface Location {
-  address: string
-  latitude: number
-  longitude: number
+  address: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface Props {
-  value: Location
-  onChange: (location: Location) => void
-  placeholder?: string
-  error?: string
+  value: Location;
+  onChange: (location: Location) => void;
+  placeholder?: string;
+  error?: string;
 }
 
 // Fix Leaflet icon issue
-delete (L.Icon.Default.prototype as any)._getIconUrl
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-})
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
 function LocationMarker({ onChange, selectedLocation }: any) {
   const map = useMapEvents({
     click(e) {
-      const lat = e.latlng.lat
-      const lng = e.latlng.lng
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
 
       // Reverse geocode
-      reverseGeocode(lat, lng, onChange)
+      reverseGeocode(lat, lng, onChange);
     },
-  })
+  });
 
   return selectedLocation ? (
     <Marker position={[selectedLocation.latitude, selectedLocation.longitude]}>
       <Popup>{selectedLocation.address}</Popup>
     </Marker>
-  ) : null
+  ) : null;
 }
 
 async function reverseGeocode(lat: number, lng: number, onChange: any) {
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
-    )
-    const data = await res.json()
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+    );
+    const data = await res.json();
 
     onChange({
-      address: data.address?.name || data.display_name || 'Selected location',
+      address: data.address?.name || data.display_name || "Selected location",
       latitude: lat,
       longitude: lng,
-    })
+    });
   } catch (error) {
-    console.error('Geocoding error:', error)
+    console.error("Geocoding error:", error);
   }
 }
 
 async function searchLocation(query: string) {
-  if (query.length < 2) return []
+  if (query.length < 2) return [];
 
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${query}&countrycodes=sn&limit=8`
-    )
-    const data = await res.json()
-    return data
+      `https://nominatim.openstreetmap.org/search?format=json&q=${query}&countrycodes=sn&limit=8`,
+    );
+    const data = await res.json();
+    return data;
   } catch (error) {
-    console.error('Search error:', error)
-    return []
+    console.error("Search error:", error);
+    return [];
   }
 }
 
 export const LocationPicker = ({
   value,
   onChange,
-  placeholder = 'Search location...',
+  placeholder = "Search location...",
   error,
 }: Props) => {
-  const [search, setSearch] = useState('')
-  const [suggestions, setSuggestions] = useState<any[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
-  const mapRef = useRef<any>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [search, setSearch] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const mapRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = async (val: string) => {
-    setSearch(val)
+    setSearch(val);
 
     if (val.length < 2) {
-      setSuggestions([])
-      setShowSuggestions(false)
-      return
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
     }
 
-    setIsSearching(true)
-    const results = await searchLocation(val)
-    setSuggestions(results)
-    setShowSuggestions(true)
-    setIsSearching(false)
-  }
+    setIsSearching(true);
+    const results = await searchLocation(val);
+    setSuggestions(results);
+    setShowSuggestions(true);
+    setIsSearching(false);
+  };
 
   const handleSelectSuggestion = (place: any) => {
-    const lat = parseFloat(place.lat)
-    const lon = parseFloat(place.lon)
+    const lat = parseFloat(place.lat);
+    const lon = parseFloat(place.lon);
 
     // Update form
     onChange({
       address: place.display_name,
       latitude: lat,
       longitude: lon,
-    })
+    });
 
     // Update map view
     if (mapRef.current) {
-      mapRef.current.setView([lat, lon], 15)
+      mapRef.current.setView([lat, lon], 15);
     }
 
     // Clear suggestions
-    setSearch(place.display_name.split(',')[0])
-    setSuggestions([])
-    setShowSuggestions(false)
-  }
+    setSearch(place.display_name.split(",")[0]);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
 
   const handleClear = () => {
-    setSearch('')
-    setSuggestions([])
-    setShowSuggestions(false)
-    onChange({ address: '', latitude: 0, longitude: 0 })
-  }
+    setSearch("");
+    setSuggestions([]);
+    setShowSuggestions(false);
+    onChange({ address: "", latitude: 0, longitude: 0 });
+  };
 
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (inputRef.current && !inputRef.current.contains(e.target as Node)) {
-        setShowSuggestions(false)
+        setShowSuggestions(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="space-y-3">
@@ -171,7 +169,7 @@ export const LocationPicker = ({
               onFocus={() => search.length > 0 && setShowSuggestions(true)}
               placeholder={placeholder}
               className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                error ? 'border-red-500' : 'border-gray-300'
+                error ? "border-red-500" : "border-gray-300"
               }`}
             />
 
@@ -193,11 +191,16 @@ export const LocationPicker = ({
         </div>
 
         {/* Suggestions Dropdown */}
+        {/* Suggestions Dropdown */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-xl mt-1 z-50 max-h-64 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-xl mt-1 z-[1000] max-h-64 overflow-y-auto">
             {suggestions.map((place, index) => {
-              const name = place.display_name.split(',')[0]
-              const region = place.display_name.split(',').slice(1, 3).join(',').trim()
+              const name = place.display_name.split(",")[0];
+              const region = place.display_name
+                .split(",")
+                .slice(1, 3)
+                .join(",")
+                .trim();
 
               return (
                 <button
@@ -211,23 +214,28 @@ export const LocationPicker = ({
                     <p className="text-xs text-gray-500 truncate">{region}</p>
                   </div>
                 </button>
-              )
+              );
             })}
           </div>
         )}
 
-        {showSuggestions && suggestions.length === 0 && search.length > 2 && !isSearching && (
-          <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-xl mt-1 z-50 p-4">
-            <p className="text-sm text-gray-500 text-center">No locations found</p>
-          </div>
-        )}
+        {showSuggestions &&
+          suggestions.length === 0 &&
+          search.length > 2 &&
+          !isSearching && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-xl mt-1 z-50 p-4">
+              <p className="text-sm text-gray-500 text-center">
+                No locations found
+              </p>
+            </div>
+          )}
       </div>
 
       {/* Map */}
       <MapContainer
         center={[14.7167, -17.4677]} // Dakar
         zoom={12}
-        style={{ height: '350px', width: '100%', borderRadius: '8px' }}
+        style={{ height: "350px", width: "100%", borderRadius: "8px" }}
         ref={mapRef}
       >
         <TileLayer
@@ -245,5 +253,5 @@ export const LocationPicker = ({
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
     </div>
-  )
-}
+  );
+};
