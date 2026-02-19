@@ -5,14 +5,14 @@ import { FiDollarSign, FiClock, FiNavigation } from 'react-icons/fi'
 
 interface FareEstimateProps {
   estimate: any
-  rideType: string
+  bookingType: 'point-to-point' | 'hourly'  // ← CHANGED from rideType
   passengers: number
   isLoading: boolean
 }
 
 export const FareEstimate: React.FC<FareEstimateProps> = ({
   estimate,
-  rideType,
+  bookingType,  // ← CHANGED
   passengers,
   isLoading,
 }) => {
@@ -114,8 +114,8 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
         {/* Details */}
         <div className="space-y-2 pt-4 border-t">
           <div className="flex justify-between text-xs text-gray-600">
-            <span>Ride Type</span>
-            <span className="font-medium capitalize">{rideType}</span>
+            <span>Booking Type</span>
+            <span className="font-medium capitalize">{bookingType}</span>  {/* ← CHANGED */}
           </div>
           <div className="flex justify-between text-xs text-gray-600">
             <span>Passengers</span>

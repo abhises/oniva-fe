@@ -1,265 +1,310 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
-import { useTranslation } from '@/hooks/useTranslation'
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import React, { useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/hooks/useTranslation";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 // import { LocationPicker } from '@/components/booking/LocationPicker'
-import { RideTypeSelector } from '@/components/booking/RideTypeSelector'
-import { PassengerSelector } from '@/components/booking/PassengerSelector'
-import { PaymentSelector } from '@/components/booking/PaymentSelector'
-import { FareEstimate } from '@/components/booking/FareEstimate'
-import toast from 'react-hot-toast'
-import { useApi } from '@/hooks/useApi'
-import { apiClient } from '@/services/api'
-import { FiMapPin, FiClock, FiUsers, FiDollarSign, FiTag, FiCheck } from 'react-icons/fi'
-import dynamic from 'next/dynamic'
-import { calculateDistance } from '@/lib/osrm' // ← ADD THIS
+import { RideTypeSelector } from "@/components/booking/RideTypeSelector";
+import { PassengerSelector } from "@/components/booking/PassengerSelector";
+import { PaymentSelector } from "@/components/booking/PaymentSelector";
+import { FareEstimate } from "@/components/booking/FareEstimate";
+import toast from "react-hot-toast";
+import { useApi } from "@/hooks/useApi";
+import { apiClient } from "@/services/api";
+import {
+  FiMapPin,
+  FiClock,
+  FiUsers,
+  FiDollarSign,
+  FiTag,
+  FiCheck,
+} from "react-icons/fi";
+import dynamic from "next/dynamic";
+import { calculateDistance } from "@/lib/osrm"; // ← ADD THIS
 const LocationPicker = dynamic(
-  () => import('@/components/booking/LocationPicker').then(mod => mod.LocationPicker),
-  { ssr: false }
-)
+  () =>
+    import("@/components/booking/LocationPicker").then(
+      (mod) => mod.LocationPicker,
+    ),
+  { ssr: false },
+);
 interface BookingFormData {
   pickupLocation: {
-    address: string
-    latitude: number
-    longitude: number
-  }
+    address: string;
+    latitude: number;
+    longitude: number;
+  };
   dropoffLocation: {
-    address: string
-    latitude: number
-    longitude: number
-  }
-  date: string
-  time: string
-  rideType: 'economy' | 'premium' | 'comfort'
-  passengers: number
-  specialRequests: string
-  paymentMethod: 'card' | 'cash' | 'wallet'
-  promoCode: string
-  termsAccepted: boolean
+    address: string;
+    latitude: number;
+    longitude: number;
+  };
+  date: string;
+  time: string;
+  bookingType: "point-to-point" | "hourly";
+  passengers: number;
+  specialRequests: string;
+  paymentMethod: "card" | "cash" | "wallet";
+  promoCode: string;
+  termsAccepted: boolean;
 }
 
 export default function BookTripPage() {
-  const router = useRouter()
-  const params = useParams()
-  const locale = (params?.locale as string) || 'en'
-  const { user } = useAuth()
-  const { t } = useTranslation()
+  const router = useRouter();
+  const params = useParams();
+  const locale = (params?.locale as string) || "en";
+  const { user } = useAuth();
+  const { t } = useTranslation();
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [fareEstimate, setFareEstimate] = useState<any>(null)
-  const [isEstimating, setIsEstimating] = useState(false)
-  const [bookingStep, setBookingStep] = useState<'details' | 'confirmation' | 'success'>('details')
-const { request } = useApi()
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [fareEstimate, setFareEstimate] = useState<any>(null);
+  const [isEstimating, setIsEstimating] = useState(false);
+  const [bookingStep, setBookingStep] = useState<
+    "details" | "confirmation" | "success"
+  >("details");
+  const { request } = useApi();
 
   const [formData, setFormData] = useState<BookingFormData>({
     pickupLocation: {
-      address: '',
+      address: "",
       latitude: 0,
       longitude: 0,
     },
     dropoffLocation: {
-      address: '',
+      address: "",
       latitude: 0,
       longitude: 0,
     },
-    date: '',
-    time: '',
-    rideType: 'economy',
+    date: "",
+    time: "",
+    bookingType: "point-to-point",
     passengers: 1,
-    specialRequests: '',
-    paymentMethod: 'card',
-    promoCode: '',
+    specialRequests: "",
+    paymentMethod: "card",
+    promoCode: "",
     termsAccepted: false,
-  })
+  });
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.pickupLocation.address.trim()) {
-      newErrors.pickup = 'Pickup location is required'
+      newErrors.pickup = "Pickup location is required";
     }
     if (!formData.dropoffLocation.address.trim()) {
-      newErrors.dropoff = 'Dropoff location is required'
+      newErrors.dropoff = "Dropoff location is required";
     }
     if (!formData.date) {
-      newErrors.date = 'Date is required'
+      newErrors.date = "Date is required";
     }
     if (!formData.time) {
-      newErrors.time = 'Time is required'
+      newErrors.time = "Time is required";
     }
     if (formData.passengers < 1) {
-      newErrors.passengers = 'At least 1 passenger is required'
+      newErrors.passengers = "At least 1 passenger is required";
     }
     if (!formData.termsAccepted) {
-      newErrors.terms = 'You must accept terms and conditions'
+      newErrors.terms = "You must accept terms and conditions";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
- const handleEstimateFare = async () => {
-  if (!formData.pickupLocation.address || !formData.dropoffLocation.address) {
-    toast.error('Please select both pickup and dropoff locations')
-    return
-  }
-
-  try {
-    setIsEstimating(true)
-
-    // Calculate distance using OSRM
-    const distanceResult = await calculateDistance(
-      formData.pickupLocation,
-      formData.dropoffLocation,
-      formData.rideType
-    )
-
-    if (!distanceResult) {
-      throw new Error('Could not calculate distance. Please try again.')
+  const handleEstimateFare = async () => {
+    if (!formData.pickupLocation.address || !formData.dropoffLocation.address) {
+      toast.error("Please select both pickup and dropoff locations");
+      return;
     }
 
-    // Return the calculated fare
-    setFareEstimate({
-      estimatedFare: distanceResult.estimatedFare,
-      estimatedDistance: distanceResult.distance,
-      estimatedDuration: distanceResult.duration,
-      baseFare: distanceResult.baseFare,
-      distanceFee: parseFloat(
-        (distanceResult.distance * distanceResult.perKmRate).toFixed(2)
-      ),
-      timeFee: parseFloat(
-        (distanceResult.duration * distanceResult.perMinRate).toFixed(2)
-      ),
-      serviceFee: 1.5,
-      surgeFee: 0,
-      minFare: distanceResult.estimatedFare * 0.9,
-      maxFare: distanceResult.estimatedFare * 1.1,
-    })
+    try {
+      setIsEstimating(true);
 
-    toast.success('Fare estimated successfully!')
-  } catch (error: any) {
-    console.error('Fare estimation error:', error)
-    toast.error(error.message || 'Failed to estimate fare')
-  } finally {
-    setIsEstimating(false)
-  }
-}
+      // Calculate distance using OSRM
+      const distanceResult = await calculateDistance(
+        formData.pickupLocation,
+        formData.dropoffLocation,
+        formData.bookingType,
+      );
+
+      if (!distanceResult) {
+        throw new Error("Could not calculate distance. Please try again.");
+      }
+
+      // Return the calculated fare
+      setFareEstimate({
+        estimatedFare: distanceResult.estimatedFare,
+        estimatedDistance: distanceResult.distance,
+        estimatedDuration: distanceResult.duration,
+        baseFare: distanceResult.baseFare,
+        distanceFee: parseFloat(
+          (distanceResult.distance * distanceResult.perKmRate).toFixed(2),
+        ),
+        timeFee: parseFloat(
+          (distanceResult.duration * distanceResult.perMinRate).toFixed(2),
+        ),
+        serviceFee: 1.5,
+        surgeFee: 0,
+        minFare: distanceResult.estimatedFare * 0.9,
+        maxFare: distanceResult.estimatedFare * 1.1,
+      });
+
+      toast.success("Fare estimated successfully!");
+    } catch (error: any) {
+      console.error("Fare estimation error:", error);
+      toast.error(error.message || "Failed to estimate fare");
+    } finally {
+      setIsEstimating(false);
+    }
+  };
 
   const handlePickupChange = (location: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       pickupLocation: location,
-    }))
+    }));
     if (errors.pickup) {
-      setErrors(prev => ({ ...prev, pickup: '' }))
+      setErrors((prev) => ({ ...prev, pickup: "" }));
     }
-  }
+  };
 
   const handleDropoffChange = (location: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       dropoffLocation: location,
-    }))
+    }));
     if (errors.dropoff) {
-      setErrors(prev => ({ ...prev, dropoff: '' }))
+      setErrors((prev) => ({ ...prev, dropoff: "" }));
     }
-  }
+  };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target
-    const isCheckbox = type === 'checkbox'
-    const inputValue = isCheckbox ? (e.target as HTMLInputElement).checked : value
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    const { name, value, type } = e.target;
+    const isCheckbox = type === "checkbox";
+    const inputValue = isCheckbox
+      ? (e.target as HTMLInputElement).checked
+      : value;
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: inputValue,
-    }))
+    }));
 
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
-  }
+  };
 
   const handleProceedToConfirmation = async () => {
     if (!validateForm()) {
-      toast.error('Please fill all required fields')
-      return
+      toast.error("Please fill all required fields");
+      return;
     }
 
     if (!fareEstimate) {
-      toast.error('Please get a fare estimate first')
-      return
+      toast.error("Please get a fare estimate first");
+      return;
     }
 
-    setBookingStep('confirmation')
-  }
+    setBookingStep("confirmation");
+  };
 
- const handleConfirmBooking = async () => {
-  try {
-    setIsLoading(true)
+  const handleConfirmBooking = async () => {
+    try {
+      setIsLoading(true);
 
-    const result = await request(() =>
-      apiClient.bookTrip({
-        pickupLocation: formData.pickupLocation,
-        dropoffLocation: formData.dropoffLocation,
-        date: formData.date,
-        time: formData.time,
-        rideType: formData.rideType,
-        passengers: formData.passengers,
-        specialRequests: formData.specialRequests,
-        paymentMethod: formData.paymentMethod,
-        promoCode: formData.promoCode,
-        estimatedFare: fareEstimate?.estimatedFare,
-      })
-    )
+      const result = await request(() =>
+        apiClient.bookTrip({
+          bookingType: formData.bookingType,
 
-    if (!result) {
-      throw new Error('Failed to book trip')
+          pickupLat: formData.pickupLocation.latitude,
+          pickupLng: formData.pickupLocation.longitude,
+          pickupAddress: formData.pickupLocation.address,
+
+          destinationLat:
+            formData.bookingType === "point-to-point"
+              ? formData.dropoffLocation.latitude
+              : null,
+
+          destinationLng:
+            formData.bookingType === "point-to-point"
+              ? formData.dropoffLocation.longitude
+              : null,
+
+          destinationAddress:
+            formData.bookingType === "point-to-point"
+              ? formData.dropoffLocation.address
+              : null,
+
+          scheduledTime: `${formData.date}T${formData.time}`,
+
+          distance: Number(Math.round(fareEstimate?.estimatedDistance || 0)),
+          duration: Number(Math.round(fareEstimate?.estimatedDuration || 0)),
+          basePrice: Number(Math.round(fareEstimate?.baseFare || 0)),
+          totalPrice: Number(Math.round(fareEstimate?.estimatedFare || 0)),
+
+          paymentMethod: formData.paymentMethod,
+          region: "Dakar",
+        }),
+      );
+
+      if (!result) {
+        throw new Error("Failed to book trip");
+      }
+
+      toast.success("Booking confirmed!");
+      setBookingStep("success");
+
+      setTimeout(() => {
+        router.push(`/${locale}/client/client-trips`);
+      }, 3000);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to book trip");
+    } finally {
+      setIsLoading(false);
     }
-
-    toast.success('Booking confirmed!')
-    setBookingStep('success')
-
-    setTimeout(() => {
-      router.push(`/${locale}/client/trips`)
-    }, 3000)
-
-  } catch (error: any) {
-    toast.error(error.message || 'Failed to book trip')
-  } finally {
-    setIsLoading(false)
-  }
-}
-  if (bookingStep === 'success') {
+  };
+  if (bookingStep === "success") {
     return (
-      <ProtectedRoute allowedRoles={['client']}>
+      <ProtectedRoute allowedRoles={["client"]}>
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
             <div className="mb-6">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
                 <FiCheck className="w-8 h-8 text-green-600" />
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Booking Confirmed!</h1>
-              <p className="text-gray-600 mb-4">Your ride has been successfully booked</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Booking Confirmed!
+              </h1>
+              <p className="text-gray-600 mb-4">
+                Your ride has been successfully booked
+              </p>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">
-                  <span className="font-semibold">Pickup:</span> {formData.pickupLocation.address}
+                  <span className="font-semibold">Pickup:</span>{" "}
+                  {formData.pickupLocation.address}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-semibold">Dropoff:</span> {formData.dropoffLocation.address}
+                  <span className="font-semibold">Dropoff:</span>{" "}
+                  {formData.dropoffLocation.address}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-semibold">Time:</span> {formData.date} at {formData.time}
+                  <span className="font-semibold">Time:</span> {formData.date}{" "}
+                  at {formData.time}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <span className="font-semibold">Fare:</span> ${fareEstimate?.estimatedFare?.toFixed(2)}
+                  <span className="font-semibold">Fare:</span> $
+                  {fareEstimate?.estimatedFare?.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -277,18 +322,20 @@ const { request } = useApi()
           </div>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
-  if (bookingStep === 'confirmation') {
+  if (bookingStep === "confirmation") {
     return (
-      <ProtectedRoute allowedRoles={['client']}>
+      <ProtectedRoute allowedRoles={["client"]}>
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
               <div className="bg-blue-600 text-white p-6">
                 <h1 className="text-2xl font-bold">Confirm Your Booking</h1>
-                <p className="text-blue-100 mt-2">Review details before confirming</p>
+                <p className="text-blue-100 mt-2">
+                  Review details before confirming
+                </p>
               </div>
 
               <div className="p-6 space-y-6">
@@ -297,8 +344,12 @@ const { request } = useApi()
                   <div className="flex items-start">
                     <FiMapPin className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-600 font-medium">Pickup Location</p>
-                      <p className="text-gray-900 font-semibold">{formData.pickupLocation.address}</p>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Pickup Location
+                      </p>
+                      <p className="text-gray-900 font-semibold">
+                        {formData.pickupLocation.address}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -308,8 +359,12 @@ const { request } = useApi()
                   <div className="flex items-start">
                     <FiMapPin className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-600 font-medium">Dropoff Location</p>
-                      <p className="text-gray-900 font-semibold">{formData.dropoffLocation.address}</p>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Dropoff Location
+                      </p>
+                      <p className="text-gray-900 font-semibold">
+                        {formData.dropoffLocation.address}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -319,9 +374,12 @@ const { request } = useApi()
                   <div className="flex items-start">
                     <FiClock className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-600 font-medium">Date & Time</p>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Date & Time
+                      </p>
                       <p className="text-gray-900 font-semibold">
-                        {new Date(formData.date).toLocaleDateString()} at {formData.time}
+                        {new Date(formData.date).toLocaleDateString()} at{" "}
+                        {formData.time}
                       </p>
                     </div>
                   </div>
@@ -329,8 +387,12 @@ const { request } = useApi()
 
                 {/* Ride Type */}
                 <div className="border rounded-lg p-4">
-                  <p className="text-sm text-gray-600 font-medium mb-2">Ride Type</p>
-                  <p className="text-gray-900 font-semibold capitalize">{formData.rideType}</p>
+                  <p className="text-sm text-gray-600 font-medium mb-2">
+                    Booking Type
+                  </p>
+                  <p className="text-gray-900 font-semibold capitalize">
+                    {formData.bookingType}
+                  </p>
                 </div>
 
                 {/* Passengers */}
@@ -338,8 +400,12 @@ const { request } = useApi()
                   <div className="flex items-start">
                     <FiUsers className="w-5 h-5 text-purple-600 mr-3 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-600 font-medium">Passengers</p>
-                      <p className="text-gray-900 font-semibold">{formData.passengers} passenger(s)</p>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Passengers
+                      </p>
+                      <p className="text-gray-900 font-semibold">
+                        {formData.passengers} passenger(s)
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -349,8 +415,12 @@ const { request } = useApi()
                   <div className="flex items-start">
                     <FiDollarSign className="w-5 h-5 text-orange-600 mr-3 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-gray-600 font-medium">Payment Method</p>
-                      <p className="text-gray-900 font-semibold capitalize">{formData.paymentMethod}</p>
+                      <p className="text-sm text-gray-600 font-medium">
+                        Payment Method
+                      </p>
+                      <p className="text-gray-900 font-semibold capitalize">
+                        {formData.paymentMethod}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -361,13 +431,16 @@ const { request } = useApi()
                     <div className="flex items-start">
                       <FiDollarSign className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
                       <div className="flex-1">
-                        <p className="text-sm text-gray-600 font-medium">Estimated Fare</p>
+                        <p className="text-sm text-gray-600 font-medium">
+                          Estimated Fare
+                        </p>
                         <p className="text-2xl font-bold text-blue-600">
                           ${fareEstimate.estimatedFare?.toFixed(2)}
                         </p>
                         {fareEstimate.estimatedDuration && (
                           <p className="text-xs text-gray-600 mt-1">
-                            Estimated duration: {fareEstimate.estimatedDuration} mins
+                            Estimated duration: {fareEstimate.estimatedDuration}{" "}
+                            mins
                           </p>
                         )}
                         {fareEstimate.estimatedDistance && (
@@ -383,7 +456,9 @@ const { request } = useApi()
                 {/* Special Requests */}
                 {formData.specialRequests && (
                   <div className="border rounded-lg p-4">
-                    <p className="text-sm text-gray-600 font-medium mb-2">Special Requests</p>
+                    <p className="text-sm text-gray-600 font-medium mb-2">
+                      Special Requests
+                    </p>
                     <p className="text-gray-900">{formData.specialRequests}</p>
                   </div>
                 )}
@@ -394,8 +469,12 @@ const { request } = useApi()
                     <div className="flex items-start">
                       <FiTag className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-sm text-gray-600 font-medium">Promo Code</p>
-                        <p className="text-gray-900 font-semibold">{formData.promoCode}</p>
+                        <p className="text-sm text-gray-600 font-medium">
+                          Promo Code
+                        </p>
+                        <p className="text-gray-900 font-semibold">
+                          {formData.promoCode}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -404,7 +483,7 @@ const { request } = useApi()
                 {/* Action Buttons */}
                 <div className="flex gap-4 pt-6 border-t">
                   <button
-                    onClick={() => setBookingStep('details')}
+                    onClick={() => setBookingStep("details")}
                     className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
                   >
                     Back
@@ -414,7 +493,7 @@ const { request } = useApi()
                     disabled={isLoading}
                     className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-medium"
                   >
-                    {isLoading ? 'Confirming...' : 'Confirm Booking'}
+                    {isLoading ? "Confirming..." : "Confirm Booking"}
                   </button>
                 </div>
               </div>
@@ -422,16 +501,18 @@ const { request } = useApi()
           </div>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
   return (
-    <ProtectedRoute allowedRoles={['client']}>
+    <ProtectedRoute allowedRoles={["client"]}>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Book Your Trip</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Book Your Trip
+            </h1>
             <p className="text-gray-600">Fill in your details to book a ride</p>
           </div>
 
@@ -455,7 +536,9 @@ const { request } = useApi()
                       error={errors.pickup}
                     />
                     {errors.pickup && (
-                      <p className="text-red-500 text-sm mt-1">{errors.pickup}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.pickup}
+                      </p>
                     )}
                   </div>
 
@@ -473,7 +556,9 @@ const { request } = useApi()
                       error={errors.dropoff}
                     />
                     {errors.dropoff && (
-                      <p className="text-red-500 text-sm mt-1">{errors.dropoff}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.dropoff}
+                      </p>
                     )}
                   </div>
 
@@ -483,7 +568,7 @@ const { request } = useApi()
                     disabled={isEstimating}
                     className="w-full px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition disabled:opacity-50 font-medium"
                   >
-                    {isEstimating ? 'Estimating...' : 'Get Fare Estimate'}
+                    {isEstimating ? "Estimating..." : "Get Fare Estimate"}
                   </button>
 
                   {/* Date & Time */}
@@ -497,13 +582,15 @@ const { request } = useApi()
                         name="date"
                         value={formData.date}
                         onChange={handleInputChange}
-                        min={new Date().toISOString().split('T')[0]}
+                        min={new Date().toISOString().split("T")[0]}
                         className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          errors.date ? 'border-red-500' : 'border-gray-300'
+                          errors.date ? "border-red-500" : "border-gray-300"
                         }`}
                       />
                       {errors.date && (
-                        <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.date}
+                        </p>
                       )}
                     </div>
 
@@ -517,11 +604,13 @@ const { request } = useApi()
                         value={formData.time}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          errors.time ? 'border-red-500' : 'border-gray-300'
+                          errors.time ? "border-red-500" : "border-gray-300"
                         }`}
                       />
                       {errors.time && (
-                        <p className="text-red-500 text-sm mt-1">{errors.time}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.time}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -532,8 +621,10 @@ const { request } = useApi()
                       Ride Type <span className="text-red-500">*</span>
                     </label>
                     <RideTypeSelector
-                      value={formData.rideType}
-                      onChange={(rideType) => setFormData(prev => ({ ...prev, rideType }))}
+                      value={formData.bookingType}
+                      onChange={(bookingType) =>
+                        setFormData((prev) => ({ ...prev, bookingType }))
+                      }
                     />
                   </div>
 
@@ -544,11 +635,15 @@ const { request } = useApi()
                     </label>
                     <PassengerSelector
                       value={formData.passengers}
-                      onChange={(passengers) => setFormData(prev => ({ ...prev, passengers }))}
+                      onChange={(passengers) =>
+                        setFormData((prev) => ({ ...prev, passengers }))
+                      }
                       maxPassengers={6}
                     />
                     {errors.passengers && (
-                      <p className="text-red-500 text-sm mt-1">{errors.passengers}</p>
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.passengers}
+                      </p>
                     )}
                   </div>
 
@@ -574,7 +669,12 @@ const { request } = useApi()
                     </label>
                     <PaymentSelector
                       value={formData.paymentMethod}
-                      onChange={(method) => setFormData(prev => ({ ...prev, paymentMethod: method }))}
+                      onChange={(method) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          paymentMethod: method,
+                        }))
+                      }
                     />
                   </div>
 
@@ -604,18 +704,20 @@ const { request } = useApi()
                         className="w-4 h-4 mt-1 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                       />
                       <span className="ml-3 text-sm text-gray-700">
-                        I agree to the{' '}
+                        I agree to the{" "}
                         <a href="#" className="text-blue-600 hover:underline">
                           terms and conditions
-                        </a>
-                        {' '}and{' '}
+                        </a>{" "}
+                        and{" "}
                         <a href="#" className="text-blue-600 hover:underline">
                           privacy policy
                         </a>
                       </span>
                     </label>
                     {errors.terms && (
-                      <p className="text-red-500 text-sm mt-2">{errors.terms}</p>
+                      <p className="text-red-500 text-sm mt-2">
+                        {errors.terms}
+                      </p>
                     )}
                   </div>
 
@@ -635,7 +737,7 @@ const { request } = useApi()
             <div className="lg:col-span-1">
               <FareEstimate
                 estimate={fareEstimate}
-                rideType={formData.rideType}
+                bookingType={formData.bookingType}
                 passengers={formData.passengers}
                 isLoading={isEstimating}
               />
@@ -644,5 +746,5 @@ const { request } = useApi()
         </div>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

@@ -1,44 +1,37 @@
 'use client'
 
 import React from 'react'
-import { FiUsers } from 'react-icons/fi'
+import { FiClock, FiNavigation } from 'react-icons/fi'
 
-interface RideTypeSelectorProps {
-  value: 'economy' | 'premium' | 'comfort'
-  onChange: (type: 'economy' | 'premium' | 'comfort') => void
+interface BookingTypeSelectorProps {
+  value: 'point-to-point' | 'hourly'
+  onChange: (type: 'point-to-point' | 'hourly') => void
 }
 
-const rideTypes = [
+const bookingTypes = [
   {
-    id: 'economy',
-    name: 'Economy',
-    description: 'Affordable, comfortable',
-    icon: '🚗',
-    passengers: 4,
+    id: 'point-to-point',
+    name: 'Point to Point',
+    description: 'Ride from A to B',
+    icon: '📍',
+    pricing: 'Per km + time',
   },
   {
-    id: 'premium',
-    name: 'Premium',
-    description: 'Premium comfort',
-    icon: '🚙',
-    passengers: 4,
-  },
-  {
-    id: 'comfort',
-    name: 'Comfort',
-    description: 'Extra space, premium service',
-    icon: '🚐',
-    passengers: 6,
+    id: 'hourly',
+    name: 'Hourly Rental',
+    description: 'Book by the hour',
+    icon: '⏰',
+    pricing: 'Hourly rate',
   },
 ]
 
-export const RideTypeSelector: React.FC<RideTypeSelectorProps> = ({
+export const RideTypeSelector: React.FC<BookingTypeSelectorProps> = ({
   value,
   onChange,
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {rideTypes.map(type => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {bookingTypes.map(type => (
         <button
           key={type.id}
           onClick={() => onChange(type.id as any)}
@@ -51,9 +44,8 @@ export const RideTypeSelector: React.FC<RideTypeSelectorProps> = ({
           <div className="text-3xl mb-2">{type.icon}</div>
           <h3 className="font-bold text-gray-900 mb-1">{type.name}</h3>
           <p className="text-xs text-gray-600 mb-3">{type.description}</p>
-          <div className="flex items-center text-xs text-gray-500">
-            <FiUsers className="w-3 h-3 mr-1" />
-            Up to {type.passengers} passengers
+          <div className="text-xs text-gray-500">
+            {type.pricing}
           </div>
         </button>
       ))}

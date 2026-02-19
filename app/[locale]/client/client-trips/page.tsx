@@ -114,7 +114,7 @@ export default function TripsPage({ params }: TripsPageProps) {
                 </div>
 
                 <Link
-                  href={`/${locale}/client/trips/${trip.id}`}
+                  href={`/${locale}/client/client-trips/${trip.id}`}
                   className="text-primary text-sm font-semibold hover:underline block mt-4"
                 >
                   {t("common.viewDetails")}

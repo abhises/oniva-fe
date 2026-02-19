@@ -18,7 +18,7 @@ const OSRM_API = 'https://router.project-osrm.org/route/v1/driving'
 export async function calculateDistance(
   pickup: { latitude: number; longitude: number },
   dropoff: { latitude: number; longitude: number },
-  rideType: 'economy' | 'premium' | 'comfort' = 'economy'
+  bookingType: 'point-to-point' | 'hourly' = 'point-to-point'
 ): Promise<DistanceResult | null> {
   try {
     // OSRM expects coordinates as [longitude, latitude]
@@ -42,14 +42,21 @@ export async function calculateDistance(
     const distanceInKm = route.distance / 1000
     const durationInMinutes = Math.ceil(route.duration / 60)
 
-    // Pricing based on ride type
+    // Pricing based on booking type
     const ratesByType = {
-      economy: { baseFare: 2.5, perKmRate: 1.2, perMinRate: 0.3 },
-      premium: { baseFare: 4.0, perKmRate: 1.8, perMinRate: 0.4 },
-      comfort: { baseFare: 5.0, perKmRate: 2.2, perMinRate: 0.5 },
+      'point-to-point': {
+        baseFare: 2.5,    // $2.50 base
+        perKmRate: 1.2,   // $1.20 per km
+        perMinRate: 0.3,  // $0.30 per minute
+      },
+      'hourly': {
+        baseFare: 15.0,   // $15 per hour
+        perKmRate: 0.8,   // $0.80 per km
+        perMinRate: 0.25, // $0.25 per minute
+      },
     }
 
-    const rates = ratesByType[rideType]
+    const rates = ratesByType[bookingType]
 
     const estimatedFare = +(
       rates.baseFare +
@@ -101,4 +108,3 @@ export async function getRouteDetails(
     return null
   }
 }
-
