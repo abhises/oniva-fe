@@ -1,8 +1,12 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { useAuthStore } from '@/store/authStore';
+import { User } from '@/types/user';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+
+console.log("ENV VALUE:", process.env.NEXT_PUBLIC_API_URL);
+console.log("BASE URL USED:", API_BASE_URL);
 interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
@@ -255,6 +259,7 @@ class ApiClient {
     return data;
   }
 
+
   async approveDriver(driverId: number) {
     const { data } = await this.instance.post<ApiResponse>(
       `/api/admin/drivers/${driverId}/approve`,
@@ -278,6 +283,42 @@ class ApiClient {
     );
     return data;
   }
+
+  async getPricing() {
+    const { data } = await this.instance.get<ApiResponse>(
+      '/api/admin/pricing'
+    );
+    return data;
+  }
+  // updatePricing
+
+  async updatePricing(pricingData: any) {
+    const { data } = await this.instance.put<ApiResponse>(
+      '/api/admin/pricing',
+      pricingData
+    );
+    return data;
+  }
+
+  // Add to the ApiClient class in app/services/api.ts
+
+async getUsers(params?: { limit?: number; offset?: number; role?: string }) {
+  const { data } = await this.instance.get<ApiResponse<User[]>>(
+    '/api/admin/users',
+    { params }
+  );
+  return data.data ?? [];
+}
+
+async suspendUser(userId: string, reason?: string) {
+  const { data } = await this.instance.post<ApiResponse>(
+    `/api/admin/users/${userId}/suspend`,
+    { reason }
+  );
+  return data;
+}
+
+  
 
   // ============================================================================
   // UTILITY METHODS

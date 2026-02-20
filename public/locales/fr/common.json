@@ -21,7 +21,8 @@
     "noData": "Aucune donnée disponible",
     "completed": "Terminé",
     "in_progress": "En Cours",
-    "accepted": "Accepté"
+    "accepted": "Accepté",
+    "viewDetails": "Voir les Détails"
   },
   "navigation": {
     "home": "Accueil",
@@ -121,6 +122,8 @@
     "activeTrips": "Trajets Actifs",
     "tool": "Outils",
     "approveDriver": "Approuver le Chauffeur",
-    "rejectDriver": "Rejeter le Chauffeur"
+    "rejectDriver": "Rejeter le Chauffeur",
+    "pricing": "Tarification",
+    "users": "Utilisateurs"
   }
 }

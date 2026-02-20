@@ -21,7 +21,8 @@
     "noData": "No data available",
     "completed": "Completed",
     "in_progress": "In Progress",
-    "accepted": "Accepted"
+    "accepted": "Accepted",
+    "viewDetails": "View Details"
   },
   "navigation": {
     "home": "Home",
@@ -119,6 +120,8 @@
     "activeTrips": "Active Trips",
     "tool": "Tools",
     "approveDriver": "Approve Driver",
-    "rejectDriver": "Reject Driver"
+    "rejectDriver": "Reject Driver",
+    "pricing": "Pricing",
+    "users": "Users"
   }
 }

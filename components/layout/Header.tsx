@@ -68,6 +68,9 @@ export const Header = ({ locale }: { locale: string }) => {
               <Link href={`/${locale}/${user.role}/drivers`}>
                 {t('admin.drivers')}
               </Link>
+              <Link href={`/${locale}/${user.role}/users`}>
+                {t('admin.users')}
+              </Link>
 
                <Link href={`/${locale}/${user.role}/earnings`}>
                 {t('admin.earnings')}
@@ -75,6 +78,9 @@ export const Header = ({ locale }: { locale: string }) => {
 
                <Link href={`/${locale}/${user.role}/reports`}>
                 {t('admin.reports')}
+              </Link>
+              <Link href={`/${locale}/${user.role}/pricing`}>
+                {t('admin.pricing')}
               </Link>
              
               </>
