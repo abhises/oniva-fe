@@ -284,18 +284,36 @@ class ApiClient {
     return data;
   }
 
+ // Get current active pricing (optional, if you still use it)
+ // Get current active pricing
   async getPricing() {
     const { data } = await this.instance.get<ApiResponse>(
       '/api/admin/pricing'
     );
-    return data;
+    return data; 
   }
-  // updatePricing
 
-  async updatePricing(pricingData: any) {
-    const { data } = await this.instance.put<ApiResponse>(
+  // Get pricing history
+  async getPricingHistory() {
+    const { data } = await this.instance.get<ApiResponse>(
+      '/api/admin/pricing/history'
+    );
+    return data; // <--- FIX: Return the full object, let useApi extract the array!
+  }
+
+  // Create NEW pricing configuration
+  async createPricing(pricingData: any) {
+    const { data } = await this.instance.post<ApiResponse>(
       '/api/admin/pricing',
       pricingData
+    );
+    return data;
+  }
+
+  // Activate an old pricing configuration
+  async activatePricing(id: number) {
+    const { data } = await this.instance.put<ApiResponse>(
+      `/api/admin/pricing/${id}/activate`
     );
     return data;
   }
@@ -307,7 +325,7 @@ async getUsers(params?: { limit?: number; offset?: number; role?: string }) {
     '/api/admin/users',
     { params }
   );
-  return data.data ?? [];
+  return data; // Return the full ApiResponse object
 }
 
 async suspendUser(userId: string, reason?: string) {

@@ -22,7 +22,8 @@
     "completed": "Completed",
     "in_progress": "In Progress",
     "accepted": "Accepted",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "restore": "Restore"
   },
   "navigation": {
     "home": "Home",

@@ -21,11 +21,17 @@ export const useApi = (options: UseApiOptions = {}) => {
         const response = await apiCall();
 
         if (response.success) {
-          if (showSuccess && response.messageKey) {
-            const message = t(response.messageKey);
-            toast.success(message);
+          // Handle Toasts: fallback to regular message if messageKey is missing
+          if (showSuccess) {
+            if (response.messageKey) {
+              toast.success(t(response.messageKey));
+            } else if (response.message) {
+              toast.success(response.message);
+            }
           }
-          return response.data as T;
+          
+          // Fix: If there's no data payload, return true instead of undefined
+          return (response.data !== undefined ? response.data : true) as T;
         } else {
           if (showError) {
             const errorKey = response.messageKey || 'errors.SERVER_ERROR';

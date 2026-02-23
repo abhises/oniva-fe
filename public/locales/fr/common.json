@@ -22,7 +22,8 @@
     "completed": "Terminé",
     "in_progress": "En Cours",
     "accepted": "Accepté",
-    "viewDetails": "Voir les Détails"
+    "viewDetails": "Voir les Détails",
+    "restore": "Restaurer"
   },
   "navigation": {
     "home": "Accueil",
