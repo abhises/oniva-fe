@@ -123,6 +123,7 @@
     "approveDriver": "Approve Driver",
     "rejectDriver": "Reject Driver",
     "pricing": "Pricing",
-    "users": "Users"
+    "users": "Users",
+    "pricing.title": "Pricing Configuration"
   }
 }

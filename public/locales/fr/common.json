@@ -125,6 +125,7 @@
     "approveDriver": "Approuver le Chauffeur",
     "rejectDriver": "Rejeter le Chauffeur",
     "pricing": "Tarification",
-    "users": "Utilisateurs"
+    "users": "Utilisateurs",
+    "pricing.title": "Configuration de la Tarification"
   }
 }

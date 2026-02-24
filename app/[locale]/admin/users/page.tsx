@@ -404,7 +404,7 @@ export default function AdminUsersPage() {
                                   disabled={
                                     suspendingUserId === user.id || isApiLoading
                                   }
-                                  className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="inline-flex items-center border-none gap-1 px-3 py-1 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                                   title="Suspend user"
                                 >
                                   {suspendingUserId === user.id ? (
@@ -431,7 +431,7 @@ export default function AdminUsersPage() {
                                 //   );
                                 }}
                                 disabled={isApiLoading}
-                                className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition disabled:opacity-50"
+                                className="inline-flex items-center border-none gap-1 px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition disabled:opacity-50"
                                 title="View details"
                               >
                                 <FiEye className="w-4 h-4" />

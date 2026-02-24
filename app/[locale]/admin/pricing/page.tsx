@@ -490,8 +490,8 @@ export default function AdminPricingPage() {
                           {item.created_at ? new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium">{item.base_fare} CFA</td>
-                      <td className="px-6 py-4 text-sm">{item.per_km_rate} CFA</td>
+                      <td className="px-6 py-4 text-sm font-medium  text-gray-800">{item.base_fare} CFA</td>
+                      <td className="px-6 py-4 text-sm   text-gray-800">{item.per_km_rate} CFA</td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {item.hourly_rates ? (
                           `${item.hourly_rates["1"] || '-'} / ${item.hourly_rates["4"] || '-'} / ${item.hourly_rates["8"] || '-'}`
