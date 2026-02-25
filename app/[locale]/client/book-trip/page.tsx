@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-// import { LocationPicker } from '@/components/booking/LocationPicker'
 import { RideTypeSelector } from "@/components/booking/RideTypeSelector";
 import { PassengerSelector } from "@/components/booking/PassengerSelector";
 import { PaymentSelector } from "@/components/booking/PaymentSelector";
@@ -22,14 +21,18 @@ import {
   FiCheck,
 } from "react-icons/fi";
 import dynamic from "next/dynamic";
-import { calculateDistance } from "@/lib/osrm"; // ← ADD THIS
+
+// Dynamically import LocationPicker and the New Map (No SSR to prevent Leaflet errors)
 const LocationPicker = dynamic(
-  () =>
-    import("@/components/booking/LocationPicker").then(
-      (mod) => mod.LocationPicker,
-    ),
-  { ssr: false },
+  () => import("@/components/booking/LocationPicker").then((mod) => mod.LocationPicker),
+  { ssr: false }
 );
+
+const UnifiedRouteMap = dynamic(
+  () => import("@/components/booking/UnifiedRouteMap"),
+  { ssr: false }
+);
+
 interface BookingFormData {
   pickupLocation: {
     address: string;
@@ -57,6 +60,7 @@ export default function BookTripPage() {
   const locale = (params?.locale as string) || "en";
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { request } = useApi();
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -65,7 +69,9 @@ export default function BookTripPage() {
   const [bookingStep, setBookingStep] = useState<
     "details" | "confirmation" | "success"
   >("details");
-  const { request } = useApi();
+  
+  // State for the blue route line on the map
+  const [routeGeometry, setRouteGeometry] = useState<[number, number][] | null>(null);
 
   const [formData, setFormData] = useState<BookingFormData>({
     pickupLocation: {
@@ -115,41 +121,55 @@ export default function BookTripPage() {
   };
 
   const handleEstimateFare = async () => {
-    if (!formData.pickupLocation.address || !formData.dropoffLocation.address) {
-      toast.error("Please select both pickup and dropoff locations");
+    if (!formData.pickupLocation.latitude || !formData.dropoffLocation.latitude) {
+      toast.error("Please select valid locations from the dropdown");
       return;
     }
 
     try {
       setIsEstimating(true);
 
-      // Calculate distance using OSRM
-      const distanceResult = await calculateDistance(
-        formData.pickupLocation,
-        formData.dropoffLocation,
-        formData.bookingType,
-      );
+      // DIRECT FETCH TO LOCAL DOCKER OSRM (No lib folder needed!)
+      // OSRM Needs Longitude,Latitude
+      const coordinates = `${formData.pickupLocation.longitude},${formData.pickupLocation.latitude};${formData.dropoffLocation.longitude},${formData.dropoffLocation.latitude}`;
+      const url = `http://localhost:5001/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
+      
+      const res = await fetch(url);
+      const data = await res.json();
 
-      if (!distanceResult) {
-        throw new Error("Could not calculate distance. Please try again.");
+      if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+        throw new Error("Could not find a valid driving route for these locations.");
       }
 
-      // Return the calculated fare
+      const route = data.routes[0];
+      
+      // Save the geometry to draw the blue line on the map
+      setRouteGeometry(route.geometry.coordinates);
+
+      // Convert OSRM raw data (meters/seconds) to KM/Minutes
+      const distanceKm = Number((route.distance / 1000).toFixed(2));
+      const durationMins = Math.ceil(route.duration / 60);
+
+      // Pricing Logic (Adjust baseFare, perKmRate, perMinRate as needed)
+      const baseFare = 3000;
+      const perKmRate = 300;
+      const perMinRate = 25;
+      
+      const distanceFee = parseFloat((distanceKm * perKmRate).toFixed(2));
+      const timeFee = parseFloat((durationMins * perMinRate).toFixed(2));
+      const estimatedFare = baseFare + distanceFee + timeFee;
+
       setFareEstimate({
-        estimatedFare: distanceResult.estimatedFare,
-        estimatedDistance: distanceResult.distance,
-        estimatedDuration: distanceResult.duration,
-        baseFare: distanceResult.baseFare,
-        distanceFee: parseFloat(
-          (distanceResult.distance * distanceResult.perKmRate).toFixed(2),
-        ),
-        timeFee: parseFloat(
-          (distanceResult.duration * distanceResult.perMinRate).toFixed(2),
-        ),
-        serviceFee: 1.5,
+        estimatedFare: estimatedFare,
+        estimatedDistance: distanceKm,
+        estimatedDuration: durationMins,
+        baseFare: baseFare,
+        distanceFee: distanceFee,
+        timeFee: timeFee,
+        serviceFee: 1.5, // Fixed service fee
         surgeFee: 0,
-        minFare: distanceResult.estimatedFare * 0.9,
-        maxFare: distanceResult.estimatedFare * 1.1,
+        minFare: estimatedFare * 0.9,
+        maxFare: estimatedFare * 1.1,
       });
 
       toast.success("Fare estimated successfully!");
@@ -166,6 +186,8 @@ export default function BookTripPage() {
       ...prev,
       pickupLocation: location,
     }));
+    setRouteGeometry(null); // Clear line if location changes
+    setFareEstimate(null); // Clear estimate if location changes
     if (errors.pickup) {
       setErrors((prev) => ({ ...prev, pickup: "" }));
     }
@@ -176,6 +198,8 @@ export default function BookTripPage() {
       ...prev,
       dropoffLocation: location,
     }));
+    setRouteGeometry(null); // Clear line if location changes
+    setFareEstimate(null); // Clear estimate if location changes
     if (errors.dropoff) {
       setErrors((prev) => ({ ...prev, dropoff: "" }));
     }
@@ -252,7 +276,7 @@ export default function BookTripPage() {
 
           paymentMethod: formData.paymentMethod,
           region: "Dakar",
-        }),
+        })
       );
 
       if (!result) {
@@ -271,6 +295,7 @@ export default function BookTripPage() {
       setIsLoading(false);
     }
   };
+
   if (bookingStep === "success") {
     return (
       <ProtectedRoute allowedRoles={["client"]}>
@@ -314,7 +339,7 @@ export default function BookTripPage() {
             </p>
 
             <button
-              onClick={() => router.push(`/${locale}/client/trips`)}
+              onClick={() => router.push(`/${locale}/client/client-trips`)}
               className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
             >
               View Trip Details
@@ -522,6 +547,14 @@ export default function BookTripPage() {
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div className="p-6 space-y-6">
+                  
+                  {/* SINGLE UNIFIED MAP AT THE TOP */}
+                  <UnifiedRouteMap 
+                    pickup={formData.pickupLocation.latitude ? formData.pickupLocation : null} 
+                    dropoff={formData.dropoffLocation.latitude ? formData.dropoffLocation : null} 
+                    routeGeometry={routeGeometry} 
+                  />
+
                   {/* Pickup Location */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-gray-900 mb-3">
@@ -565,10 +598,10 @@ export default function BookTripPage() {
                   {/* Get Fare Estimate */}
                   <button
                     onClick={handleEstimateFare}
-                    disabled={isEstimating}
+                    disabled={isEstimating || !formData.pickupLocation.latitude || !formData.dropoffLocation.latitude}
                     className="w-full px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition disabled:opacity-50 font-medium"
                   >
-                    {isEstimating ? "Estimating..." : "Get Fare Estimate"}
+                    {isEstimating ? "Estimating..." : "Get Fare Estimate & Map Route"}
                   </button>
 
                   {/* Date & Time */}
