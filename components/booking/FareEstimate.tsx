@@ -1,18 +1,18 @@
 'use client'
 
 import React from 'react'
-import { FiDollarSign, FiClock, FiNavigation } from 'react-icons/fi'
+import { FiClock, FiNavigation } from 'react-icons/fi'
 
 interface FareEstimateProps {
   estimate: any
-  bookingType: 'point-to-point' | 'hourly'  // ← CHANGED from rideType
+  bookingType: 'point-to-point' | 'hourly'
   passengers: number
   isLoading: boolean
 }
 
 export const FareEstimate: React.FC<FareEstimateProps> = ({
   estimate,
-  bookingType,  // ← CHANGED
+  bookingType,
   passengers,
   isLoading,
 }) => {
@@ -48,7 +48,7 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
         <div className="flex justify-between items-center pb-4 border-b">
           <span className="text-gray-600">Base Fare</span>
           <span className="font-semibold text-gray-900">
-            ${estimate?.baseFare?.toFixed(2)}
+            {estimate?.baseFare?.toFixed(2)} FCFA
           </span>
         </div>
 
@@ -60,7 +60,7 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
               Distance Fee ({estimate.estimatedDistance} km)
             </div>
             <span className="font-semibold text-gray-900">
-              ${estimate?.distanceFee?.toFixed(2)}
+              {estimate?.distanceFee?.toFixed(2)} FCFA
             </span>
           </div>
         )}
@@ -73,7 +73,7 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
               Time ({estimate.estimatedDuration} min)
             </div>
             <span className="font-semibold text-gray-900">
-              ${estimate?.timeFee?.toFixed(2)}
+              {estimate?.timeFee?.toFixed(2)} FCFA
             </span>
           </div>
         )}
@@ -82,7 +82,7 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
         <div className="flex justify-between items-center pb-4 border-b">
           <span className="text-gray-600">Service Fee</span>
           <span className="font-semibold text-gray-900">
-            ${estimate?.serviceFee?.toFixed(2)}
+            {estimate?.serviceFee?.toFixed(2)} FCFA
           </span>
         </div>
 
@@ -91,7 +91,7 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
           <div className="flex justify-between items-center pb-4 border-b bg-orange-50 -mx-2 px-2 py-2 rounded">
             <span className="text-orange-700 font-medium">Surge Pricing</span>
             <span className="font-bold text-orange-700">
-              ${estimate?.surgeFee?.toFixed(2)}
+              {estimate?.surgeFee?.toFixed(2)} FCFA
             </span>
           </div>
         )}
@@ -101,11 +101,11 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
           <span className="text-lg font-bold text-gray-900">Total Estimate</span>
           <div className="text-right">
             <div className="text-3xl font-bold text-blue-600">
-              ${estimate?.estimatedFare?.toFixed(2)}
+              {estimate?.estimatedFare?.toFixed(2)} FCFA
             </div>
             {estimate?.minFare && estimate?.maxFare && (
               <p className="text-xs text-gray-600 mt-1">
-                ${estimate.minFare?.toFixed(2)} - ${estimate.maxFare?.toFixed(2)}
+                {estimate.minFare?.toFixed(2)} FCFA - {estimate.maxFare?.toFixed(2)} FCFA
               </p>
             )}
           </div>
@@ -115,7 +115,7 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
         <div className="space-y-2 pt-4 border-t">
           <div className="flex justify-between text-xs text-gray-600">
             <span>Booking Type</span>
-            <span className="font-medium capitalize">{bookingType}</span>  {/* ← CHANGED */}
+            <span className="font-medium capitalize">{bookingType}</span>
           </div>
           <div className="flex justify-between text-xs text-gray-600">
             <span>Passengers</span>

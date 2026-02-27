@@ -184,7 +184,6 @@ export default function BookTripPage() {
       setIsEstimating(false);
     }
   };
-
   const handlePickupChange = (location: any) => {
     setFormData((prev) => ({
       ...prev,
