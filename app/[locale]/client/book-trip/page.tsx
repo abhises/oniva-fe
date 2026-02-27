@@ -129,10 +129,14 @@ export default function BookTripPage() {
     try {
       setIsEstimating(true);
 
-      // DIRECT FETCH TO LOCAL DOCKER OSRM (No lib folder needed!)
-      // OSRM Needs Longitude,Latitude
+      // 1. Fetch the base URL from your .env file
+      // Adding a fallback to localhost is a good safety measure
+      const osrmBaseUrl = process.env.NEXT_PUBLIC_OSRM_URL || "http://localhost:5001";
+
       const coordinates = `${formData.pickupLocation.longitude},${formData.pickupLocation.latitude};${formData.dropoffLocation.longitude},${formData.dropoffLocation.latitude}`;
-      const url = `http://localhost:5001/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
+      
+      // 2. Inject the base URL dynamically into the fetch URL
+      const url = `${osrmBaseUrl}/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
       
       const res = await fetch(url);
       const data = await res.json();
