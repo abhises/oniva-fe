@@ -61,7 +61,7 @@ export default function DriverTripDetailPage() {
     }));
     if (result) {
       toast.success("Trip completed!");
-      router.push(`/${locale}/driver/driver-trips`);
+      router.push(`/${locale}/driver/trips`);
     }
   };
 
