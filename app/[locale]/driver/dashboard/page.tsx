@@ -31,11 +31,38 @@ export default function DriverDashboard({
   })
   const [pendingRequests, setPendingRequests] = useState<any[]>([])
 
-  useEffect(() => {
-    const updateStatus = async () => {
+ useEffect(() => {
+    const updateStatusAndLocation = async () => {
+      // 1. Tell backend if we are online/offline
       await request(() => apiClient.setOnlineStatus(isOnline))
+
+      // 2. If going online, get the spoofed Chrome Sensor location and send it to the backend
+      if (isOnline) {
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              try {
+                // This calls the POST /api/driver/location route in your backend
+                await request(() => apiClient.updateLocation({
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude
+                }))
+                console.log("📍 Driver location updated to:", position.coords.latitude, position.coords.longitude);
+              } catch (err) {
+                console.error("Failed to update location", err);
+              }
+            },
+            (error) => {
+              console.error("Browser location error. Make sure Chrome Sensors are active!", error);
+            }
+          );
+        } else {
+          console.error("Geolocation is not supported by this browser.");
+        }
+      }
     }
-    updateStatus()
+    
+    updateStatusAndLocation()
   }, [isOnline, request])
 
   useEffect(() => {
