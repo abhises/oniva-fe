@@ -16,12 +16,12 @@ import { use } from 'react'
 export default function DriverDashboard({ 
   params 
 }: { 
-  params: Promise<{ locale: string }>  // Now it's a Promise!
+  params: Promise<{ locale: string }> 
 }) {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { isLoading, request } = useApi({ showSuccess: true })
-  const { locale } = use(params)  // Must unwrap with use()
+  const { locale } = use(params)
 
   const [isOnline, setIsOnline] = useState(false)
   const [stats, setStats] = useState({
@@ -31,18 +31,15 @@ export default function DriverDashboard({
   })
   const [pendingRequests, setPendingRequests] = useState<any[]>([])
 
- useEffect(() => {
+  useEffect(() => {
     const updateStatusAndLocation = async () => {
-      // 1. Tell backend if we are online/offline
       await request(() => apiClient.setOnlineStatus(isOnline))
 
-      // 2. If going online, get the spoofed Chrome Sensor location and send it to the backend
       if (isOnline) {
         if ("geolocation" in navigator) {
           navigator.geolocation.getCurrentPosition(
             async (position) => {
               try {
-                // This calls the POST /api/driver/location route in your backend
                 await request(() => apiClient.updateLocation({
                   latitude: position.coords.latitude,
                   longitude: position.coords.longitude
@@ -56,8 +53,6 @@ export default function DriverDashboard({
               console.error("Browser location error. Make sure Chrome Sensors are active!", error);
             }
           );
-        } else {
-          console.error("Geolocation is not supported by this browser.");
         }
       }
     }
@@ -102,7 +97,6 @@ export default function DriverDashboard({
         </Button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatsCard
           label={t('driver.totalTrips')}
@@ -127,7 +121,6 @@ export default function DriverDashboard({
         />
       </div>
 
-      {/* Pending Requests */}
       {isOnline && (
         <Card>
           <h2 className="text-2xl font-bold mb-4">{t('driver.pendingRequests')}</h2>
@@ -135,29 +128,32 @@ export default function DriverDashboard({
             <p className="text-gray-600 text-center py-8">{t('common.loading')}</p>
           ) : (
             <div className="space-y-4">
-              {pendingRequests.map((request) => (
-                <div key={request.id} className="border rounded-lg p-4 hover:shadow-md transition">
+              {pendingRequests.map((req) => (
+                // 1. Fixed Key mapping
+                <div key={req.request_id} className="border rounded-lg p-4 hover:shadow-md transition">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="font-semibold flex items-center gap-2">
                         <FiMapPin size={16} className="text-primary" />
-                        {request.pickup_address}
+                        {req.pickup_address}
                       </h3>
-                      <p className="text-sm text-gray-600 ml-6">→ {request.destination_address}</p>
+                      <p className="text-sm text-gray-600 ml-6">→ {req.destination_address}</p>
                     </div>
-                    <Badge variant="warning" label={`${request.distance} km`} />
+                    {/* 2. Fixed distance mapping (from your socket output: estimated_distance) */}
+                    <Badge variant="warning" label={`${req.estimated_distance} km`} />
                   </div>
 
                   <div className="flex justify-between items-center pt-4 border-t">
                     <div>
                       <p className="text-sm text-gray-600">{t('client.estimatedFare')}</p>
-                      <p className="font-bold text-primary">{request.total_price} XOF</p>
+                      <p className="font-bold text-primary">{req.total_price} XOF</p>
                     </div>
                     <div className="flex gap-2">
                       <Button
                         variant="success"
                         size="sm"
-                        onClick={() => handleAccept(request.id)}
+                        // 3. Fixed ID passing for API call
+                        onClick={() => handleAccept(req.request_id)}
                         isLoading={isLoading}
                       >
                         {t('driver.accept')}
@@ -165,7 +161,8 @@ export default function DriverDashboard({
                       <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleReject(request.id)}
+                        // 4. Fixed ID passing for API call
+                        onClick={() => handleReject(req.request_id)}
                         isLoading={isLoading}
                       >
                         {t('driver.reject')}
@@ -179,7 +176,6 @@ export default function DriverDashboard({
         </Card>
       )}
 
-      {/* Quick Links */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
         <Link href={`/${locale}/driver/driver-trips`}>
           <Card className="hover:shadow-lg cursor-pointer">

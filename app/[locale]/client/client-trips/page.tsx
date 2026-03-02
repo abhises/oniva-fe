@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { use } from "react";  // ← Add this import!
+import { use } from "react"; // ← Add this import!
 import { useTranslation } from "react-i18next";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Card } from "@/components/common/Card";
@@ -26,12 +26,12 @@ interface Trip {
 }
 
 interface TripsPageProps {
-  params: Promise<{ locale: string }>;  // ← Change this!
+  params: Promise<{ locale: string }>; // ← Change this!
 }
 
 export default function TripsPage({ params }: TripsPageProps) {
-  const { locale } = use(params);  // ← Add this!
-  
+  const { locale } = use(params); // ← Add this!
+
   const { t } = useTranslation();
   const { isLoading, request } = useApi({ showError: true });
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -79,47 +79,49 @@ export default function TripsPage({ params }: TripsPageProps) {
         ) : (
           <div className="space-y-4">
             {trips.map((trip) => (
-              <Card key={trip.id} hoverable>
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      <FiMapPin size={16} />
-                      {trip.pickup_address}
-                    </h3>
-                    <p className="text-sm text-gray-600 ml-6">
-                      → {trip.destination_address}
-                    </p>
-                  </div>
-                  <Badge
-                    variant={getStatusColor(trip.status)}
-                    label={trip.status}
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 border-t pt-4">
-                  <div className="flex items-center gap-2">
-                    <FiDollarSign size={16} />
-                    {trip.total_price} XOF
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FiClock size={16} />
-                    {new Date(trip.created_at).toLocaleDateString()}
-                  </div>
-                  {trip.driver && (
-                    <div className="flex items-center gap-2">
-                      <FiStar size={16} />
-                      {trip.driver.fullName}
+              <Link href={`/${locale}/client/client-trips/${trip.id}`} className="flex justify-between items-start mb-10 gap-4">
+                <Card key={trip.id} hoverable>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <FiMapPin size={16} />
+                        {trip.pickup_address}
+                      </h3>
+                      <p className="text-sm text-gray-600 ml-6">
+                        → {trip.destination_address}
+                      </p>
                     </div>
-                  )}
-                </div>
+                    <Badge
+                      variant={getStatusColor(trip.status)}
+                      label={trip.status}
+                    />
+                  </div>
 
-                <Link
-                  href={`/${locale}/client/client-trips/${trip.id}`}
-                  className="text-primary text-sm font-semibold hover:underline block mt-4"
-                >
-                  {t("common.viewDetails")}
-                </Link>
-              </Card>
+                  <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 border-t pt-4">
+                    <div className="flex items-center gap-2">
+                      <FiDollarSign size={16} />
+                      {trip.total_price} XOF
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FiClock size={16} />
+                      {new Date(trip.created_at).toLocaleDateString()}
+                    </div>
+                    {trip.driver && (
+                      <div className="flex items-center gap-2">
+                        <FiStar size={16} />
+                        {trip.driver.fullName}
+                      </div>
+                    )}
+                  </div>
+
+                  <Link
+                    href={`/${locale}/client/client-trips/${trip.id}`}
+                    className="text-primary text-sm font-semibold hover:underline block mt-4"
+                  >
+                    {t("common.viewDetails")}
+                  </Link>
+                </Card>
+              </Link>
             ))}
           </div>
         )}

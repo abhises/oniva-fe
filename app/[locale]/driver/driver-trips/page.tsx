@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useRouter, useParams } from 'next/navigation'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { Card } from '@/components/common/Card'
 import { Badge } from '@/components/common/Badge'
 import { Loader } from '@/components/common/Loader'
 import { useApi } from '@/hooks/useApi'
 import { apiClient } from '@/services/api'
-import { FiMapPin, FiClock, FiDollarSign, FiCheck } from 'react-icons/fi'
+import { FiMapPin, FiClock, FiDollarSign, FiCheck, FiChevronRight } from 'react-icons/fi'
 
 interface DriverTrip {
   id: number
@@ -22,13 +23,17 @@ interface DriverTrip {
 
 export default function DriverTripsPage() {
   const { t } = useTranslation()
+  const router = useRouter()
+  const params = useParams()
+  const locale = params?.locale || 'en'
+  
   const { isLoading, request } = useApi({ showError: true })
   const [trips, setTrips] = useState<DriverTrip[]>([])
   const [filter, setFilter] = useState('all')
 
   useEffect(() => {
     const fetchTrips = async () => {
-      const result = await request<DriverTrip[]>(() => apiClient.getTrips())
+      const result = await request<DriverTrip[]>(() => apiClient.getDriverTrips())
       if (result) {
         setTrips(result)
       }
@@ -46,6 +51,8 @@ export default function DriverTripsPage() {
         return 'info'
       case 'accepted':
         return 'warning'
+      case 'cancelled':
+        return 'danger'
       default:
         return 'info'
     }
@@ -64,7 +71,7 @@ export default function DriverTripsPage() {
               onClick={() => setFilter(f)}
               className={`px-4 py-2 rounded-lg font-semibold transition ${
                 filter === f
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary text-white shadow-md'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -82,35 +89,44 @@ export default function DriverTripsPage() {
         ) : (
           <div className="space-y-4">
             {filteredTrips.map((trip) => (
-              <Card key={trip.id} hoverable>
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      <FiMapPin size={16} />
-                      {trip.pickup_address}
-                    </h3>
-                    <p className="text-sm text-gray-600 ml-6">→ {trip.destination_address}</p>
-                  </div>
-                  <Badge variant={getStatusColor(trip.status)} label={trip.status} />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 border-t pt-4">
-                  <div className="flex items-center gap-2">
-                    <FiDollarSign size={16} />
-                    <span className="font-semibold text-primary">{trip.total_price} XOF</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FiClock size={16} />
-                    {new Date(trip.created_at).toLocaleDateString()}
-                  </div>
-                  {trip.status === 'completed' && (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <FiCheck size={16} />
-                      Completed
+              <div 
+                key={trip.id} 
+                onClick={() => router.push(`/${locale}/driver/driver-trips/${trip.id}`)}
+                className="cursor-pointer transition-transform hover:scale-[1.01]"
+              >
+                <Card hoverable>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold flex items-center gap-2 text-gray-900">
+                        <FiMapPin size={16} className="text-primary" />
+                        {trip.pickup_address}
+                      </h3>
+                      <p className="text-sm text-gray-600 ml-6">→ {trip.destination_address}</p>
                     </div>
-                  )}
-                </div>
-              </Card>
+                    <div className="flex items-center gap-3">
+                      <Badge variant={getStatusColor(trip.status)} label={trip.status} />
+                      <FiChevronRight className="text-gray-400" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 border-t pt-4">
+                    <div className="flex items-center gap-2">
+                      <FiDollarSign size={16} className="text-green-600" />
+                      <span className="font-semibold text-gray-900">{trip.total_price} XOF</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FiClock size={16} />
+                      {new Date(trip.created_at).toLocaleDateString()}
+                    </div>
+                    {trip.status === 'completed' && (
+                      <div className="flex items-center gap-2 text-green-600 font-medium">
+                        <FiCheck size={16} />
+                        {t('common.completed')}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </div>
             ))}
           </div>
         )}

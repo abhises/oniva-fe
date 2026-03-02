@@ -201,6 +201,13 @@ class ApiClient {
     return data;
   }
 
+   async  getDriverTrips() {
+    const { data } = await this.instance.get<ApiResponse>(
+      `/api/driver/trips`
+    );
+    return data;
+  }
+
   async acceptRequest(requestId: string) {
     const { data } = await this.instance.post<ApiResponse>(
       `/api/driver/requests/${requestId}/accept`,
@@ -208,6 +215,8 @@ class ApiClient {
     );
     return data;
   }
+
+  
 
   async rejectRequest(requestId: string, reason?: string) {
     const { data } = await this.instance.post<ApiResponse>(
@@ -217,13 +226,14 @@ class ApiClient {
     return data;
   }
 
-  async startTrip(tripId: string) {
-    const { data } = await this.instance.post<ApiResponse>(
-      `/api/driver/trips/${tripId}/start`,
-      {}
-    );
-    return data;
-  }
+  // Inside your ApiClient class
+async startTrip(tripId: string | number, otp: string) {
+  const { data } = await this.instance.post<ApiResponse>(
+    `/api/driver/trips/${tripId}/start`,
+    { otp } // This sends { "otp": "306813" } to the backend
+  );
+  return data;
+}
 
   async endTrip(tripId: string, tripData: any) {
     const { data } = await this.instance.post<ApiResponse>(
@@ -335,6 +345,16 @@ async suspendUser(userId: string, reason?: string) {
   );
   return data;
 }
+
+
+async getAllTripDetails(tripId: string | number) {
+    const { data } = await this.instance.get<ApiResponse>(
+      `/api/trips/${tripId}`
+    );
+    // We return the whole 'data' object (ApiResponse) 
+    // so your 'useApi' hook can handle success/error states
+    return data;
+  }
 
   
 
