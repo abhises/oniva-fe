@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { use } from "react"; // ← Add this import!
+import { use } from "react"; 
 import { useTranslation } from "react-i18next";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Card } from "@/components/common/Card";
@@ -10,7 +10,7 @@ import { Loader } from "@/components/common/Loader";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import Link from "next/link";
-import { FiMapPin, FiClock, FiDollarSign, FiStar } from "react-icons/fi";
+import { FiMapPin, FiClock, FiDollarSign, FiStar, FiChevronRight } from "react-icons/fi";
 
 interface Trip {
   id: number;
@@ -26,11 +26,11 @@ interface Trip {
 }
 
 interface TripsPageProps {
-  params: Promise<{ locale: string }>; // ← Change this!
+  params: Promise<{ locale: string }>;
 }
 
 export default function TripsPage({ params }: TripsPageProps) {
-  const { locale } = use(params); // ← Add this!
+  const { locale } = use(params);
 
   const { t } = useTranslation();
   const { isLoading, request } = useApi({ showError: true });
@@ -77,49 +77,59 @@ export default function TripsPage({ params }: TripsPageProps) {
             </Link>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {trips.map((trip) => (
-              <Link href={`/${locale}/client/client-trips/${trip.id}`} className="flex justify-between items-start mb-10 gap-4">
-                <Card key={trip.id} hoverable>
+              /* FIXED: The 'key' prop MUST be on the outermost element of the map */
+              <Link 
+                key={trip.id} 
+                href={`/${locale}/client/client-trips/${trip.id}`} 
+                className="block transition-transform hover:scale-[1.01]"
+              >
+                <Card hoverable className="relative overflow-hidden">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold flex items-center gap-2">
-                        <FiMapPin size={16} />
+                      <h3 className="font-semibold flex items-center gap-2 text-gray-900">
+                        <FiMapPin size={16} className="text-primary" />
                         {trip.pickup_address}
                       </h3>
                       <p className="text-sm text-gray-600 ml-6">
                         → {trip.destination_address}
                       </p>
                     </div>
-                    <Badge
-                      variant={getStatusColor(trip.status)}
-                      label={trip.status}
-                    />
+                    <div className="flex flex-col items-end gap-2">
+                      <Badge
+                        variant={getStatusColor(trip.status)}
+                        label={trip.status}
+                      />
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 border-t pt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600 border-t pt-4">
                     <div className="flex items-center gap-2">
-                      <FiDollarSign size={16} />
-                      {trip.total_price} XOF
+                      <FiDollarSign size={16} className="text-green-600" />
+                      <span className="font-bold text-gray-900">{trip.total_price.toLocaleString()} XOF</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <FiClock size={16} />
                       {new Date(trip.created_at).toLocaleDateString()}
                     </div>
-                    {trip.driver && (
+                    {trip.driver ? (
                       <div className="flex items-center gap-2">
-                        <FiStar size={16} />
-                        {trip.driver.fullName}
+                        <FiStar size={16} className="text-yellow-500" />
+                        <span className="truncate">{trip.driver.fullName}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-gray-400 italic">
+                        {t("client.findingDriver")}
                       </div>
                     )}
                   </div>
 
-                  <Link
-                    href={`/${locale}/client/client-trips/${trip.id}`}
-                    className="text-primary text-sm font-semibold hover:underline block mt-4"
-                  >
+                  {/* Visual indicator for clickability */}
+                  <div className="mt-4 flex items-center justify-end text-primary text-sm font-bold gap-1 uppercase tracking-tight">
                     {t("common.viewDetails")}
-                  </Link>
+                    <FiChevronRight />
+                  </div>
                 </Card>
               </Link>
             ))}

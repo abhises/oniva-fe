@@ -43,6 +43,7 @@ interface Trip {
   cancellation_reason?: string | null;
   driver_name?: string | null;
   driver_phone?: string | null;
+  otp_code?: string; // <--- Add this property
   // If your backend populates a nested driver object later:
   driver?: {
     id: string | number;
@@ -147,7 +148,7 @@ export default function ClientTripDetailPage() {
                   created_at: new Date().toISOString(),
                 },
               }
-            : null
+            : null,
         );
         setShowRatingModal(false);
         setSelectedRating(5);
@@ -186,11 +187,12 @@ export default function ClientTripDetailPage() {
                 cancellation_reason: cancelReason,
                 cancelled_at: new Date().toISOString(),
               }
-            : null
+            : null,
         );
         setShowCancelModal(false);
         setCancelReason("");
         toast.success("Trip cancelled successfully");
+        router.push("/client/book-trip");
       }
     } catch (error: any) {
       toast.error("Failed to cancel trip");
@@ -281,7 +283,8 @@ export default function ClientTripDetailPage() {
   // Safely cast strings to Numbers to prevent .toFixed() crashes
   const safeBasePrice = Number(trip.base_price || 0);
   const safeTotalPrice = Number(trip.total_price || 0);
-  const safeDistanceCharge = safeTotalPrice > safeBasePrice ? safeTotalPrice - safeBasePrice : 0;
+  const safeDistanceCharge =
+    safeTotalPrice > safeBasePrice ? safeTotalPrice - safeBasePrice : 0;
   const safeEstimatedDistance = Number(trip.estimated_distance || 0);
 
   return (
@@ -308,7 +311,7 @@ export default function ClientTripDetailPage() {
 
               <span
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${getStatusColor(
-                  trip.status
+                  trip.status,
                 )}`}
               >
                 {getStatusIcon(trip.status)}
@@ -316,6 +319,30 @@ export default function ClientTripDetailPage() {
               </span>
             </div>
           </div>
+          {/* 🟢 NEW OTP SECTION 🟢 */}
+          {trip.otp_code &&
+            (trip.status === "pending" ||
+              trip.status === "assigned" ||
+              trip.status === "accepted") && (
+              <div className="bg-blue-600 rounded-lg shadow-lg p-6 mb-6 text-white text-center">
+                <h2 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-2">
+                  Pickup Verification Code
+                </h2>
+                <div className="flex justify-center gap-3">
+                  {trip.otp_code.split("").map((digit, index) => (
+                    <div
+                      key={index}
+                      className="w-12 h-14 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center text-3xl font-black border border-white/30"
+                    >
+                      {digit}
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-4 text-xs opacity-90">
+                  Give this code to the driver upon arrival.
+                </p>
+              </div>
+            )}
 
           {/* Trip Status Timeline */}
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -332,7 +359,7 @@ export default function ClientTripDetailPage() {
                     <FiCheckCircle className="w-5 h-5" />
                   </div>
                   {/* Only show line if there's a next step */}
-                  {(trip.driver || trip.status === 'cancelled') && (
+                  {(trip.driver || trip.status === "cancelled") && (
                     <div className="w-0.5 h-12 bg-gray-300 my-1"></div>
                   )}
                 </div>
@@ -352,7 +379,7 @@ export default function ClientTripDetailPage() {
                       <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
                         <FiCheckCircle className="w-5 h-5" />
                       </div>
-                      {(trip.started_at) && (
+                      {trip.started_at && (
                         <div className="w-0.5 h-12 bg-gray-300 my-1"></div>
                       )}
                     </div>
@@ -374,7 +401,7 @@ export default function ClientTripDetailPage() {
                           <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
                             <FiCheckCircle className="w-5 h-5" />
                           </div>
-                          {(trip.completed_at) && (
+                          {trip.completed_at && (
                             <div className="w-0.5 h-12 bg-gray-300 my-1"></div>
                           )}
                         </div>
@@ -469,14 +496,18 @@ export default function ClientTripDetailPage() {
 
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="bg-blue-50 rounded-lg p-4">
-                  <p className="text-xs text-blue-600 font-medium">EST. DISTANCE</p>
+                  <p className="text-xs text-blue-600 font-medium">
+                    EST. DISTANCE
+                  </p>
                   <p className="text-2xl font-bold text-blue-900 mt-1">
                     {safeEstimatedDistance.toFixed(1)} km
                   </p>
                 </div>
 
                 <div className="bg-green-50 rounded-lg p-4">
-                  <p className="text-xs text-green-600 font-medium">EST. DURATION</p>
+                  <p className="text-xs text-green-600 font-medium">
+                    EST. DURATION
+                  </p>
                   <p className="text-2xl font-bold text-green-900 mt-1">
                     {trip.estimated_duration || 0} min
                   </p>
@@ -486,69 +517,73 @@ export default function ClientTripDetailPage() {
           </div>
 
           {/* Driver Information */}
-          {(trip.driver || trip.driver_name) && trip.status !== "scheduled" && trip.status !== "pending" && (
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <FiUser className="w-5 h-5" />
-                Driver Information
-              </h2>
+          {(trip.driver || trip.driver_name) &&
+            trip.status !== "scheduled" &&
+            trip.status !== "pending" && (
+              <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <FiUser className="w-5 h-5" />
+                  Driver Information
+                </h2>
 
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-2xl font-bold text-blue-600">
-                    {(trip.driver?.full_name || trip.driver_name || "D").charAt(0).toUpperCase()}
-                  </span>
-                </div>
-
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900">
-                    {trip.driver?.full_name || trip.driver_name}
-                  </h3>
-                  <div className="flex items-center gap-1 mt-1">
-                    <FiStar className="w-4 h-4 text-yellow-600 fill-yellow-600" />
-                    <span className="text-yellow-600 font-semibold">
-                      {Number(trip.driver?.rating || 5.0).toFixed(1)}
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-2xl font-bold text-blue-600">
+                      {(trip.driver?.full_name || trip.driver_name || "D")
+                        .charAt(0)
+                        .toUpperCase()}
                     </span>
                   </div>
+
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {trip.driver?.full_name || trip.driver_name}
+                    </h3>
+                    <div className="flex items-center gap-1 mt-1">
+                      <FiStar className="w-4 h-4 text-yellow-600 fill-yellow-600" />
+                      <span className="text-yellow-600 font-semibold">
+                        {Number(trip.driver?.rating || 5.0).toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact and Car Details */}
+                <div className="space-y-3">
+                  {(trip.driver?.phone || trip.driver_phone) && (
+                    <button
+                      onClick={() => {
+                        const phone = trip.driver?.phone || trip.driver_phone;
+                        if (phone) window.location.href = `tel:${phone}`;
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition font-medium"
+                    >
+                      <FiPhone className="w-5 h-5" />
+                      {trip.driver?.phone || trip.driver_phone}
+                    </button>
+                  )}
+
+                  {trip.driver?.car && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-sm text-gray-600 font-medium mb-2 flex items-center gap-2">
+                        VEHICLE INFORMATION
+                      </p>
+                      <p className="text-gray-900 font-semibold">
+                        {trip.driver.car.model}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        License Plate: {trip.driver.car.license_plate}
+                      </p>
+                      {trip.driver.car.color && (
+                        <p className="text-sm text-gray-600">
+                          Color: {trip.driver.car.color}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Contact and Car Details */}
-              <div className="space-y-3">
-                {(trip.driver?.phone || trip.driver_phone) && (
-                  <button
-                    onClick={() => {
-                      const phone = trip.driver?.phone || trip.driver_phone;
-                      if (phone) window.location.href = `tel:${phone}`;
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition font-medium"
-                  >
-                    <FiPhone className="w-5 h-5" />
-                    {trip.driver?.phone || trip.driver_phone}
-                  </button>
-                )}
-
-                {trip.driver?.car && (
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600 font-medium mb-2 flex items-center gap-2">
-                      VEHICLE INFORMATION
-                    </p>
-                    <p className="text-gray-900 font-semibold">
-                      {trip.driver.car.model}
-                    </p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      License Plate: {trip.driver.car.license_plate}
-                    </p>
-                    {trip.driver.car.color && (
-                      <p className="text-sm text-gray-600">
-                        Color: {trip.driver.car.color}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+            )}
 
           {/* Fare Breakdown */}
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -566,9 +601,7 @@ export default function ClientTripDetailPage() {
               </div>
 
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">
-                  Distance / Hourly Charge
-                </span>
+                <span className="text-gray-600">Distance / Hourly Charge</span>
                 <span className="font-semibold text-gray-900">
                   {safeDistanceCharge.toFixed(2)} XOF
                 </span>

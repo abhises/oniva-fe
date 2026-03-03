@@ -243,54 +243,51 @@ export default function BookTripPage() {
     setBookingStep("confirmation");
   };
 
-  const handleConfirmBooking = async () => {
+ const handleConfirmBooking = async () => {
     try {
       setIsLoading(true);
 
-      const result = await request(() =>
+      const result = await request<any>(() =>
         apiClient.bookTrip({
           bookingType: formData.bookingType,
-
           pickupLat: formData.pickupLocation.latitude,
           pickupLng: formData.pickupLocation.longitude,
           pickupAddress: formData.pickupLocation.address,
-
           destinationLat:
             formData.bookingType === "point-to-point"
               ? formData.dropoffLocation.latitude
               : null,
-
           destinationLng:
             formData.bookingType === "point-to-point"
               ? formData.dropoffLocation.longitude
               : null,
-
           destinationAddress:
             formData.bookingType === "point-to-point"
               ? formData.dropoffLocation.address
               : null,
-
           scheduledTime: `${formData.date}T${formData.time}`,
-
           distance: Number(Math.round(fareEstimate?.estimatedDistance || 0)),
           duration: Number(Math.round(fareEstimate?.estimatedDuration || 0)),
           basePrice: Number(Math.round(fareEstimate?.baseFare || 0)),
           totalPrice: Number(Math.round(fareEstimate?.estimatedFare || 0)),
-
           paymentMethod: formData.paymentMethod,
           region: "Dakar",
         })
       );
 
-      if (!result) {
+      if (!result || !result.trip) {
         throw new Error("Failed to book trip");
       }
+
+      console.log("Booking result:", result);
+      const newTripId = result.trip.id;
 
       toast.success("Booking confirmed!");
       setBookingStep("success");
 
+      // Redirect specifically to the new trip detail page after 3 seconds
       setTimeout(() => {
-        router.push(`/${locale}/client/client-trips`);
+        router.push(`/${locale}/client/client-trips/${newTripId}`);
       }, 3000);
     } catch (error: any) {
       toast.error(error.message || "Failed to book trip");
