@@ -20,6 +20,15 @@ interface AcceptResponse {
   message?: string;
 }
 
+// Updated interface to match what your console is actually showing
+interface DriverStatsResponse {
+  total_trips: string | number;
+  total_earnings: string | number;
+  rating: string | number;
+  trips_this_week: string | number;
+  earnings_this_week: string | number;
+}
+
 export default function DriverDashboard({
   params,
 }: {
@@ -27,7 +36,7 @@ export default function DriverDashboard({
 }) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { isLoading, request } = useApi({ showSuccess: true });
+  const { isLoading, request } = useApi({ showSuccess: false });
   const { locale } = use(params);
   const router = useRouter();
 
@@ -36,8 +45,31 @@ export default function DriverDashboard({
     totalTrips: 0,
     earnings: 0,
     rating: 5.0,
+    tripsThisWeek: 0,
   });
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+
+  // Corrected Fetch logic based on your console output
+  useEffect(() => {
+    const fetchStats = async () => {
+      const result = await request<any>(() =>
+        apiClient.getDriverDashboardStats()
+      );
+      
+      console.log("Fetched driver stats:", result);
+      
+      // Changed: Accessing properties directly from 'result' as per your console log
+      if (result) {
+        setStats({
+          totalTrips: Number(result.total_trips) || 0,
+          earnings: Number(result.total_earnings) || 0,
+          rating: Number(result.rating) || 0,
+          tripsThisWeek: Number(result.trips_this_week) || 0,
+        });
+      }
+    };
+    fetchStats();
+  }, [request]);
 
   useEffect(() => {
     const updateStatusAndLocation = async () => {
@@ -54,7 +86,7 @@ export default function DriverDashboard({
                     longitude: position.coords.longitude,
                   }),
                 );
-                console.log(
+                 console.log(
                   "📍 Driver location updated to:",
                   position.coords.latitude,
                   position.coords.longitude,
@@ -64,10 +96,7 @@ export default function DriverDashboard({
               }
             },
             (error) => {
-              console.error(
-                "Browser location error. Make sure Chrome Sensors are active!",
-                error,
-              );
+              console.error("Location error:", error);
             },
           );
         }
@@ -94,7 +123,6 @@ export default function DriverDashboard({
   }, [isOnline, request]);
 
   const handleAccept = async (requestId: string) => {
-    // Use the interface instead of any
     const result = await request<AcceptResponse>(() =>
       apiClient.acceptRequest(requestId),
     );
@@ -129,21 +157,21 @@ export default function DriverDashboard({
           value={stats.totalTrips}
           icon={<FiMapPin />}
           trend="up"
-          trendValue="5 this week"
+          trendValue={`${stats.tripsThisWeek} ${t("common.thisWeek")}`}
         />
         <StatsCard
           label={t("driver.totalEarnings")}
           value={`${stats.earnings.toLocaleString()} XOF`}
           icon={<FiDollarSign />}
           trend="up"
-          trendValue="15% from last week"
+          trendValue="Overall"
         />
         <StatsCard
           label={t("driver.rating")}
           value={stats.rating.toFixed(1)}
           icon={<FiStar />}
           trend="up"
-          trendValue="Based on 45 ratings"
+          trendValue="Average"
         />
       </div>
 
@@ -159,7 +187,6 @@ export default function DriverDashboard({
           ) : (
             <div className="space-y-4">
               {pendingRequests.map((req) => (
-                // 1. Fixed Key mapping
                 <div
                   key={req.request_id}
                   className="border rounded-lg p-4 hover:shadow-md transition"
@@ -174,7 +201,6 @@ export default function DriverDashboard({
                         → {req.destination_address}
                       </p>
                     </div>
-                    {/* 2. Fixed distance mapping (from your socket output: estimated_distance) */}
                     <Badge
                       variant="warning"
                       label={`${req.estimated_distance} km`}
@@ -194,7 +220,6 @@ export default function DriverDashboard({
                       <Button
                         variant="success"
                         size="sm"
-                        // 3. Fixed ID passing for API call
                         onClick={() => handleAccept(req.request_id)}
                         isLoading={isLoading}
                       >
@@ -203,7 +228,6 @@ export default function DriverDashboard({
                       <Button
                         variant="danger"
                         size="sm"
-                        // 4. Fixed ID passing for API call
                         onClick={() => handleReject(req.request_id)}
                         isLoading={isLoading}
                       >
