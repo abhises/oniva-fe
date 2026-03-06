@@ -113,6 +113,13 @@ class ApiClient {
     return data;
   }
 
+   async getActivePrice() {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/client/pricing/active",
+    );
+    return data;
+  }
+
   async estimateFare(fareData: FareEstimateData) {
     const { data } = await this.instance.post<ApiResponse>(
       "/api/client/estimate-fare",

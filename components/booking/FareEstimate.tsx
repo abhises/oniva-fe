@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { FiClock, FiNavigation } from 'react-icons/fi'
+import { FiClock, FiNavigation, FiMoon, FiTrendingUp } from 'react-icons/fi'
 
 interface FareEstimateProps {
   estimate: any
@@ -48,7 +48,7 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
         <div className="flex justify-between items-center pb-4 border-b">
           <span className="text-gray-600">Base Fare</span>
           <span className="font-semibold text-gray-900">
-            {estimate?.baseFare?.toFixed(2)} FCFA
+            {estimate?.baseFare?.toLocaleString()} FCFA
           </span>
         </div>
 
@@ -60,7 +60,7 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
               Distance Fee ({estimate.estimatedDistance} km)
             </div>
             <span className="font-semibold text-gray-900">
-              {estimate?.distanceFee?.toFixed(2)} FCFA
+              {estimate?.distanceFee?.toLocaleString()} FCFA
             </span>
           </div>
         )}
@@ -73,8 +73,29 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
               Time ({estimate.estimatedDuration} min)
             </div>
             <span className="font-semibold text-gray-900">
-              {estimate?.timeFee?.toFixed(2)} FCFA
+              {estimate?.timeFee?.toLocaleString()} FCFA
             </span>
+          </div>
+        )}
+
+        {/* Night Surcharge */}
+        {estimate?.nightSurcharge > 0 && (
+          <div className="flex justify-between items-center pb-4 border-b text-indigo-600">
+            <div className="flex items-center text-sm">
+              <FiMoon className="w-4 h-4 mr-2" />
+              Night Surcharge
+            </div>
+            <span className="font-semibold">
+              +{estimate.nightSurcharge.toLocaleString()} FCFA
+            </span>
+          </div>
+        )}
+
+        {/* Long Distance Indicator */}
+        {estimate?.isLongDistance && (
+          <div className="flex items-center text-amber-700 text-xs bg-amber-50 p-2 rounded border border-amber-100">
+            <FiTrendingUp className="w-4 h-4 mr-2" />
+            Long distance coefficient applied
           </div>
         )}
 
@@ -101,11 +122,11 @@ export const FareEstimate: React.FC<FareEstimateProps> = ({
           <span className="text-lg font-bold text-gray-900">Total Estimate</span>
           <div className="text-right">
             <div className="text-3xl font-bold text-blue-600">
-              {estimate?.estimatedFare?.toFixed(2)} FCFA
+              {estimate?.estimatedFare?.toLocaleString()} FCFA
             </div>
             {estimate?.minFare && estimate?.maxFare && (
               <p className="text-xs text-gray-600 mt-1">
-                {estimate.minFare?.toFixed(2)} FCFA - {estimate.maxFare?.toFixed(2)} FCFA
+                {estimate.minFare?.toLocaleString()} FCFA - {estimate.maxFare?.toLocaleString()} FCFA
               </p>
             )}
           </div>
