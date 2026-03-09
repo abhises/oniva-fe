@@ -368,6 +368,36 @@ class ApiClient {
     // so your 'useApi' hook can handle success/error states
     return data;
   }
+  // Add to the ApiClient class in app/services/api.ts
+
+async getAdminActiveTrips(params?: { 
+  limit?: number
+  offset?: number
+  status?: string
+  role?: 'client' | 'driver' | 'all'
+}) {
+  const { data } = await this.instance.get<ApiResponse>(
+    '/api/admin/trips/active',
+    { params }
+  );
+  return data;
+}
+
+
+
+async getAdminTripStatistics() {
+  const { data } = await this.instance.get<ApiResponse>(
+    '/api/admin/trips/statistics'
+  );
+  return data;
+}
+
+async getAdminTripDetails(tripId: string) {
+  const { data } = await this.instance.get<ApiResponse>(
+    `/api/admin/trips/${tripId}`
+  );
+  return data;
+}
 
   // ============================================================================
   // UTILITY METHODS

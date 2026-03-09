@@ -124,6 +124,7 @@
     "rejectDriver": "Reject Driver",
     "pricing": "Pricing",
     "users": "Users",
-    "pricing.title": "Pricing Configuration"
+    "pricing.title": "Pricing Configuration",
+    "trips": "Trips"
   }
 }

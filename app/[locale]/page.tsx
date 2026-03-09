@@ -10,7 +10,10 @@ import dynamic from "next/dynamic";
 
 const SenegalMap = dynamic(
   () => import("@/components/common/SenegalMap"),
-  { ssr: false }
+  { 
+    ssr: false,
+    loading: () => <div className="h-full w-full bg-blue-50 animate-pulse rounded-xl" /> 
+  }
 );
 
 export default function LandingPage() {

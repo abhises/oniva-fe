@@ -126,6 +126,7 @@
     "rejectDriver": "Rejeter le Chauffeur",
     "pricing": "Tarification",
     "users": "Utilisateurs",
-    "pricing.title": "Configuration de la Tarification"
+    "pricing.title": "Configuration de la Tarification",
+    "trips": "Trajets"
   }
 }
