@@ -154,6 +154,15 @@ export default function ClientTripDetailPage() {
         setSelectedRating(5);
         setReviewText("");
         toast.success("Thank you for your rating!");
+        if (result) {
+          toast.success("Thank you for your rating!");
+
+          // Close modal and clear state (optional if navigating immediately)
+          setShowRatingModal(false);
+
+          // Redirect the user back to the trips list
+          // router.push("/client/cltrips");
+        }
       }
     } catch (error: any) {
       toast.error("Failed to submit rating");

@@ -49,6 +49,8 @@ export default function DriverDashboard({
   });
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
 
+  console.log("Pending requests:", pendingRequests);
+
   // Corrected Fetch logic based on your console output
   useEffect(() => {
     const fetchStats = async () => {
@@ -176,7 +178,7 @@ export default function DriverDashboard({
       </div>
 
       {isOnline && (
-        <Card>
+        <Card className="cursor-pointer">
           <h2 className="text-2xl font-bold mb-4">
             {t("driver.pendingRequests")}
           </h2>
@@ -190,6 +192,7 @@ export default function DriverDashboard({
                 <div
                   key={req.request_id}
                   className="border rounded-lg p-4 hover:shadow-md transition"
+                  onClick={() => router.push(`/${locale}/driver/requests/${req.request_id}`)}
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>

@@ -238,6 +238,13 @@ class ApiClient {
     return data;
   }
 
+  async getRequestById(requestId: string) {
+    const { data } = await this.instance.get<ApiResponse>(
+      `/api/driver/requests/${requestId}`,
+    );
+    return data;
+  }
+
   // Inside your ApiClient class
   async startTrip(tripId: string | number, otp: string) {
     const { data } = await this.instance.post<ApiResponse>(
