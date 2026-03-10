@@ -101,33 +101,18 @@ export default function AdminTripsPage() {
   useEffect(() => {
     loadActiveTrips()
     // Auto-refresh every 10 seconds
-    const interval = setInterval(loadActiveTrips, 10000)
-    return () => clearInterval(interval)
+    // const interval = setInterval(loadActiveTrips, 10000)
+    // return () => clearInterval(interval)
   }, [statusFilter, pagination.offset])
 
   const loadActiveTrips = async () => {
     try {
       setIsLoading(true)
 
-      // 2. Cast the response to the interface we created using `as AdminTripsResponse`
-      const data = await request(async () => {
-        return await apiClient.getAdminActiveTrips({
-          limit: pagination.limit,
-          offset: pagination.offset,
-          status: statusFilter !== 'all' ? statusFilter : undefined
-        })
-      }) as AdminTripsResponse; 
 
-      if (data) {
-        setActiveTrips(data.data || [])
-        setPagination({
-          limit: data.pagination.limit,
-          offset: data.pagination.offset,
-          total: data.pagination.total,
-          hasMore: data.pagination.hasMore
-        })
-        setStats(data.stats)
-      }
+      setIsLoading(false)
+
+      
     } catch (error: any) {
       console.error('Error loading trips:', error)
       toast.error('Failed to load trips')
