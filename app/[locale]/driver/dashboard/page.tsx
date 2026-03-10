@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState ,useCallback} from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/common/Card";
@@ -13,6 +13,7 @@ import Link from "next/link";
 import { FiMapPin, FiDollarSign, FiStar, FiTrendingUp } from "react-icons/fi";
 import { use } from "react";
 import { useRouter } from "next/navigation";
+import { io } from 'socket.io-client';
 
 interface AcceptResponse {
   success: boolean;
@@ -108,22 +109,65 @@ export default function DriverDashboard({
     updateStatusAndLocation();
   }, [isOnline, request]);
 
-  useEffect(() => {
-    const fetchRequests = async () => {
-      if (isOnline) {
-        const result = await request<[]>(() => apiClient.getPendingRequests());
-        if (result) {
-          setPendingRequests(result);
-        }
+  // useEffect(() => {
+  //   const fetchRequests = async () => {
+  //     if (isOnline) {
+  //       const result = await request<[]>(() => apiClient.getPendingRequests());
+  //       if (result) {
+  //         setPendingRequests(result);
+  //       }
+  //     }
+  //   };
+
+  //   const interval = isOnline ? setInterval(fetchRequests, 5000) : undefined;
+  //   fetchRequests();
+
+  //   return () => clearInterval(interval);
+  // }, [isOnline, request]);
+
+ // 1. Define fetchRequests using useCallback so it can be safely called anywhere
+  const fetchRequests = useCallback(async () => {
+    if (isOnline) {
+      const result = await request<any[]>(() => apiClient.getPendingRequests());
+      if (result) {
+        setPendingRequests(result);
       }
-    };
-
-    const interval = isOnline ? setInterval(fetchRequests, 5000) : undefined;
-    fetchRequests();
-
-    return () => clearInterval(interval);
+    }
   }, [isOnline, request]);
 
+  // 2. Fetch requests once immediately when the driver goes online
+  useEffect(() => {
+    if (isOnline) {
+      fetchRequests();
+    }
+  }, [isOnline, fetchRequests]);
+
+  // 3. Setup the socket connection to listen for new requests
+ // 3. Setup the socket connection to listen for new requests
+  useEffect(() => {
+    // Only connect if online AND we have a user ID
+    if (isOnline && user?.id) {
+      // Use the environment variable, with a fallback just in case
+      const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const socket = io(socketUrl); 
+      
+      // Tell the backend who we are
+      socket.emit('auth', { userId: user.id, userRole: 'driver' });
+      
+      // Wait for the backend to PUSH a new ride to us
+      socket.on('new_booking_request', (data) => {
+          console.log("New booking received via socket:", data);
+          // Fetch the updated list of requests from the database
+          fetchRequests(); 
+      });
+      
+      // Cleanup function to prevent memory leaks and multiple connections
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [isOnline, user?.id, fetchRequests]);
+ 
   const handleAccept = async (requestId: string) => {
     const result = await request<AcceptResponse>(() =>
       apiClient.acceptRequest(requestId),

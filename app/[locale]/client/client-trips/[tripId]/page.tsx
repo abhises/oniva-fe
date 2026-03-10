@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
 import {
   FiArrowLeft,
   FiLoader,
@@ -43,8 +44,7 @@ interface Trip {
   cancellation_reason?: string | null;
   driver_name?: string | null;
   driver_phone?: string | null;
-  otp_code?: string; // <--- Add this property
-  // If your backend populates a nested driver object later:
+  otp_code?: string;
   driver?: {
     id: string | number;
     full_name: string;
@@ -85,17 +85,7 @@ export default function ClientTripDetailPage() {
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
 
-  // Auto-refresh for live updates
-  useEffect(() => {
-    // 1. Initial load (SHOWS spinner)
-    loadTripDetails(true);
-
-    // 2. Background polling every 5 seconds (HIDES spinner)
-    const interval = setInterval(() => loadTripDetails(false), 5000);
-    return () => clearInterval(interval);
-  }, [tripId]);
-
-  const loadTripDetails = async (showSpinner = true) => {
+  const loadTripDetails = useCallback(async (showSpinner = true) => {
     try {
       if (!tripId) return;
 
@@ -117,7 +107,37 @@ export default function ClientTripDetailPage() {
         setIsLoading(false);
       }
     }
-  };
+  }, [tripId, request]);
+
+  useEffect(() => {
+    // Initial load
+    loadTripDetails(true);
+
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const socket = io(socketUrl);
+
+    if (user?.id) {
+      socket.emit('auth', { userId: user.id, userRole: 'client' });
+      socket.emit('join_trip_room', { tripId });
+    }
+
+    // 🟢 UPDATED SOCKET LISTENER 🟢
+    socket.on('trip_status_changed', (data) => {
+      if (String(data.tripId) === String(tripId) || String(data.trip_id) === String(tripId)) {
+        if (data.status === 'cancelled') {
+          toast.error("This trip has been cancelled.");
+          loadTripDetails(false); 
+        } else {
+          console.log(`Trip status changed to: ${data.status}`);
+          loadTripDetails(false); 
+        }
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [tripId, user?.id, loadTripDetails]);
 
   const handleRateTrip = async () => {
     if (!trip) return;
@@ -154,15 +174,6 @@ export default function ClientTripDetailPage() {
         setSelectedRating(5);
         setReviewText("");
         toast.success("Thank you for your rating!");
-        if (result) {
-          toast.success("Thank you for your rating!");
-
-          // Close modal and clear state (optional if navigating immediately)
-          setShowRatingModal(false);
-
-          // Redirect the user back to the trips list
-          // router.push("/client/cltrips");
-        }
       }
     } catch (error: any) {
       toast.error("Failed to submit rating");
@@ -216,9 +227,10 @@ export default function ClientTripDetailPage() {
       case "completed":
         return "bg-green-100 text-green-800";
       case "started":
-      case "in-progress":
+      case "in_progress": // Changed to match backend string
         return "bg-blue-100 text-blue-800";
       case "assigned":
+      case "accepted":
         return "bg-yellow-100 text-yellow-800";
       case "pending":
       case "scheduled":
@@ -237,16 +249,16 @@ export default function ClientTripDetailPage() {
       case "cancelled":
         return <FiX className="w-5 h-5" />;
       case "started":
-      case "in-progress":
+      case "in_progress": // Changed to match backend string
         return <FiMap className="w-5 h-5" />;
       case "assigned":
+      case "accepted": 
         return <FiUser className="w-5 h-5" />;
       default:
         return <FiCalendar className="w-5 h-5" />;
     }
   };
 
-  // UI - Loading State (Only shows on initial load)
   if (isLoading) {
     return (
       <ProtectedRoute allowedRoles={["client"]}>
@@ -260,7 +272,6 @@ export default function ClientTripDetailPage() {
     );
   }
 
-  // UI - Trip Not Found State
   if (!trip) {
     return (
       <ProtectedRoute allowedRoles={["client"]}>
@@ -289,7 +300,6 @@ export default function ClientTripDetailPage() {
     );
   }
 
-  // Safely cast strings to Numbers to prevent .toFixed() crashes
   const safeBasePrice = Number(trip.base_price || 0);
   const safeTotalPrice = Number(trip.total_price || 0);
   const safeDistanceCharge =
@@ -328,7 +338,8 @@ export default function ClientTripDetailPage() {
               </span>
             </div>
           </div>
-          {/* 🟢 NEW OTP SECTION 🟢 */}
+          
+          {/* OTP SECTION */}
           {trip.otp_code &&
             (trip.status === "pending" ||
               trip.status === "assigned" ||
@@ -678,7 +689,7 @@ export default function ClientTripDetailPage() {
           )}
 
           {/* Cancel Button */}
-          {["pending", "scheduled", "assigned"].includes(trip.status) && (
+          {["pending", "scheduled", "assigned", "accepted"].includes(trip.status) && (
             <div className="mb-6">
               <button
                 onClick={() => setShowCancelModal(true)}

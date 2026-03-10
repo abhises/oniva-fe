@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
 import {
   FiArrowLeft, FiLoader, FiMapPin, FiClock, FiDollarSign,
   FiPhone, FiCheckCircle, FiAlertCircle, FiNavigation, FiKey
@@ -18,19 +19,16 @@ export default function DriverTripDetailPage() {
   const params = useParams();
   const tripId = params?.tripId as string;
   const locale = params?.locale || 'en';
+  
+  const { user } = useAuth(); // Added to get the driver's ID for the socket
   const { request, isLoading: isApiLoading } = useApi({ showSuccess: true });
 
   const [trip, setTrip] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [otp, setOtp] = useState("");
 
-  useEffect(() => {
-    loadTripDetails(true);
-    const interval = setInterval(() => loadTripDetails(false), 5000);
-    return () => clearInterval(interval);
-  }, [tripId]);
-
-  const loadTripDetails = async (showSpinner = true) => {
+  // Wrapped in useCallback so it can be safely used inside the socket useEffect
+  const loadTripDetails = useCallback(async (showSpinner = true) => {
     if (!tripId) return;
     if (showSpinner) setIsLoading(true);
     try {
@@ -39,21 +37,64 @@ export default function DriverTripDetailPage() {
     } finally {
       if (showSpinner) setIsLoading(false);
     }
+  }, [tripId, request]);
+
+  useEffect(() => {
+    // 1. Load the initial trip details right away
+    loadTripDetails(true);
+
+    // 2. Setup the socket connection
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const socket = io(socketUrl);
+
+    if (user?.id) {
+      socket.emit('auth', { userId: user.id, userRole: 'driver' });
+      // Optional: Tell the backend which specific trip room we are watching
+      socket.emit('join_trip_room', { tripId });
+    }
+
+    // 3. Listen for changes PUSHED from the backend
+    socket.on('trip_updated', (data) => {
+      // Convert both to strings to ensure a safe comparison
+      if (String(data.tripId) === String(tripId) || String(data.trip_id) === String(tripId)) {
+        console.log("Trip update received via socket!");
+        loadTripDetails(false); // Fetch fresh data without the loading spinner
+      }
+    });
+
+    socket.on('trip_cancelled', (data) => {
+      if (String(data.tripId) === String(tripId) || String(data.trip_id) === String(tripId)) {
+        toast.error("The client cancelled this trip.");
+        router.push(`/${locale}/driver/driver-trips`);
+      }
+    });
+
+    // 4. Cleanup when the driver leaves the page
+    return () => {
+      socket.disconnect();
+    };
+  }, [tripId, user?.id, loadTripDetails, router, locale]);
+
+  const handleStartTrip = async () => {
+    // 1. Make the request
+    const result = await request<any>(() => apiClient.startTrip(tripId, otp));
+
+    // 2. We just check if result exists. (Removed result.success in case your API doesn't return it)
+    if (result) {
+      toast.success("Trip started successfully!");
+      
+      // 3. OPTIMISTIC UPDATE: Instantly change the status in the UI so the driver doesn't wait
+      setTrip((prevTrip: any) => ({
+        ...prevTrip,
+        status: 'in_progress' // Matches the status needed to show the "Complete Trip" button
+      }));
+
+      // 4. Fetch the fresh data quietly in the background to ensure full sync
+      loadTripDetails(false); 
+    }
   };
 
- const handleStartTrip = async () => {
-  // Use <any> after the request call
-  const result = await request<any>(() => apiClient.startTrip(tripId, otp));
-
-  // Now TypeScript won't complain about .success
-  if (result && result.success) {
-    toast.success("Trip started successfully!");
-    loadTripDetails();
-  }
-};
-
   const handleEndTrip = async () => {
-    // In a real app, you'd calculate final distance/price here
     const result = await request(() => apiClient.endTrip(tripId, {
       actualDistance: trip.estimated_distance,
       actualDuration: trip.estimated_duration,
