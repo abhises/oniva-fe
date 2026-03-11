@@ -369,7 +369,13 @@ class ApiClient {
     return data;
   }
   // Add to the ApiClient class in app/services/api.ts
-
+  async getAdminActiveTrips(params?: { status?: string; limit?: number; offset?: number }) {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/admin/trips/active",
+      { params }
+    );
+    return data; 
+  }
 
   // ============================================================================
   // UTILITY METHODS

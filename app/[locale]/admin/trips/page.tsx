@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useApi } from '@/hooks/useApi'
 import { apiClient } from '@/services/api'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import toast from 'react-hot-toast'
+import { io } from 'socket.io-client' // <-- Import Socket.io
 import {
   FiArrowLeft,
   FiLoader,
@@ -64,7 +65,6 @@ interface TripStats {
   total: number
 }
 
-// 1. Added an interface for the API Response based on your backend structure
 interface AdminTripsResponse {
   success: boolean;
   data: ActiveTrip[];
@@ -98,28 +98,66 @@ export default function AdminTripsPage() {
     hasMore: false
   })
 
-  useEffect(() => {
-    loadActiveTrips()
-    // Auto-refresh every 10 seconds
-    // const interval = setInterval(loadActiveTrips, 10000)
-    // return () => clearInterval(interval)
-  }, [statusFilter, pagination.offset])
-
-  const loadActiveTrips = async () => {
+  // Wrapped in useCallback so it can be safely used in useEffect without infinite loops
+  const loadActiveTrips = useCallback(async (showSpinner = true) => {
     try {
-      setIsLoading(true)
+      if (showSpinner) setIsLoading(true);
+      
+      const response = await request<AdminTripsResponse>(() => 
+        apiClient.getAdminActiveTrips({
+          status: statusFilter,
+          limit: pagination.limit,
+          offset: pagination.offset
+        })
+      );
 
-
-      setIsLoading(false)
-
+      if (response && response.data) {
+        setActiveTrips(response.data);
+        if (response.stats) setStats(response.stats);
+        if (response.pagination) {
+          setPagination(prev => ({
+            ...prev,
+            total: response.pagination.total,
+            hasMore: response.pagination.hasMore
+          }));
+        }
+      }
       
     } catch (error: any) {
-      console.error('Error loading trips:', error)
-      toast.error('Failed to load trips')
+      console.error('Error loading trips:', error);
+      if (showSpinner) toast.error('Failed to load trips');
     } finally {
-      setIsLoading(false)
+      if (showSpinner) setIsLoading(false);
     }
-  }
+  }, [statusFilter, pagination.limit, pagination.offset, request]); // Dependencies for useCallback
+
+  useEffect(() => {
+    // 1. Initial Load (Shows Spinner)
+    loadActiveTrips(true);
+
+    // 2. Setup Socket Connection for Live Data
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const socket = io(socketUrl);
+
+    if (user?.id) {
+      socket.emit('auth', { userId: user.id, userRole: 'admin' });
+    }
+
+    // 3. Listen for global backend events and silently refresh data
+    const handleSocketUpdate = (data: any) => {
+      console.log('Real-time update received:', data);
+      loadActiveTrips(false); // Fetch fresh data without showing the spinner
+    };
+
+    socket.on('trip_status_changed', handleSocketUpdate);
+    socket.on('driver_accepted', handleSocketUpdate);
+    socket.on('driver_rejected', handleSocketUpdate);
+
+    // 4. Cleanup when the component unmounts
+    return () => {
+      socket.disconnect();
+    };
+  }, [loadActiveTrips, user?.id]); // Re-run if loadActiveTrips or user changes
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -185,7 +223,7 @@ export default function AdminTripsPage() {
               </div>
 
               <button
-                // onClick={loadActiveTrips}
+                onClick={() => loadActiveTrips(true)} // Manual refresh button
                 disabled={isApiLoading}
                 className="p-2 text-blue-600 hover:text-blue-700 disabled:opacity-50"
                 title="Refresh"

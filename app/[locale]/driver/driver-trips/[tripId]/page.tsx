@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
+import dynamic from "next/dynamic"; // <-- Import dynamic here
 import { useAuth } from "@/hooks/useAuth";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
@@ -14,20 +15,29 @@ import {
 } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 
+// Dynamically import the map component with SSR disabled
+const MapRoute = dynamic(() => import('./MapRoute'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center mb-6">
+      <FiLoader className="animate-spin text-primary w-6 h-6" />
+    </div>
+  )
+});
+
 export default function DriverTripDetailPage() {
   const router = useRouter();
   const params = useParams();
   const tripId = params?.tripId as string;
   const locale = params?.locale || 'en';
   
-  const { user } = useAuth(); // Added to get the driver's ID for the socket
+  const { user } = useAuth();
   const { request, isLoading: isApiLoading } = useApi({ showSuccess: true });
 
   const [trip, setTrip] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [otp, setOtp] = useState("");
 
-  // Wrapped in useCallback so it can be safely used inside the socket useEffect
   const loadTripDetails = useCallback(async (showSpinner = true) => {
     if (!tripId) return;
     if (showSpinner) setIsLoading(true);
@@ -40,25 +50,18 @@ export default function DriverTripDetailPage() {
   }, [tripId, request]);
 
   useEffect(() => {
-    // 1. Load the initial trip details right away
     loadTripDetails(true);
-
-    // 2. Setup the socket connection
     const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
     const socket = io(socketUrl);
 
     if (user?.id) {
       socket.emit('auth', { userId: user.id, userRole: 'driver' });
-      // Optional: Tell the backend which specific trip room we are watching
       socket.emit('join_trip_room', { tripId });
     }
 
-    // 3. Listen for changes PUSHED from the backend
     socket.on('trip_updated', (data) => {
-      // Convert both to strings to ensure a safe comparison
       if (String(data.tripId) === String(tripId) || String(data.trip_id) === String(tripId)) {
-        console.log("Trip update received via socket!");
-        loadTripDetails(false); // Fetch fresh data without the loading spinner
+        loadTripDetails(false);
       }
     });
 
@@ -69,27 +72,19 @@ export default function DriverTripDetailPage() {
       }
     });
 
-    // 4. Cleanup when the driver leaves the page
     return () => {
       socket.disconnect();
     };
   }, [tripId, user?.id, loadTripDetails, router, locale]);
 
   const handleStartTrip = async () => {
-    // 1. Make the request
     const result = await request<any>(() => apiClient.startTrip(tripId, otp));
-
-    // 2. We just check if result exists. (Removed result.success in case your API doesn't return it)
     if (result) {
       toast.success("Trip started successfully!");
-      
-      // 3. OPTIMISTIC UPDATE: Instantly change the status in the UI so the driver doesn't wait
       setTrip((prevTrip: any) => ({
         ...prevTrip,
-        status: 'in_progress' // Matches the status needed to show the "Complete Trip" button
+        status: 'in_progress'
       }));
-
-      // 4. Fetch the fresh data quietly in the background to ensure full sync
       loadTripDetails(false); 
     }
   };
@@ -109,6 +104,9 @@ export default function DriverTripDetailPage() {
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><FiLoader className="animate-spin w-8 h-8 text-primary"/></div>;
   if (!trip) return <div className="p-8 text-center">Trip not found</div>;
 
+  // Check if we have both coordinates to render the map securely
+  const hasCoordinates = trip.pickup_latitude && trip.pickup_longitude && trip.destination_latitude && trip.destination_longitude;
+
   return (
     <ProtectedRoute allowedRoles={["driver"]}>
       <div className="max-w-2xl mx-auto py-8 px-4">
@@ -124,6 +122,16 @@ export default function DriverTripDetailPage() {
           </div>
           <Badge variant="info" label={trip.status} />
         </div>
+
+        {/* Leaflet Map Component */}
+        {hasCoordinates && (
+          <div className="mb-6">
+            <MapRoute 
+              pickup={[parseFloat(trip.pickup_latitude), parseFloat(trip.pickup_longitude)]}
+              destination={[parseFloat(trip.destination_latitude), parseFloat(trip.destination_longitude)]}
+            />
+          </div>
+        )}
 
         {/* Route Card */}
         <div className="bg-white rounded-xl shadow-md p-6 mb-6">
@@ -141,7 +149,7 @@ export default function DriverTripDetailPage() {
           
           <div className="mt-6 flex gap-4">
             <button 
-              onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${trip.pickup_latitude},${trip.pickup_longitude}`)}
+              onClick={() => window.open(`https://maps.google.com/?q=${trip.pickup_latitude},${trip.pickup_longitude}`)}
               className="flex-1 bg-blue-50 text-blue-600 py-3 rounded-lg font-bold flex items-center justify-center gap-2"
             >
               <FiNavigation /> Navigate
