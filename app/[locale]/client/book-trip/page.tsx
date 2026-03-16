@@ -312,7 +312,7 @@ export default function BookTripPage() {
               </div>
               
               <button onClick={handleEstimateFare} disabled={isEstimating} className="w-full py-3 bg-orange-600 text-white rounded font-bold">
-                {isEstimating ? "Calculating..." : "Update Estimate"}
+                {isEstimating ? "Calculating..." : "Estimate price"}
               </button>
 
               <PassengerSelector value={formData.passengers} onChange={(passengers) => setFormData((prev) => ({ ...prev, passengers }))} maxPassengers={6} />

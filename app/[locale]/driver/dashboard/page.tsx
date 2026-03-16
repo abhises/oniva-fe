@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState ,useCallback} from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/common/Card";
@@ -13,7 +13,8 @@ import Link from "next/link";
 import { FiMapPin, FiDollarSign, FiStar, FiTrendingUp } from "react-icons/fi";
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
+import toast from "react-hot-toast";
 
 interface AcceptResponse {
   success: boolean;
@@ -21,7 +22,6 @@ interface AcceptResponse {
   message?: string;
 }
 
-// Updated interface to match what your console is actually showing
 interface DriverStatsResponse {
   total_trips: string | number;
   total_earnings: string | number;
@@ -50,82 +50,81 @@ export default function DriverDashboard({
   });
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
 
-  console.log("Pending requests:", pendingRequests);
-
-  // Corrected Fetch logic based on your console output
-  useEffect(() => {
-    const fetchStats = async () => {
-      const result = await request<any>(() =>
-        apiClient.getDriverDashboardStats()
+  // 1. Reusable function to push location to backend
+  const updateLocation = useCallback(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            await apiClient.updateLocation({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            });
+            console.log("📍 Location updated:", position.coords.latitude, position.coords.longitude);
+          } catch (err) {
+            console.error("Failed to update location", err);
+          }
+        },
+        (error) => {
+          console.error("Location error:", error);
+        }
       );
-      
-      console.log("Fetched driver stats:", result);
-      
-      // Changed: Accessing properties directly from 'result' as per your console log
-      if (result) {
+    }
+  }, []);
+
+  // 2. Fetch initial data on mount (Stats + Current Online Status)
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      // Fetch Stats
+      const statsResult = await request<any>(() => apiClient.getDriverDashboardStats());
+      if (statsResult) {
         setStats({
-          totalTrips: Number(result.total_trips) || 0,
-          earnings: Number(result.total_earnings) || 0,
-          rating: Number(result.rating) || 0,
-          tripsThisWeek: Number(result.trips_this_week) || 0,
+          totalTrips: Number(statsResult.total_trips) || 0,
+          earnings: Number(statsResult.total_earnings) || 0,
+          rating: Number(statsResult.rating) || 0,
+          tripsThisWeek: Number(statsResult.trips_this_week) || 0,
         });
       }
-    };
-    fetchStats();
-  }, [request]);
 
-  useEffect(() => {
-    const updateStatusAndLocation = async () => {
-      await request(() => apiClient.setOnlineStatus(isOnline));
-
-      if (isOnline) {
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              try {
-                await request(() =>
-                  apiClient.updateLocation({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                  }),
-                );
-                 console.log(
-                  "📍 Driver location updated to:",
-                  position.coords.latitude,
-                  position.coords.longitude,
-                );
-              } catch (err) {
-                console.error("Failed to update location", err);
-              }
-            },
-            (error) => {
-              console.error("Location error:", error);
-            },
-          );
-        }
+      // Fetch Profile to see if they are ALREADY online in the database
+      const profileResult = await request<any>(() => apiClient.getDriverProfile());
+      const actualProfile = profileResult?.data || profileResult;
+      
+      if (actualProfile && actualProfile.is_online) {
+        setIsOnline(true);
+        updateLocation(); // Push location since they are already active
       }
     };
+    
+    fetchInitialData();
+  }, [request, updateLocation]);
 
-    updateStatusAndLocation();
-  }, [isOnline, request]);
+  // 3. Handle explicit button click to toggle status
+  const handleToggleOnline = async () => {
+    const newStatus = !isOnline;
+    
+    // Update UI immediately for responsiveness
+    setIsOnline(newStatus); 
+    
+    try {
+      // Send explicit request to backend
+      await apiClient.setOnlineStatus(newStatus);
+      
+      if (newStatus) {
+        toast.success(t("driver.wentOnline") || "You are now online!");
+        updateLocation();
+        fetchRequests(); // Fetch immediately upon going online
+      } else {
+        toast.success(t("driver.wentOffline") || "You are now offline.");
+        setPendingRequests([]); // Clear requests when going offline
+      }
+    } catch (error) {
+      // If API fails, revert the button state back
+      setIsOnline(!newStatus);
+      toast.error("Failed to change status. Please try again.");
+    }
+  };
 
-  // useEffect(() => {
-  //   const fetchRequests = async () => {
-  //     if (isOnline) {
-  //       const result = await request<[]>(() => apiClient.getPendingRequests());
-  //       if (result) {
-  //         setPendingRequests(result);
-  //       }
-  //     }
-  //   };
-
-  //   const interval = isOnline ? setInterval(fetchRequests, 5000) : undefined;
-  //   fetchRequests();
-
-  //   return () => clearInterval(interval);
-  // }, [isOnline, request]);
-
- // 1. Define fetchRequests using useCallback so it can be safely called anywhere
   const fetchRequests = useCallback(async () => {
     if (isOnline) {
       const result = await request<any[]>(() => apiClient.getPendingRequests());
@@ -135,33 +134,26 @@ export default function DriverDashboard({
     }
   }, [isOnline, request]);
 
-  // 2. Fetch requests once immediately when the driver goes online
+  // Fetch requests if online (runs after the initial profile fetch sets isOnline to true)
   useEffect(() => {
     if (isOnline) {
       fetchRequests();
     }
   }, [isOnline, fetchRequests]);
 
-  // 3. Setup the socket connection to listen for new requests
- // 3. Setup the socket connection to listen for new requests
+  // Socket connection
   useEffect(() => {
-    // Only connect if online AND we have a user ID
     if (isOnline && user?.id) {
-      // Use the environment variable, with a fallback just in case
       const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       const socket = io(socketUrl); 
       
-      // Tell the backend who we are
       socket.emit('auth', { userId: user.id, userRole: 'driver' });
       
-      // Wait for the backend to PUSH a new ride to us
       socket.on('new_booking_request', (data) => {
           console.log("New booking received via socket:", data);
-          // Fetch the updated list of requests from the database
           fetchRequests(); 
       });
       
-      // Cleanup function to prevent memory leaks and multiple connections
       return () => {
         socket.disconnect();
       };
@@ -180,6 +172,7 @@ export default function DriverDashboard({
 
   const handleReject = async (requestId: string) => {
     await request(() => apiClient.rejectRequest(requestId, "Too far away"));
+    fetchRequests(); // Refresh list after rejecting
   };
 
   return (
@@ -190,7 +183,7 @@ export default function DriverDashboard({
         </h1>
         <Button
           variant={isOnline ? "danger" : "success"}
-          onClick={() => setIsOnline(!isOnline)}
+          onClick={handleToggleOnline} // 👈 Using the new handler
           isLoading={isLoading}
         >
           {isOnline ? t("driver.goOffline") : t("driver.goOnline")}
@@ -236,9 +229,11 @@ export default function DriverDashboard({
                 <div
                   key={req.request_id}
                   className="border rounded-lg p-4 hover:shadow-md transition"
-                  onClick={() => router.push(`/${locale}/driver/requests/${req.request_id}`)}
                 >
-                  <div className="flex justify-between items-start mb-4">
+                  <div 
+                    className="flex justify-between items-start mb-4"
+                    onClick={() => router.push(`/${locale}/driver/requests/${req.request_id}`)}
+                  >
                     <div>
                       <h3 className="font-semibold flex items-center gap-2">
                         <FiMapPin size={16} className="text-primary" />
@@ -267,7 +262,10 @@ export default function DriverDashboard({
                       <Button
                         variant="success"
                         size="sm"
-                        onClick={() => handleAccept(req.request_id)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card click
+                          handleAccept(req.request_id);
+                        }}
                         isLoading={isLoading}
                       >
                         {t("driver.accept")}
@@ -275,7 +273,10 @@ export default function DriverDashboard({
                       <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleReject(req.request_id)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card click
+                          handleReject(req.request_id);
+                        }}
                         isLoading={isLoading}
                       >
                         {t("driver.reject")}

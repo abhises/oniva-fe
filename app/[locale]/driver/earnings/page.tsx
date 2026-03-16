@@ -6,11 +6,12 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Card } from "@/components/common/Card";
 import { StatsCard } from "@/components/common/StatsCard";
 import { Loader } from "@/components/common/Loader";
-import { Button } from "@/components/common/Button"; // Use your existing Button component
+import { Button } from "@/components/common/Button";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import { FiDollarSign, FiTrendingUp, FiCalendar, FiFilter } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
+
 interface EarningsData {
   totalEarnings: number;
   tripCount: number;
@@ -26,9 +27,15 @@ export default function EarningsPage() {
   const { isLoading, request } = useApi({ showError: true });
   const [earnings, setEarnings] = useState<EarningsData | null>(null);
 
-  const [dateRange, setDateRange] = useState({
-    startDate: formatDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
-    endDate: formatDate(new Date()),
+  const [dateRange, setDateRange] = useState(() => {
+    const today = new Date();
+    // Add 7 days (7 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds)
+    const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    return {
+      startDate: formatDate(lastWeek),
+      endDate: today.toISOString().split("T")[0],
+    };
   });
 
   const fetchEarnings = useCallback(async () => {
@@ -39,17 +46,18 @@ export default function EarningsPage() {
       })
     );
 
-    // ✅ Match the Backend response structure
-    const result = response?.data || response;
+    // 🚀 THE ULTIMATE DATA EXTRACTOR
+    // This digs through the object to find your data whether it's wrapped in 
+    // response.data.data, response.data, or just sitting right inside response.
+    const actualData = response?.data?.data || response?.data || response || {};
 
-    if (result) {
-      setEarnings({
-        totalEarnings: Number(result.totalEarnings) || 0,
-        tripCount: Number(result.tripCount) || 0,
-        averagePerTrip: Number(result.averagePerTrip) || 0,
-        weeklyEarnings: Array.isArray(result.weeklyEarnings) ? result.weeklyEarnings : [],
-      });
-    }
+    setEarnings({
+      totalEarnings: Number(actualData.totalEarnings) || 0,
+      tripCount: Number(actualData.tripCount) || 0,
+      averagePerTrip: Number(actualData.averagePerTrip) || 0,
+      weeklyEarnings: Array.isArray(actualData.weeklyEarnings) ? actualData.weeklyEarnings : [],
+    });
+    
   }, [dateRange, request]);
 
   useEffect(() => {
