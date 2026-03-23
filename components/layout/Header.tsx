@@ -164,12 +164,21 @@ const AuthButton = ({ user, logout, t, locale, mobile, onClick }: any) => {
     );
   }
   return (
+    <>
     <Link
       href={`/${locale}/login`}
       onClick={onClick}
-      className={`btn btn-primary text-center ${mobile ? "w-full py-3" : "px-4 py-2"}`}
+      className={`btn btn-primary text-center ${mobile ? "w-full py-2" : "px-1 py-1"}`}
     >
       {t("auth.login")}
     </Link>
+    <Link
+      href={`/${locale}/register`}
+      onClick={onClick}
+      className={`btn btn-primary text-center ${mobile ? "w-full py-2" : "px-1 py-1"}`}
+    >
+      {t("auth.register")}
+    </Link>
+    </>
   );
 };

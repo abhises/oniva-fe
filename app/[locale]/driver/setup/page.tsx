@@ -98,7 +98,7 @@ export default function DriverSetupPage() {
           
           {/* Progress Tracker */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Driver Onboarding</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">Create a profile First</h1>
             <div className="flex items-center justify-center space-x-4">
               {[1, 2, 3].map((s) => (
                 <React.Fragment key={s}>

@@ -1,68 +1,75 @@
-// app/driver/layout.tsx
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
-import { useApi } from "@/hooks/useApi" // Import your custom hook
-import { apiClient } from '@/services/api'
-import { Loader } from '@/components/common/Loader'
+import { useEffect, useState } from "react";
+import { useRouter, usePathname, useParams } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { apiClient } from "@/services/api";
+import { Loader } from "@/components/common/Loader";
+import { useApi } from "@/hooks/useApi";
 
-
-interface DriverStatusResponse {
+interface DriverStatusData {
   success: boolean;
-  status: 'none' | 'pending' | 'approved' | 'rejected';
+  status: "none" | "pending" | "approved" | "rejected";
 }
 
-export default function DriverLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const [isVerifying, setIsVerifying] = useState(true)
-  
-  // Use the same request pattern as your Profile page
+export default function DriverLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useParams();
+  const locale = params?.locale || "en";
+  const { isInitialized } = useAuth();
+  const [isVerifying, setIsVerifying] = useState(true);
   const { request } = useApi({ showSuccess: false });
 
   useEffect(() => {
+    if (!isInitialized) return;
+
     const checkOnboardingStatus = async () => {
       try {
-        // Use the request hook with the specific interface
-        const result = await request<DriverStatusResponse>(() =>
-          apiClient.checkDriverStatus()
+        // Pass the interface <DriverStatusData> here
+        const result = await request<DriverStatusData>(() =>
+          apiClient.checkDriverStatus(),
         );
 
-        // If result is null, the hook likely handled the error
+        // result is now typed as { status: 'none' | 'pending' ... } | null
         if (!result) return;
 
-        const status = result.status;
+        console.log("Onboarding Status Result:", result.status);
 
-        if (status === 'none') {
-          if (pathname !== '/driver/setup') {
-            router.replace('/driver/setup');
-          }
-        } 
-        else if (status === 'pending') {
-          if (pathname !== '/driver/pending') {
-            router.replace('/driver/pending');
-          }
-        } 
-        else if (status === 'approved') {
-          // If approved, don't let them stay on setup or pending
-          if (pathname === '/driver/setup' || pathname === '/driver/pending') {
-            router.replace('/driver/dashboard');
-          }
+        const status = result.status; // No more TS error!
+
+        const isOnSetup = pathname.endsWith("/driver/setup");
+        const isOnPending = pathname.endsWith("/driver/pending");
+
+        if (status === "none" && !isOnSetup) {
+          return router.replace(`/${locale}/driver/setup`);
         }
+
+        if (status === "pending" && !isOnPending) {
+          return router.replace(`/${locale}/driver/pending`);
+        }
+
+        if (status === "approved" && (isOnSetup || isOnPending)) {
+          return router.replace(`/${locale}/driver/dashboard`);
+        }
+
+        setIsVerifying(false);
       } catch (error) {
-        console.error("Status check failed:", error);
-      } finally {
+        console.error("Guard Error:", error);
         setIsVerifying(false);
       }
     };
 
     checkOnboardingStatus();
-  }, [pathname, router]);
-
-  if (isVerifying) {
+  }, [isInitialized, pathname, locale, router]);
+  // IMPORTANT: Do not render children until we are sure they are on the right page
+  if (!isInitialized || isVerifying) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <Loader />
       </div>
     );

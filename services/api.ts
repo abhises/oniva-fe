@@ -275,7 +275,6 @@ class ApiClient {
     const { data } = await this.instance.get<ApiResponse>(
       "/api/driver/checkDriverCreation",
     );
-    // This will return { success: true, status: 'none' | 'pending' | 'approved' | 'rejected' }
     return data;
   }
 
