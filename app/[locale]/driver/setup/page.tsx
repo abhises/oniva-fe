@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { Loader } from "@/components/common/Loader";
 import { DriverProfileForm } from "@/components/driver/DriverProfileForm";
 import { DocumentUpload } from "@/components/driver/DocumentUpload";
 import { VehicleInformation } from "@/components/driver/VehicleInformation";
@@ -16,11 +15,10 @@ import toast from "react-hot-toast";
 ========================= */
 
 export interface ProfileStepData {
-  nationalId: string;
-  drivingLicense: string;
+  nationalId: string;      // The number/ID text
+  drivingLicense: string;  // The license number text
   licenseExpiry: string;
   region: string;
-  profilePhoto?: string;
 }
 
 export interface VehicleStepData {
@@ -33,7 +31,7 @@ export interface VehicleStepData {
 
 interface DriverRegistrationState {
   profile: ProfileStepData | null;
-  documents: any | null;
+  documents: any | null; // Contains URLs from Step 2
   vehicle: VehicleStepData | null;
 }
 
@@ -63,18 +61,29 @@ export default function DriverSetupPage() {
   };
 
   const handleFinalSubmit = async (vehicleData: VehicleStepData) => {
-    if (!formData.profile) {
-      toast.error("Profile data missing. Restarting...");
+    // Safety check
+    if (!formData.profile || !formData.documents) {
+      toast.error("Required information missing. Please check steps 1 and 2.");
       setStep(1);
       return;
     }
 
+    // FINAL PAYLOAD: Separating Numbers from URLs
     const finalPayload = {
-      nationalId: formData.documents.nationalId.url,
-      drivingLicense: formData.documents.drivingLicense.url,
-      profilePhoto: formData.documents.profilePhoto.url,
+      // 1. Identification Numbers (from Step 1)
+      nationalId: formData.profile.nationalId,
+      drivingLicense: formData.profile.drivingLicense,
+
+      // 2. Document Image URLs (from Supabase in Step 2)
+      nationalIdUrl: formData.documents.nationalId?.url,
+      drivingLicenseUrl: formData.documents.drivingLicense?.url,
+      profilePhoto: formData.documents.profilePhoto?.url,
+
+      // 3. Region & Expiry (from Step 1)
       licenseExpiry: formData.profile.licenseExpiry,
       region: formData.profile.region,
+
+      // 4. Vehicle Details (from Step 3)
       vehicleInfo: {
         make: vehicleData.make,
         model: vehicleData.model,
@@ -84,11 +93,14 @@ export default function DriverSetupPage() {
       },
     };
 
+    console.log("Submitting Final Payload:", finalPayload);
+
     const result = await request(() =>
-      apiClient.createDriverProfile(finalPayload),
+      apiClient.createDriverProfile(finalPayload)
     );
 
     if (result) {
+      toast.success("Application submitted successfully!");
       router.push("/driver/pending");
     }
   };
@@ -97,18 +109,21 @@ export default function DriverSetupPage() {
     <ProtectedRoute allowedRoles={["driver"]}>
       <div className="min-h-screen bg-gray-50 py-12 px-4">
         <div className="max-w-3xl mx-auto">
+          
           {/* Progress Tracker */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">
-              Create a profile First
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Driver Onboarding
             </h1>
+            <p className="text-gray-500 mb-6 font-medium">Complete all 3 steps to start earning</p>
+            
             <div className="flex items-center justify-center space-x-4">
               {[1, 2, 3].map((s) => (
                 <React.Fragment key={s}>
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 ${
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-colors ${
                       step >= s
-                        ? "bg-blue-600 border-blue-600 text-white"
+                        ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-100"
                         : "bg-white border-gray-300 text-gray-400"
                     }`}
                   >
@@ -116,7 +131,7 @@ export default function DriverSetupPage() {
                   </div>
                   {s < 3 && (
                     <div
-                      className={`w-10 h-0.5 ${step > s ? "bg-blue-600" : "bg-gray-300"}`}
+                      className={`w-12 h-0.5 transition-colors ${step > s ? "bg-blue-600" : "bg-gray-300"}`}
                     />
                   )}
                 </React.Fragment>
@@ -124,31 +139,44 @@ export default function DriverSetupPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border p-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             {step === 1 && (
-              <DriverProfileForm
-                onSuccess={handleProfileComplete}
-                isInitialSetup={true}
-              />
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <DriverProfileForm
+                  onSuccess={handleProfileComplete}
+                  isInitialSetup={true}
+                  initialData={formData.profile}
+                />
+              </div>
             )}
 
             {step === 2 && (
-              <DocumentUpload
-                onSuccess={handleDocsComplete}
-                onBack={() => setStep(1)}
-                isInitialSetup={true}
-              />
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <DocumentUpload
+                  onSuccess={handleDocsComplete}
+                  onBack={() => setStep(1)}
+                  isInitialSetup={true}
+                  initialData={formData.documents}
+                />
+              </div>
             )}
 
             {step === 3 && (
-              <VehicleInformation
-                onSuccess={handleFinalSubmit}
-                onBack={() => setStep(2)}
-                isInitialSetup={true}
-                isLoading={isLoading}
-              />
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <VehicleInformation
+                  onSuccess={handleFinalSubmit}
+                  onBack={() => setStep(2)}
+                  isInitialSetup={true}
+                  isLoading={isLoading}
+                  initialData={formData.vehicle}
+                />
+              </div>
             )}
           </div>
+          
+          <p className="mt-8 text-center text-xs text-gray-400">
+            By continuing, you agree to Oniva's Driver Terms of Service.
+          </p>
         </div>
       </div>
     </ProtectedRoute>
