@@ -2,38 +2,51 @@
 
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
-import { FiSave, FiTruck } from 'react-icons/fi'
+import { FiSave, FiTruck, FiArrowLeft, FiCheckCircle } from 'react-icons/fi'
+
+/* =========================
+   Types
+========================= */
 
 interface VehicleInformationProps {
   initialData?: any
-  onSuccess: () => void
+  // Updated to pass the data back to the parent
+  onSuccess: (data: any) => void 
+  onBack?: () => void
+  isInitialSetup?: boolean
+  isLoading?: boolean // Passed from parent API state
 }
+
+/* =========================
+   Component
+========================= */
 
 export const VehicleInformation: React.FC<VehicleInformationProps> = ({
   initialData,
   onSuccess,
+  onBack,
+  isInitialSetup = false,
+  isLoading: isSubmitting = false
 }) => {
-  const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  
   const [formData, setFormData] = useState({
-    vehicleType: initialData?.vehicleType || 'sedan',
     make: initialData?.make || '',
     model: initialData?.model || '',
     year: initialData?.year || new Date().getFullYear(),
     licensePlate: initialData?.licensePlate || '',
     color: initialData?.color || '',
+    vehicleType: initialData?.vehicleType || 'sedan',
     seats: initialData?.seats || 4,
-    mileage: initialData?.mileage || 0,
-    registrationExpiry: initialData?.registrationExpiry || '',
   })
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
-    if (!formData.make.trim()) newErrors.make = 'Required'
-    if (!formData.model.trim()) newErrors.model = 'Required'
-    if (!formData.licensePlate.trim()) newErrors.licensePlate = 'Required'
-    if (!formData.color.trim()) newErrors.color = 'Required'
-    if (!formData.registrationExpiry) newErrors.registrationExpiry = 'Required'
+    if (!formData.make.trim()) newErrors.make = 'Make is required'
+    if (!formData.model.trim()) newErrors.model = 'Model is required'
+    if (!formData.licensePlate.trim()) newErrors.licensePlate = 'License plate is required'
+    if (!formData.color.trim()) newErrors.color = 'Color is required'
+    
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -42,7 +55,7 @@ export const VehicleInformation: React.FC<VehicleInformationProps> = ({
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: ['year', 'seats', 'mileage'].includes(name) ? parseInt(value) : value,
+      [name]: name === 'year' || name === 'seats' ? parseInt(value) || value : value,
     }))
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
@@ -52,12 +65,19 @@ export const VehicleInformation: React.FC<VehicleInformationProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validateForm()) {
-      toast.error('Please fix errors')
+      toast.error('Please complete all required fields')
       return
     }
 
+    // If it's the initial setup flow, pass data to Parent (DriverSetupPage) 
+    // to call the final createProfile API
+    if (isInitialSetup) {
+      onSuccess(formData)
+      return
+    }
+
+    // If it's an edit from the profile page, call the standalone update API
     try {
-      setIsLoading(true)
       const response = await fetch('/api/driver/vehicle', {
         method: 'PUT',
         headers: {
@@ -67,137 +87,127 @@ export const VehicleInformation: React.FC<VehicleInformationProps> = ({
         body: JSON.stringify(formData),
       })
 
-      if (!response.ok) throw new Error('Failed')
-      toast.success('Vehicle info saved')
-      onSuccess()
+      if (!response.ok) throw new Error('Failed to update vehicle')
+      toast.success('Vehicle information updated')
+      onSuccess(formData)
     } catch (error: any) {
-      toast.error(error.message || 'Failed')
-    } finally {
-      setIsLoading(false)
+      toast.error(error.message || 'Update failed')
     }
   }
 
   return (
-    <div className="p-6 sm:p-8">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex items-center mb-6">
-          <FiTruck className="w-6 h-6 text-blue-600 mr-2" />
-          <h2 className="text-xl font-semibold text-gray-900">Vehicle Information</h2>
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex items-center space-x-2 text-blue-600 mb-2">
+        <FiTruck className="w-5 h-5" />
+        <span className="font-bold uppercase tracking-wider text-sm">Vehicle Details</span>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Make */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Type <span className="text-red-500">*</span>
-          </label>
-          <select
-            name="vehicleType"
-            value={formData.vehicleType}
+          <label className="block text-sm font-medium text-gray-700 mb-1">Make</label>
+          <input
+            type="text"
+            name="make"
+            value={formData.make}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-          >
-            <option value="sedan">Sedan</option>
-            <option value="suv">SUV</option>
-            <option value="truck">Truck</option>
-            <option value="van">Van</option>
-          </select>
+            placeholder="e.g. Toyota"
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
+              errors.make ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Make</label>
-            <input
-              type="text"
-              name="make"
-              value={formData.make}
-              onChange={handleChange}
-              placeholder="Toyota"
-              className={`w-full px-4 py-2 border rounded-lg ${errors.make ? 'border-red-500' : 'border-gray-300'}`}
-            />
-            {errors.make && <p className="text-red-500 text-sm mt-1">{errors.make}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Model</label>
-            <input
-              type="text"
-              name="model"
-              value={formData.model}
-              onChange={handleChange}
-              placeholder="Camry"
-              className={`w-full px-4 py-2 border rounded-lg ${errors.model ? 'border-red-500' : 'border-gray-300'}`}
-            />
-            {errors.model && <p className="text-red-500 text-sm mt-1">{errors.model}</p>}
-          </div>
+        {/* Model */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
+          <input
+            type="text"
+            name="model"
+            value={formData.model}
+            onChange={handleChange}
+            placeholder="e.g. Prius"
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
+              errors.model ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Year */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
           <input
             type="number"
             name="year"
             value={formData.year}
             onChange={handleChange}
-            min="1990"
-            className="px-4 py-2 border border-gray-300 rounded-lg"
+            min="2000"
+            max={new Date().getFullYear() + 1}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+
+        {/* Color */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
           <input
             type="text"
             name="color"
             value={formData.color}
             onChange={handleChange}
-            placeholder="White"
-            className={`px-4 py-2 border rounded-lg ${errors.color ? 'border-red-500' : 'border-gray-300'}`}
+            placeholder="e.g. White"
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
+              errors.color ? 'border-red-500' : 'border-gray-300'
+            }`}
           />
         </div>
 
-        <input
-          type="text"
-          name="licensePlate"
-          value={formData.licensePlate}
-          onChange={handleChange}
-          placeholder="ABC-1234"
-          className={`w-full px-4 py-2 border rounded-lg uppercase ${errors.licensePlate ? 'border-red-500' : 'border-gray-300'}`}
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* License Plate */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">License Plate Number</label>
           <input
-            type="number"
-            name="seats"
-            value={formData.seats}
+            type="text"
+            name="licensePlate"
+            value={formData.licensePlate}
             onChange={handleChange}
-            min="1"
-            max="8"
-            className="px-4 py-2 border border-gray-300 rounded-lg"
-            placeholder="Seats"
-          />
-          <input
-            type="number"
-            name="mileage"
-            value={formData.mileage}
-            onChange={handleChange}
-            min="0"
-            className="px-4 py-2 border border-gray-300 rounded-lg"
-            placeholder="Mileage"
+            placeholder="SN-123-XYZ"
+            className={`w-full px-4 py-2 border rounded-lg uppercase focus:ring-2 focus:ring-blue-500 outline-none ${
+              errors.licensePlate ? 'border-red-500' : 'border-gray-300'
+            }`}
           />
         </div>
+      </div>
 
-        <input
-          type="date"
-          name="registrationExpiry"
-          value={formData.registrationExpiry}
-          onChange={handleChange}
-          className={`w-full px-4 py-2 border rounded-lg ${errors.registrationExpiry ? 'border-red-500' : 'border-gray-300'}`}
-        />
-
-        <div className="flex justify-end pt-6 border-t border-gray-200">
+      {/* Navigation Buttons */}
+      <div className="flex items-center justify-between pt-8 border-t border-gray-100">
+        {isInitialSetup && (
           <button
-            type="submit"
-            disabled={isLoading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center"
+            type="button"
+            onClick={onBack}
+            className="flex items-center text-gray-500 hover:text-gray-800 font-semibold transition"
           >
-            <FiSave className="mr-2" />
-            {isLoading ? 'Saving...' : 'Save'}
+            <FiArrowLeft className="mr-2" /> Previous Step
           </button>
-        </div>
-      </form>
-    </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`ml-auto px-10 py-3 rounded-xl font-bold flex items-center transition shadow-lg ${
+            isSubmitting 
+            ? 'bg-gray-400 cursor-not-allowed text-white' 
+            : 'bg-green-600 hover:bg-green-700 text-white shadow-green-100'
+          }`}
+        >
+          {isSubmitting ? (
+            'Processing...'
+          ) : isInitialSetup ? (
+            <>Complete Registration <FiCheckCircle className="ml-2" /></>
+          ) : (
+            <>Save Changes <FiSave className="ml-2" /></>
+          )}
+        </button>
+      </div>
+    </form>
   )
 }

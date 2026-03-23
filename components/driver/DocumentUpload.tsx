@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
-import { FiUpload, FiCheck, FiAlertCircle } from 'react-icons/fi'
+import { FiUpload, FiCheck, FiArrowLeft, FiArrowRight } from 'react-icons/fi'
+import { supabase } from '@/lib/supabase' // Make sure your supabase client is here
+import { useAuth } from '@/hooks/useAuth' // To get the driver's user ID
 
 /* =========================
    Types
@@ -17,17 +19,14 @@ interface UploadedDocument {
   fileName: string
   uploadedAt: string
   verified: boolean
+  url?: string // Added to store the Supabase URL
 }
 
 interface DocumentUploadProps {
   initialData?: Partial<Record<DocumentType, UploadedDocument>>
-  onSuccess: () => void
-}
-
-interface DocumentCardProps {
-  title: string
-  documentType: DocumentType
-  description: string
+  onSuccess: (data: Record<DocumentType, UploadedDocument | null>) => void
+  onBack?: () => void
+  isInitialSetup?: boolean
 }
 
 /* =========================
@@ -37,7 +36,10 @@ interface DocumentCardProps {
 export const DocumentUpload: React.FC<DocumentUploadProps> = ({
   initialData,
   onSuccess,
+  onBack,
+  isInitialSetup
 }) => {
+  const { user } = useAuth() // Get current logged-in driver's info
   const [isLoading, setIsLoading] = useState(false)
 
   const [documents, setDocuments] = useState<
@@ -48,6 +50,8 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     registrationDocument: initialData?.registrationDocument || null,
   })
 
+  const canContinue = documents.licenseDocument !== null;
+
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     documentType: DocumentType
@@ -56,133 +60,88 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     if (!file) return
 
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png']
-
     if (!allowedTypes.includes(file.type)) {
       toast.error('Only PDF and image files allowed')
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB')
       return
     }
 
     try {
       setIsLoading(true)
 
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('documentType', documentType)
+      // 1. Define file path: documents/USER_ID/DOCUMENT_TYPE_TIMESTAMP.ext
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${documentType}_${Date.now()}.${fileExt}`
+      const filePath = `documents/${user?.id || 'anonymous'}/${fileName}`
 
-      const response = await fetch('/api/driver/documents/upload', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: formData,
-      })
+      // 2. Upload to Supabase Storage
+      const { data, error: uploadError } = await supabase.storage
+        .from('oniva-image') // Using your actual bucket name
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        })
 
-      if (!response.ok) throw new Error('Upload failed')
+      if (uploadError) throw uploadError
 
-      const data: { document: UploadedDocument } = await response.json()
+      // 3. Get the Public URL from Supabase
+      const { data: { publicUrl } } = supabase.storage
+        .from('oniva-image')
+        .getPublicUrl(filePath)
 
-      setDocuments((prev) => ({
-        ...prev,
-        [documentType]: data.document,
-      }))
-
-      toast.success('Document uploaded')
-      onSuccess()
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error('Upload failed')
+      const docData: UploadedDocument = {
+        fileName: file.name,
+        uploadedAt: new Date().toISOString(),
+        verified: false,
+        url: publicUrl // This is the URL we'll eventually save in Postgres
       }
+
+      const updatedDocs = {
+        ...documents,
+        [documentType]: docData,
+      }
+      
+      setDocuments(updatedDocs)
+      toast.success(`${documentType.replace('Document', '')} uploaded successfully`)
+      
+      // If we're just editing one field, fire success immediately
+      if (!isInitialSetup) {
+        onSuccess(updatedDocs)
+      }
+    } catch (error: any) {
+      console.error("Upload Error:", error)
+      toast.error(error.message || 'Upload failed')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const DocumentCard: React.FC<DocumentCardProps> = ({
-    title,
-    documentType,
-    description,
-  }) => {
-    const doc = documents[documentType]
-
+  const DocumentCard = ({ title, type, desc }: { title: string, type: DocumentType, desc: string }) => {
+    const doc = documents[type]
     return (
-      <div className="border border-gray-300 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          {title}
-        </h3>
-        <p className="text-sm text-gray-600 mb-4">
-          {description}
-        </p>
-
+      <div className="border border-gray-200 rounded-xl p-5 hover:border-blue-300 transition-colors bg-white shadow-sm">
+        <h3 className="font-bold text-gray-800">{title}</h3>
+        <p className="text-xs text-gray-500 mb-4">{desc}</p>
+        
         {doc ? (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-              <div>
-                <p className="font-medium text-green-900">
-                  {doc.fileName}
-                </p>
-                <p className="text-xs text-green-700 mt-1">
-                  {new Date(doc.uploadedAt).toLocaleDateString()}
-                </p>
-              </div>
-
-              {doc.verified ? (
-                <div className="flex items-center text-green-600">
-                  <FiCheck className="w-5 h-5 mr-1" />
-                  <span className="text-sm font-medium">
-                    Verified
-                  </span>
-                </div>
-              ) : (
-                <div className="flex items-center text-yellow-600">
-                  <FiAlertCircle className="w-5 h-5 mr-1" />
-                  <span className="text-sm font-medium">
-                    Pending
-                  </span>
-                </div>
-              )}
+          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <div className="overflow-hidden">
+              <p className="text-sm font-medium text-blue-900 truncate">{doc.fileName}</p>
+              <span className="text-[10px] text-blue-600">Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}</span>
             </div>
-
-            <label>
-              <input
-                type="file"
-                onChange={(e) =>
-                  handleFileUpload(e, documentType)
-                }
-                disabled={isLoading}
-                className="hidden"
-                accept=".pdf,.jpg,.jpeg,.png"
-              />
-              <span className="cursor-pointer inline-block px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
-                Update
-              </span>
-            </label>
+            <FiCheck className="text-blue-600 flex-shrink-0 ml-2" />
           </div>
         ) : (
-          <label>
-            <input
-              type="file"
-              onChange={(e) =>
-                handleFileUpload(e, documentType)
-              }
-              disabled={isLoading}
-              className="hidden"
+          <label className="cursor-pointer">
+            <input 
+              type="file" 
+              className="hidden" 
+              onChange={(e) => handleFileUpload(e, type)} 
+              disabled={isLoading} 
               accept=".pdf,.jpg,.jpeg,.png"
             />
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500">
-              <FiUpload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-              <p className="font-medium text-gray-900">
-                {isLoading ? 'Uploading...' : 'Click to upload'}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                PDF or image up to 5MB
-              </p>
+            <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center hover:bg-gray-50 transition">
+              <FiUpload className="text-gray-400 mb-1 w-6 h-6" />
+              <span className="text-sm text-gray-600">{isLoading ? 'Uploading...' : 'Click to Upload'}</span>
             </div>
           </label>
         )}
@@ -191,32 +150,37 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
   }
 
   return (
-    <div className="p-6 sm:p-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <DocumentCard
-          title="Driving License"
-          documentType="licenseDocument"
-          description="Upload your valid driving license"
-        />
-
-        <DocumentCard
-          title="Insurance"
-          documentType="insuranceDocument"
-          description="Upload your vehicle insurance"
-        />
-
-        <DocumentCard
-          title="Registration"
-          documentType="registrationDocument"
-          description="Upload vehicle registration"
-        />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <DocumentCard title="License" type="licenseDocument" desc="Front side of your DL" />
+        <DocumentCard title="Insurance" type="insuranceDocument" desc="Valid vehicle insurance" />
+        <DocumentCard title="Registration" type="registrationDocument" desc="Proof of ownership" />
       </div>
 
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-sm text-blue-900">
-          <strong>Note:</strong> All documents will be verified by our team.
-        </p>
-      </div>
+      {isInitialSetup && (
+        <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex items-center text-gray-600 hover:text-gray-900 font-medium transition"
+          >
+            <FiArrowLeft className="mr-2" /> Back
+          </button>
+          
+          <button
+            type="button"
+            disabled={!canContinue || isLoading}
+            onClick={() => onSuccess(documents)}
+            className={`flex items-center px-8 py-2.5 rounded-lg font-bold transition ${
+              canContinue && !isLoading
+                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            Next Step <FiArrowRight className="ml-2" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

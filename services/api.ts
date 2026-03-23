@@ -113,7 +113,7 @@ class ApiClient {
     return data;
   }
 
-   async getActivePrice() {
+  async getActivePrice() {
     const { data } = await this.instance.get<ApiResponse>(
       "/api/client/pricing/active",
     );
@@ -270,6 +270,15 @@ class ApiClient {
     return data;
   }
 
+  // Inside your ApiClient class
+  async checkDriverStatus() {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/driver/checkDriverCreation",
+    );
+    // This will return { success: true, status: 'none' | 'pending' | 'approved' | 'rejected' }
+    return data;
+  }
+
   // ============================================================================
   // ADMIN ENDPOINTS
   // ============================================================================
@@ -369,12 +378,16 @@ class ApiClient {
     return data;
   }
   // Add to the ApiClient class in app/services/api.ts
-  async getAdminActiveTrips(params?: { status?: string; limit?: number; offset?: number }) {
+  async getAdminActiveTrips(params?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const { data } = await this.instance.get<ApiResponse>(
       "/api/admin/trips/active",
-      { params }
+      { params },
     );
-    return data; 
+    return data;
   }
 
   // ============================================================================

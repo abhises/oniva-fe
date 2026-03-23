@@ -1,58 +1,56 @@
+'use client'
+
 import React, { useState } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import toast from 'react-hot-toast'
-import { FiSave, FiMail, FiPhone, FiUser } from 'react-icons/fi'
+import { FiSave, FiMail, FiPhone, FiUser, FiArrowRight, FiFileText, FiMapPin } from 'react-icons/fi'
+
+/* =========================
+   Types
+========================= */
 
 interface DriverProfileFormProps {
   initialData?: any
-  onSuccess: () => void
+  // CHANGE: onSuccess now passes the data back to the parent
+  onSuccess: (data: any) => void
+  isInitialSetup?: boolean
 }
 
 export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
   initialData,
   onSuccess,
+  isInitialSetup = false,
 }) => {
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // ALIGNED: Using keys that match your backend schema
   const [formData, setFormData] = useState({
     fullName: initialData?.fullName || '',
     phone: initialData?.phone || '',
     email: initialData?.email || '',
-    dateOfBirth: initialData?.dateOfBirth || '',
-    licenseNumber: initialData?.licenseNumber || '',
-    address: initialData?.address || '',
-    city: initialData?.city || '',
-    state: initialData?.state || '',
-    zipCode: initialData?.zipCode || '',
+    nationalId: initialData?.nationalId || '',
+    drivingLicense: initialData?.drivingLicense || '',
+    licenseExpiry: initialData?.licenseExpiry || '',
+    region: initialData?.region || 'Dakar',
   })
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required'
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone is required'
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email'
-    }
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = 'Date of birth is required'
-    }
-    if (!formData.licenseNumber.trim()) {
-      newErrors.licenseNumber = 'License number is required'
-    }
+    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required'
+    if (!formData.phone.trim()) newErrors.phone = 'Phone is required'
+    if (!formData.nationalId.trim()) newErrors.nationalId = 'National ID is required'
+    if (!formData.drivingLicense.trim()) newErrors.drivingLicense = 'License number is required'
+    if (!formData.licenseExpiry) newErrors.licenseExpiry = 'Expiry date is required'
+    if (!formData.region.trim()) newErrors.region = 'Region is required'
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
     if (errors[name]) {
@@ -67,6 +65,13 @@ export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
       return
     }
 
+    // IF INITIAL SETUP: Just pass data up to DriverSetupPage
+    if (isInitialSetup) {
+      onSuccess(formData)
+      return
+    }
+
+    // IF EDIT MODE: Perform the legacy PUT request
     try {
       setIsLoading(true)
       const response = await fetch('/api/driver/profile', {
@@ -79,8 +84,8 @@ export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
       })
 
       if (!response.ok) throw new Error('Failed to update')
-      toast.success('Profile saved successfully')
-      onSuccess()
+      toast.success('Profile updated')
+      onSuccess(formData)
     } catch (error: any) {
       toast.error(error.message || 'Failed to save')
     } finally {
@@ -89,145 +94,117 @@ export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
   }
 
   return (
-    <div className="p-6 sm:p-8">
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Full Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <FiUser className="inline mr-2" />
-            Full Name <span className="text-red-500">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <FiUser className="inline mr-2" /> Full Name
           </label>
           <input
             type="text"
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
               errors.fullName ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="John Doe"
           />
-          {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
         </div>
 
+        {/* Phone */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <FiPhone className="inline mr-2" />
-            Phone <span className="text-red-500">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <FiPhone className="inline mr-2" /> Phone
           </label>
           <input
             type="tel"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.phone ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="+1 555-0000"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
         </div>
 
+        {/* National ID */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            <FiMail className="inline mr-2" />
-            Email <span className="text-red-500">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <FiFileText className="inline mr-2" /> National ID (CNI)
           </label>
           <input
-            type="email"
-            name="email"
-            value={formData.email}
+            type="text"
+            name="nationalId"
+            value={formData.nationalId}
             onChange={handleChange}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.email ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.nationalId ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="driver@example.com"
           />
-          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
         </div>
 
+        {/* Driving License */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Date of Birth <span className="text-red-500">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Driving License Number
+          </label>
+          <input
+            type="text"
+            name="drivingLicense"
+            value={formData.drivingLicense}
+            onChange={handleChange}
+            className={`w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.drivingLicense ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+        </div>
+
+        {/* License Expiry */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            License Expiry Date
           </label>
           <input
             type="date"
-            name="dateOfBirth"
-            value={formData.dateOfBirth}
+            name="licenseExpiry"
+            value={formData.licenseExpiry}
             onChange={handleChange}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${
+              errors.licenseExpiry ? 'border-red-500' : 'border-gray-300'
             }`}
           />
-          {errors.dateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</p>}
         </div>
 
+        {/* Region */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            License Number <span className="text-red-500">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <FiMapPin className="inline mr-2" /> Region
           </label>
-          <input
-            type="text"
-            name="licenseNumber"
-            value={formData.licenseNumber}
+          <select
+            name="region"
+            value={formData.region}
             onChange={handleChange}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.licenseNumber ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="DL-123456"
-          />
-          {errors.licenseNumber && <p className="text-red-500 text-sm mt-1">{errors.licenseNumber}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="123 Main St"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <input
-            type="text"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="City"
-          />
-          <input
-            type="text"
-            name="state"
-            value={formData.state}
-            onChange={handleChange}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="State"
-          />
-          <input
-            type="text"
-            name="zipCode"
-            value={formData.zipCode}
-            onChange={handleChange}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Zip"
-          />
-        </div>
-
-        <div className="flex justify-end pt-6 border-t border-gray-200">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <FiSave className="mr-2" />
-            {isLoading ? 'Saving...' : 'Save Changes'}
-          </button>
+            <option value="Dakar">Dakar</option>
+            <option value="Thies">Thiès</option>
+            <option value="Saint-Louis">Saint-Louis</option>
+          </select>
         </div>
-      </form>
-    </div>
+      </div>
+
+      <div className="flex justify-end pt-6">
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition flex items-center shadow-lg shadow-blue-200 disabled:opacity-50"
+        >
+          {isInitialSetup ? (
+            <> Continue <FiArrowRight className="ml-2" /> </>
+          ) : (
+            <> <FiSave className="mr-2" /> {isLoading ? 'Saving...' : 'Save Changes'} </>
+          )}
+        </button>
+      </div>
+    </form>
   )
 }
