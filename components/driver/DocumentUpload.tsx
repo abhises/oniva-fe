@@ -2,24 +2,22 @@
 
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
-import { FiUpload, FiCheck, FiArrowLeft, FiArrowRight } from 'react-icons/fi'
-import { supabase } from '@/lib/supabase' // Make sure your supabase client is here
-import { useAuth } from '@/hooks/useAuth' // To get the driver's user ID
+import { FiUpload, FiCheck, FiArrowLeft, FiArrowRight, FiFileText, FiCamera } from 'react-icons/fi'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/hooks/useAuth'
 
 /* =========================
    Types
 ========================= */
 
-type DocumentType =
-  | 'licenseDocument'
-  | 'insuranceDocument'
-  | 'registrationDocument'
+// Step 1: Added 'profilePhoto' to the type definition
+type DocumentType = 'nationalId' | 'drivingLicense' | 'profilePhoto'
 
 interface UploadedDocument {
   fileName: string
   uploadedAt: string
   verified: boolean
-  url?: string // Added to store the Supabase URL
+  url: string 
 }
 
 interface DocumentUploadProps {
@@ -39,18 +37,21 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
   onBack,
   isInitialSetup
 }) => {
-  const { user } = useAuth() // Get current logged-in driver's info
-  const [isLoading, setIsLoading] = useState(false)
+  const { user } = useAuth()
+  const [isLoading, setIsLoading] = useState<string | null>(null)
 
-  const [documents, setDocuments] = useState<
-    Record<DocumentType, UploadedDocument | null>
-  >({
-    licenseDocument: initialData?.licenseDocument || null,
-    insuranceDocument: initialData?.insuranceDocument || null,
-    registrationDocument: initialData?.registrationDocument || null,
+  // Step 2: Added profilePhoto to the initial state
+  const [documents, setDocuments] = useState<Record<DocumentType, UploadedDocument | null>>({
+    nationalId: initialData?.nationalId || null,
+    drivingLicense: initialData?.drivingLicense || null,
+    profilePhoto: initialData?.profilePhoto || null,
   })
 
-  const canContinue = documents.licenseDocument !== null;
+  // Step 3: Updated validation to require all 3 items
+  const canContinue = 
+    documents.nationalId !== null && 
+    documents.drivingLicense !== null && 
+    documents.profilePhoto !== null;
 
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -66,24 +67,21 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     }
 
     try {
-      setIsLoading(true)
+      setIsLoading(documentType)
 
-      // 1. Define file path: documents/USER_ID/DOCUMENT_TYPE_TIMESTAMP.ext
       const fileExt = file.name.split('.').pop()
       const fileName = `${documentType}_${Date.now()}.${fileExt}`
-      const filePath = `documents/${user?.id || 'anonymous'}/${fileName}`
+      
+      // Keep profile photos in a separate folder within the bucket for better organization
+      const folder = documentType === 'profilePhoto' ? 'profiles' : 'documents'
+      const filePath = `${folder}/${user?.id || 'anonymous'}/${fileName}`
 
-      // 2. Upload to Supabase Storage
       const { data, error: uploadError } = await supabase.storage
-        .from('oniva-image') // Using your actual bucket name
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        })
+        .from('oniva-image')
+        .upload(filePath, file, { upsert: true })
 
       if (uploadError) throw uploadError
 
-      // 3. Get the Public URL from Supabase
       const { data: { publicUrl } } = supabase.storage
         .from('oniva-image')
         .getPublicUrl(filePath)
@@ -92,92 +90,122 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
         fileName: file.name,
         uploadedAt: new Date().toISOString(),
         verified: false,
-        url: publicUrl // This is the URL we'll eventually save in Postgres
+        url: publicUrl 
       }
 
-      const updatedDocs = {
-        ...documents,
-        [documentType]: docData,
-      }
-      
+      const updatedDocs = { ...documents, [documentType]: docData }
       setDocuments(updatedDocs)
-      toast.success(`${documentType.replace('Document', '')} uploaded successfully`)
       
-      // If we're just editing one field, fire success immediately
-      if (!isInitialSetup) {
-        onSuccess(updatedDocs)
-      }
+      const friendlyName = documentType === 'profilePhoto' ? 'Profile Photo' : 
+                           documentType === 'nationalId' ? 'National ID' : 'Driving License'
+      
+      toast.success(`${friendlyName} uploaded`)
+      
+      if (!isInitialSetup) onSuccess(updatedDocs)
     } catch (error: any) {
-      console.error("Upload Error:", error)
       toast.error(error.message || 'Upload failed')
     } finally {
-      setIsLoading(false)
+      setIsLoading(null)
     }
   }
 
-  const DocumentCard = ({ title, type, desc }: { title: string, type: DocumentType, desc: string }) => {
+  const DocumentCard = ({ title, type, desc, icon: Icon }: { title: string, type: DocumentType, desc: string, icon: any }) => {
     const doc = documents[type]
+    const isThisLoading = isLoading === type
+
     return (
-      <div className="border border-gray-200 rounded-xl p-5 hover:border-blue-300 transition-colors bg-white shadow-sm">
-        <h3 className="font-bold text-gray-800">{title}</h3>
-        <p className="text-xs text-gray-500 mb-4">{desc}</p>
-        
-        {doc ? (
-          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
-            <div className="overflow-hidden">
-              <p className="text-sm font-medium text-blue-900 truncate">{doc.fileName}</p>
-              <span className="text-[10px] text-blue-600">Uploaded {new Date(doc.uploadedAt).toLocaleDateString()}</span>
-            </div>
-            <FiCheck className="text-blue-600 flex-shrink-0 ml-2" />
+      <div className="border border-gray-200 rounded-xl p-5 hover:border-blue-300 transition-all bg-white shadow-sm flex flex-col h-full">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+            <Icon size={20} />
           </div>
-        ) : (
-          <label className="cursor-pointer">
-            <input 
-              type="file" 
-              className="hidden" 
-              onChange={(e) => handleFileUpload(e, type)} 
-              disabled={isLoading} 
-              accept=".pdf,.jpg,.jpeg,.png"
-            />
-            <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 flex flex-col items-center justify-center hover:bg-gray-50 transition">
-              <FiUpload className="text-gray-400 mb-1 w-6 h-6" />
-              <span className="text-sm text-gray-600">{isLoading ? 'Uploading...' : 'Click to Upload'}</span>
+          <div>
+            <h3 className="font-bold text-gray-800 leading-tight">{title}</h3>
+            <p className="text-[11px] text-gray-500">{desc}</p>
+          </div>
+        </div>
+        
+        <div className="mt-auto">
+          {doc ? (
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+              <div className="overflow-hidden flex items-center space-x-3">
+                {type === 'profilePhoto' && (
+                   <img src={doc.url} alt="Preview" className="w-8 h-8 rounded-full object-cover border border-green-200" />
+                )}
+                <div className="overflow-hidden">
+                  <p className="text-xs font-semibold text-green-900 truncate max-w-[120px]">{doc.fileName}</p>
+                  <span className="text-[10px] text-green-600 uppercase font-bold">Ready</span>
+                </div>
+              </div>
+              <FiCheck className="text-green-600 flex-shrink-0 ml-2" />
             </div>
-          </label>
-        )}
+          ) : (
+            <label className={`cursor-pointer block ${isThisLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+              <input 
+                type="file" 
+                className="hidden" 
+                onChange={(e) => handleFileUpload(e, type)} 
+                disabled={!!isLoading} 
+                accept={type === 'profilePhoto' ? "image/*" : ".pdf,.jpg,.jpeg,.png"}
+              />
+              <div className="border-2 border-dashed border-gray-200 rounded-lg py-6 flex flex-col items-center justify-center hover:bg-gray-50 hover:border-blue-400 transition-all">
+                <FiUpload className={`mb-2 w-5 h-5 ${isThisLoading ? 'animate-bounce text-blue-500' : 'text-gray-400'}`} />
+                <span className="text-[10px] font-bold text-gray-600 uppercase">
+                  {isThisLoading ? 'Uploading...' : `Upload ${title}`}
+                </span>
+              </div>
+            </label>
+          )}
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
+      {/* Step 4: Updated Grid to handle 3 items nicely */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <DocumentCard title="License" type="licenseDocument" desc="Front side of your DL" />
-        <DocumentCard title="Insurance" type="insuranceDocument" desc="Valid vehicle insurance" />
-        <DocumentCard title="Registration" type="registrationDocument" desc="Proof of ownership" />
+        <DocumentCard 
+          title="Profile Photo" 
+          type="profilePhoto" 
+          icon={FiCamera}
+          desc="Clear headshot photo" 
+        />
+        <DocumentCard 
+          title="National ID" 
+          type="nationalId" 
+          icon={FiFileText}
+          desc="CNI scan or photo" 
+        />
+        <DocumentCard 
+          title="Driving License" 
+          type="drivingLicense" 
+          icon={FiFileText}
+          desc="Front side of license" 
+        />
       </div>
 
       {isInitialSetup && (
-        <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-8 border-t border-gray-100 mt-8">
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center text-gray-600 hover:text-gray-900 font-medium transition"
+            className="flex items-center text-gray-500 hover:text-gray-900 font-bold text-sm transition"
           >
-            <FiArrowLeft className="mr-2" /> Back
+            <FiArrowLeft className="mr-2" /> PREVIOUS
           </button>
           
           <button
             type="button"
-            disabled={!canContinue || isLoading}
+            disabled={!canContinue || !!isLoading}
             onClick={() => onSuccess(documents)}
-            className={`flex items-center px-8 py-2.5 rounded-lg font-bold transition ${
+            className={`flex items-center px-10 py-3 rounded-xl font-bold transition shadow-lg ${
               canContinue && !isLoading
-                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
             }`}
           >
-            Next Step <FiArrowRight className="ml-2" />
+            NEXT STEP <FiArrowRight className="ml-2" />
           </button>
         </div>
       )}

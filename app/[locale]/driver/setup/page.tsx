@@ -33,7 +33,7 @@ export interface VehicleStepData {
 
 interface DriverRegistrationState {
   profile: ProfileStepData | null;
-  documents: any | null; 
+  documents: any | null;
   vehicle: VehicleStepData | null;
 }
 
@@ -45,7 +45,7 @@ export default function DriverSetupPage() {
   const router = useRouter();
   const { isLoading, request } = useApi({ showSuccess: true });
   const [step, setStep] = useState(1);
-  
+
   const [formData, setFormData] = useState<DriverRegistrationState>({
     profile: null,
     documents: null,
@@ -70,10 +70,10 @@ export default function DriverSetupPage() {
     }
 
     const finalPayload = {
-      nationalId: formData.profile.nationalId,
-      drivingLicense: formData.profile.drivingLicense,
+      nationalId: formData.documents.nationalId.url,
+      drivingLicense: formData.documents.drivingLicense.url,
+      profilePhoto: formData.documents.profilePhoto.url,
       licenseExpiry: formData.profile.licenseExpiry,
-      profilePhoto: formData.profile.profilePhoto || "",
       region: formData.profile.region,
       vehicleInfo: {
         make: vehicleData.make,
@@ -81,11 +81,13 @@ export default function DriverSetupPage() {
         year: Number(vehicleData.year),
         licensePlate: vehicleData.licensePlate,
         color: vehicleData.color,
-      }
+      },
     };
 
-    const result = await request(() => apiClient.createDriverProfile(finalPayload));
-    
+    const result = await request(() =>
+      apiClient.createDriverProfile(finalPayload),
+    );
+
     if (result) {
       router.push("/driver/pending");
     }
@@ -95,19 +97,28 @@ export default function DriverSetupPage() {
     <ProtectedRoute allowedRoles={["driver"]}>
       <div className="min-h-screen bg-gray-50 py-12 px-4">
         <div className="max-w-3xl mx-auto">
-          
           {/* Progress Tracker */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">Create a profile First</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">
+              Create a profile First
+            </h1>
             <div className="flex items-center justify-center space-x-4">
               {[1, 2, 3].map((s) => (
                 <React.Fragment key={s}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 ${
-                    step >= s ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-gray-300 text-gray-400"
-                  }`}>
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 ${
+                      step >= s
+                        ? "bg-blue-600 border-blue-600 text-white"
+                        : "bg-white border-gray-300 text-gray-400"
+                    }`}
+                  >
                     {s}
                   </div>
-                  {s < 3 && <div className={`w-10 h-0.5 ${step > s ? "bg-blue-600" : "bg-gray-300"}`} />}
+                  {s < 3 && (
+                    <div
+                      className={`w-10 h-0.5 ${step > s ? "bg-blue-600" : "bg-gray-300"}`}
+                    />
+                  )}
                 </React.Fragment>
               ))}
             </div>
@@ -115,23 +126,23 @@ export default function DriverSetupPage() {
 
           <div className="bg-white rounded-xl shadow-sm border p-8">
             {step === 1 && (
-              <DriverProfileForm 
-                onSuccess={handleProfileComplete} 
-                isInitialSetup={true} 
+              <DriverProfileForm
+                onSuccess={handleProfileComplete}
+                isInitialSetup={true}
               />
             )}
 
             {step === 2 && (
-              <DocumentUpload 
-                onSuccess={handleDocsComplete} 
+              <DocumentUpload
+                onSuccess={handleDocsComplete}
                 onBack={() => setStep(1)}
                 isInitialSetup={true}
               />
             )}
 
             {step === 3 && (
-              <VehicleInformation 
-                onSuccess={handleFinalSubmit} 
+              <VehicleInformation
+                onSuccess={handleFinalSubmit}
                 onBack={() => setStep(2)}
                 isInitialSetup={true}
                 isLoading={isLoading}
