@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
           role: selectedRole,
         });
       });
-console.log("Loaded users:", data);
+      console.log("Loaded users:", data);
       if (data) {
         setUsers(data);
         // Check if there are more results
@@ -426,9 +426,9 @@ console.log("Loaded users:", data);
                               <button
                                 onClick={() => {
                                   // TODO: View user details
-                                //   toast.info(
-                                //     "View details feature coming soon",
-                                //   );
+                                  //   toast.info(
+                                  //     "View details feature coming soon",
+                                  //   );
                                 }}
                                 disabled={isApiLoading}
                                 className="inline-flex items-center border-none gap-1 px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition disabled:opacity-50"

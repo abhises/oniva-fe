@@ -4,10 +4,11 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useApi } from '@/hooks/useApi'
+import { useLocale } from '@/hooks/useLocale'
 import { apiClient } from '@/services/api'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import toast from 'react-hot-toast'
-import { io } from 'socket.io-client' // <-- Import Socket.io
+import { io } from 'socket.io-client'
 import {
   FiArrowLeft,
   FiLoader,
@@ -80,6 +81,7 @@ interface AdminTripsResponse {
 export default function AdminTripsPage() {
   const router = useRouter()
   const { user } = useAuth()
+  const { t } = useLocale()
   const { request, isLoading: isApiLoading } = useApi({ showSuccess: false })
 
   const [activeTrips, setActiveTrips] = useState<ActiveTrip[]>([])
@@ -98,7 +100,6 @@ export default function AdminTripsPage() {
     hasMore: false
   })
 
-  // Wrapped in useCallback so it can be safely used in useEffect without infinite loops
   const loadActiveTrips = useCallback(async (showSpinner = true) => {
     try {
       if (showSpinner) setIsLoading(true);
@@ -125,17 +126,15 @@ export default function AdminTripsPage() {
       
     } catch (error: any) {
       console.error('Error loading trips:', error);
-      if (showSpinner) toast.error('Failed to load trips');
+      if (showSpinner) toast.error(t('admin.failedLoadTrips'));
     } finally {
       if (showSpinner) setIsLoading(false);
     }
-  }, [statusFilter, pagination.limit, pagination.offset, request]); // Dependencies for useCallback
+  }, [statusFilter, pagination.limit, pagination.offset, request, t]);
 
   useEffect(() => {
-    // 1. Initial Load (Shows Spinner)
     loadActiveTrips(true);
 
-    // 2. Setup Socket Connection for Live Data
     const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
     const socket = io(socketUrl);
 
@@ -143,45 +142,45 @@ export default function AdminTripsPage() {
       socket.emit('auth', { userId: user.id, userRole: 'admin' });
     }
 
-    // 3. Listen for global backend events and silently refresh data
     const handleSocketUpdate = (data: any) => {
       console.log('Real-time update received:', data);
-      loadActiveTrips(false); // Fetch fresh data without showing the spinner
+      loadActiveTrips(false);
     };
 
     socket.on('trip_status_changed', handleSocketUpdate);
     socket.on('driver_accepted', handleSocketUpdate);
     socket.on('driver_rejected', handleSocketUpdate);
 
-    // 4. Cleanup when the component unmounts
     return () => {
       socket.disconnect();
     };
-  }, [loadActiveTrips, user?.id]); // Re-run if loadActiveTrips or user changes
+  }, [loadActiveTrips, user?.id]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'scheduled':
-        return 'bg-purple-100 text-purple-800'
-      case 'assigned':
-        return 'bg-blue-100 text-blue-800'
-      case 'started':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+      case 'scheduled': return 'bg-purple-100 text-purple-800'
+      case 'assigned':  return 'bg-blue-100 text-blue-800'
+      case 'started':   return 'bg-green-100 text-green-800'
+      default:          return 'bg-gray-100 text-gray-800'
     }
   }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'scheduled':
-        return '📋'
-      case 'assigned':
-        return '✅'
-      case 'started':
-        return '🚗'
-      default:
-        return '❓'
+      case 'scheduled': return '📋'
+      case 'assigned':  return '✅'
+      case 'started':   return '🚗'
+      default:          return '❓'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'all':       return t('common.all')
+      case 'scheduled': return t('admin.scheduled')
+      case 'assigned':  return t('admin.assigned')
+      case 'started':   return t('admin.started')
+      default:          return status.charAt(0).toUpperCase() + status.slice(1)
     }
   }
 
@@ -195,7 +194,7 @@ export default function AdminTripsPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
             <FiLoader className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading active trips...</p>
+            <p className="text-gray-600">{t('admin.loadingTrips')}</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -213,17 +212,17 @@ export default function AdminTripsPage() {
               className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
             >
               <FiArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              {t('common.back')}
             </button>
 
             <div className="flex items-center justify-between bg-white rounded-lg shadow-lg p-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Active Trips</h1>
-                <p className="text-gray-600 mt-1">Real-time trip monitoring</p>
+                <h1 className="text-3xl font-bold text-gray-900">{t('admin.activeTrips')}</h1>
+                <p className="text-gray-600 mt-1">{t('admin.activeTripsMonitoring')}</p>
               </div>
 
               <button
-                onClick={() => loadActiveTrips(true)} // Manual refresh button
+                onClick={() => loadActiveTrips(true)}
                 disabled={isApiLoading}
                 className="p-2 text-blue-600 hover:text-blue-700 disabled:opacity-50"
                 title="Refresh"
@@ -236,22 +235,19 @@ export default function AdminTripsPage() {
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm text-gray-600">Scheduled</p>
+              <p className="text-sm text-gray-600">{t('admin.scheduled')}</p>
               <p className="text-3xl font-bold text-purple-600 mt-2">{stats?.scheduled || 0}</p>
             </div>
-
             <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm text-gray-600">Assigned</p>
+              <p className="text-sm text-gray-600">{t('admin.assigned')}</p>
               <p className="text-3xl font-bold text-blue-600 mt-2">{stats?.assigned || 0}</p>
             </div>
-
             <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm text-gray-600">In Progress</p>
+              <p className="text-sm text-gray-600">{t('admin.inProgress')}</p>
               <p className="text-3xl font-bold text-green-600 mt-2">{stats?.started || 0}</p>
             </div>
-
             <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm text-gray-600">Total</p>
+              <p className="text-sm text-gray-600">{t('admin.total')}</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.total || 0}</p>
             </div>
           </div>
@@ -260,15 +256,15 @@ export default function AdminTripsPage() {
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <FiFilter className="w-5 h-5 text-gray-600" />
-              <h2 className="font-bold text-gray-900">Filter by Status</h2>
+              <h2 className="font-bold text-gray-900">{t('admin.filterByStatus')}</h2>
             </div>
 
             <div className="flex gap-2 flex-wrap">
-              {['all', 'scheduled', 'assigned', 'started'].map((status) => (
+              {(['all', 'scheduled', 'assigned', 'started'] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => {
-                    setStatusFilter(status as any)
+                    setStatusFilter(status)
                     setPagination(prev => ({ ...prev, offset: 0 }))
                   }}
                   className={`px-4 py-2 rounded-lg font-medium transition ${
@@ -277,7 +273,7 @@ export default function AdminTripsPage() {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {getStatusLabel(status)}
                 </button>
               ))}
             </div>
@@ -288,7 +284,7 @@ export default function AdminTripsPage() {
             {activeTrips.length === 0 ? (
               <div className="p-8 text-center">
                 <FiMapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No active trips</p>
+                <p className="text-gray-600">{t('admin.noActiveTrips')}</p>
               </div>
             ) : (
               <>
@@ -296,15 +292,15 @@ export default function AdminTripsPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Trip ID</th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Route</th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Client</th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Driver</th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Distance</th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Fare</th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Duration</th>
-                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('admin.tripId')}</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('common.status')}</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('admin.route')}</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('admin.client')}</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('admin.driver')}</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('admin.distance')}</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('admin.fare')}</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('admin.duration')}</th>
+                        <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">{t('admin.actions')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -319,7 +315,7 @@ export default function AdminTripsPage() {
 
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(trip.status)}`}>
-                              {getStatusIcon(trip.status)} {trip.status}
+                              {getStatusIcon(trip.status)} {getStatusLabel(trip.status)}
                             </span>
                           </td>
 
@@ -346,11 +342,11 @@ export default function AdminTripsPage() {
                               <div className="text-sm">
                                 <p className="font-medium text-gray-900">{trip.driver.name}</p>
                                 <p className={`text-xs ${trip.driver.isOnline ? 'text-green-600' : 'text-gray-500'}`}>
-                                  {trip.driver.isOnline ? '🟢 Online' : '⚫ Offline'}
+                                  {trip.driver.isOnline ? `🟢 ${t('admin.online')}` : `⚫ ${t('admin.offline')}`}
                                 </p>
                               </div>
                             ) : (
-                              <p className="text-sm text-gray-500">Waiting...</p>
+                              <p className="text-sm text-gray-500">{t('admin.waiting')}</p>
                             )}
                           </td>
 
@@ -370,10 +366,10 @@ export default function AdminTripsPage() {
                             <button
                               onClick={() => handleViewTrip(trip.id)}
                               className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition"
-                              title="View details"
+                              title={t('common.viewDetails')}
                             >
                               <FiEye className="w-4 h-4" />
-                              View
+                              {t('admin.view')}
                             </button>
                           </td>
                         </tr>
@@ -385,11 +381,11 @@ export default function AdminTripsPage() {
                 {/* Pagination */}
                 <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                   <div className="text-sm text-gray-600">
-                    Showing{' '}
+                    {t('admin.showing')}{' '}
                     <span className="font-medium">
                       {pagination.offset + 1}-{Math.min(pagination.offset + pagination.limit, pagination.total)}
                     </span>{' '}
-                    of <span className="font-medium">{pagination.total}</span> trips
+                    {t('admin.of')} <span className="font-medium">{pagination.total}</span> {t('admin.trips')}
                   </div>
 
                   <div className="flex gap-2">
@@ -404,7 +400,7 @@ export default function AdminTripsPage() {
                       className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <FiChevronLeft className="w-4 h-4" />
-                      Previous
+                      {t('admin.previous')}
                     </button>
 
                     <button
@@ -417,7 +413,7 @@ export default function AdminTripsPage() {
                       disabled={!pagination.hasMore || isApiLoading}
                       className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Next
+                      {t('common.next')}
                       <FiChevronRight className="w-4 h-4" />
                     </button>
                   </div>
