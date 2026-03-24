@@ -23,6 +23,20 @@ activeDrivers: number
 newUsers: number
 newDrivers: number
 }
+interface RevenueData {
+  period: string
+  trips: number
+  total_revenue: string
+  commission: string
+  avg_trip_value: string
+}
+interface RegionalData {
+  region: string
+  trips: number
+  total_revenue: string
+  commission: string
+  active_drivers: number
+}
 interface ReportsPageProps {
 params: Promise<{ locale: string }>
 }
@@ -37,6 +51,8 @@ const { locale } = use(params)
 const { t } = useTranslation()
 const { isLoading, request } = useApi({ showError: true, showSuccess: false })
 const [reportData, setReportData] = useState<ReportData | null>(null)
+const [revenueData, setRevenueData] = useState<RevenueData[]>([])
+const [regionalData, setRegionalData] = useState<RegionalData[]>([])
 const [error, setError] = useState<string | null>(null)
 const [dateRange, setDateRange] = useState<DateRange>({
 startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -47,18 +63,32 @@ period: 'monthly',
 })
 useEffect(() => {
 const fetchReport = async () => {
-try {
-setError(null)
-    const data = await request<ReportData>(() =>
-      apiClient.getAdminReportSummary({
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
-        period: dateRange.period,
-      })
-    )
+  try {
+    setError(null)
+    const [summaryResult, revenueResult, regionalResult] = await Promise.all([
+      request<ReportData>(() =>
+        apiClient.getAdminReportSummary({
+          startDate: dateRange.startDate,
+          endDate: dateRange.endDate,
+          period: dateRange.period,
+        })
+      ),
+      request<RevenueData[]>(() =>
+        apiClient.getAdminRevenueReport({
+          startDate: dateRange.startDate,
+          endDate: dateRange.endDate,
+          period: dateRange.period,
+        })
+      ),
+      request<RegionalData[]>(() =>
+        apiClient.getAdminRegionalReport()
+      )
+    ])
 
-    if (data) {
-      setReportData(data)
+    if (summaryResult) {
+      setReportData(summaryResult)
+      setRevenueData(revenueResult || [])
+      setRegionalData(regionalResult || [])
     } else {
       setError('Failed to load report data')
       setReportData(null)
@@ -72,10 +102,37 @@ setError(null)
 fetchReport()
 }, [dateRange, request])
 const handleExportPDF = () => {
-alert('PDF export functionality coming soon')
+  alert('PDF export functionality coming soon')
 }
 const handleExportCSV = () => {
-alert('CSV export functionality coming soon')
+  if (!reportData) return
+  
+  const headers = ["Metric", "Value"]
+  const rows = [
+    ["Total Trips", reportData.totalTrips],
+    ["Total Platform Earnings", `${reportData.platformCommission} XOF`],
+    ["Driver Earnings", `${reportData.driverEarnings} XOF`],
+    ["Average Fare", `${reportData.averageFare} XOF`],
+    ["Average Rating", reportData.averageRating],
+    ["Active Users", reportData.activeUsers],
+    ["Active Drivers", reportData.activeDrivers],
+    ["New Users", reportData.newUsers],
+    ["New Drivers", reportData.newDrivers],
+  ]
+  
+  const csvContent = [
+    headers.join(","),
+    ...rows.map(row => row.join(","))
+  ].join("\n")
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  const url = URL.createObjectURL(blob)
+  link.setAttribute('href', url)
+  link.setAttribute('download', `oniva_report_${dateRange.startDate}_${dateRange.endDate}.csv`)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 return (
 <ProtectedRoute allowedRoles={['admin']}>
@@ -320,6 +377,68 @@ Export CSV
             </table>
           </div>
         </Card>
+
+        {/* Revenue Trends Table */}
+        {revenueData.length > 0 && (
+          <Card className="mt-8">
+            <h2 className="text-2xl font-bold mb-6">Revenue Breakdown</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="text-left p-4 font-semibold">Period</th>
+                    <th className="text-right p-4 font-semibold">Trips</th>
+                    <th className="text-right p-4 font-semibold">Gross Revenue</th>
+                    <th className="text-right p-4 font-semibold">Commission</th>
+                    <th className="text-right p-4 font-semibold">Avg. Trip Value</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {revenueData.map((row, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="p-4 font-medium">{new Date(row.period).toLocaleDateString()}</td>
+                      <td className="p-4 text-right">{row.trips}</td>
+                      <td className="p-4 text-right font-semibold text-green-600">{Number(row.total_revenue || 0).toLocaleString()} XOF</td>
+                      <td className="p-4 text-right font-semibold text-blue-600">{Number(row.commission || 0).toLocaleString()} XOF</td>
+                      <td className="p-4 text-right text-gray-700">{Number(row.avg_trip_value || 0).toLocaleString()} XOF</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
+
+        {/* Regional Performance Table */}
+        {regionalData.length > 0 && (
+          <Card className="mt-8">
+            <h2 className="text-2xl font-bold mb-6">Regional Performance</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="text-left p-4 font-semibold">Region</th>
+                    <th className="text-right p-4 font-semibold">Trips</th>
+                    <th className="text-right p-4 font-semibold">Total Revenue</th>
+                    <th className="text-right p-4 font-semibold">Platform Commission</th>
+                    <th className="text-right p-4 font-semibold">Active Drivers</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {regionalData.map((row, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="p-4 capitalize font-bold text-gray-900">{row.region}</td>
+                      <td className="p-4 text-right">{row.trips}</td>
+                      <td className="p-4 text-right font-semibold text-green-600">{Number(row.total_revenue || 0).toLocaleString()} XOF</td>
+                      <td className="p-4 text-right font-semibold text-blue-600">{Number(row.commission || 0).toLocaleString()} XOF</td>
+                      <td className="p-4 text-right text-gray-700">{row.active_drivers}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
 
         {/* Summary */}
         <Card className="mt-8 bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-600">

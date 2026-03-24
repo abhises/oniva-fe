@@ -32,7 +32,7 @@ interface AdminEarningsPageProps {
 export default function AdminEarningsPage({ params }: AdminEarningsPageProps) {
   const { locale } = use(params)
   const { t } = useLocale()
-  const { isLoading, request } = useApi({ showError: true })
+  const { isLoading, request } = useApi({ showError: true, showSuccess: false })
   const [earnings, setEarnings] = useState<EarningsStats | null>(null)
   const [dateRange, setDateRange] = useState({
     startDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
@@ -43,36 +43,18 @@ export default function AdminEarningsPage({ params }: AdminEarningsPageProps) {
 
   useEffect(() => {
     const fetchEarnings = async () => {
-      // Mock data for now
-      const mockData: EarningsStats = {
-        totalPlatformEarnings: 312500,
-        totalDriverEarnings: 937500,
-        totalCommission: 312500,
-        commissionPercentage: 25,
-        totalTrips: 625,
-        averageCommissionPerTrip: 500,
-        monthlyData: [
-          {
-            month: 'January',
-            platformEarnings: 104167,
-            driverEarnings: 312500,
-            commission: 104167,
-          },
-          {
-            month: 'February',
-            platformEarnings: 104167,
-            driverEarnings: 312500,
-            commission: 104167,
-          },
-          {
-            month: 'Current',
-            platformEarnings: 104166,
-            driverEarnings: 312500,
-            commission: 104166,
-          },
-        ],
+      const data = await request<EarningsStats>(() =>
+        apiClient.getAdminEarnings({
+          startDate: dateRange.startDate,
+          endDate: dateRange.endDate,
+        })
+      )
+
+      if (data) {
+        setEarnings(data)
+      } else {
+        setEarnings(null)
       }
-      setEarnings(mockData)
     }
 
     fetchEarnings()

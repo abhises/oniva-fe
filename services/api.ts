@@ -296,6 +296,29 @@ class ApiClient {
     );
     return data;
   }
+  
+  async getAdminRevenueReport(params: { startDate: string; endDate: string; period?: string }) {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/admin/reports/revenue",
+      { params }
+    );
+    return data;
+  }
+
+  async getAdminRegionalReport() {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/admin/reports/regional"
+    );
+    return data;
+  }
+
+  async getAdminEarnings(params: { startDate: string; endDate: string }) {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/admin/earnings",
+      { params }
+    );
+    return data;
+  }
   async getAdminDashboard() {
     const { data } = await this.instance.get<ApiResponse>(
       "/api/admin/dashboard",

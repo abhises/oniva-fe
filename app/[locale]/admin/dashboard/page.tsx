@@ -65,7 +65,7 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
             totalEarnings: Number(data.total_revenue || 0),
             totalTrips: Number(data.completed_trips || 0),
             pendingDriverApprovals: Number(data.pending_drivers || 0),
-            activeTrips: Number(data.active_drivers || 0),
+            activeTrips: Number(data.active_trips || 0),
           };
 
           setStats(validatedStats);
@@ -182,9 +182,11 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                   </div>
                   <Badge variant="success" label="Active" />
                 </div>
-                <Button variant="secondary" fullWidth className="mt-4" disabled>
-                  Monitor Trips
-                </Button>
+                <Link href={`/${locale}/admin/trips`}>
+                  <Button variant="secondary" fullWidth className="mt-4">
+                    Monitor Trips
+                  </Button>
+                </Link>
               </Card>
             </div>
 
