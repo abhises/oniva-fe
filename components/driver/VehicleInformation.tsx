@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import { FiSave, FiTruck, FiArrowLeft, FiCheckCircle } from 'react-icons/fi'
+import { apiClient } from '@/services/api'
 
 /* =========================
    Types
@@ -78,16 +79,8 @@ export const VehicleInformation: React.FC<VehicleInformationProps> = ({
 
     // If it's an edit from the profile page, call the standalone update API
     try {
-      const response = await fetch('/api/driver/vehicle', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(formData),
-      })
+      const response = await apiClient.updateDriverProfile({ vehicleInfo: formData })
 
-      if (!response.ok) throw new Error('Failed to update vehicle')
       toast.success('Vehicle information updated')
       onSuccess(formData)
     } catch (error: any) {

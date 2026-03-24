@@ -8,10 +8,9 @@ import { Loader } from "@/components/common/Loader";
 import { DriverProfileForm } from "@/components/driver/DriverProfileForm";
 import { DocumentUpload } from "@/components/driver/DocumentUpload";
 import { VehicleInformation } from "@/components/driver/VehicleInformation";
-import { BankDetails } from "@/components/driver/BankDetails";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
-import { FiEdit2, FiUser, FiTruck, FiFileText, FiCreditCard, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
+import { FiEdit2, FiUser, FiTruck, FiFileText, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { Button } from "@/components/common/Button";
 
@@ -24,7 +23,7 @@ export default function DriverProfilePage() {
   const locale = (params?.locale as string) || "en";
   const { isLoading: isActionLoading, request } = useApi({ showSuccess: true });
   
-  const [activeTab, setActiveTab] = useState<"profile" | "documents" | "vehicle" | "bank">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "documents" | "vehicle">("profile");
   const [profileData, setProfileData] = useState<any>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -110,22 +109,20 @@ export default function DriverProfilePage() {
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto mt-8 px-4 grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="max-w-5xl mx-auto mt-8 px-4 flex flex-col gap-6">
           
-          {/* Sidebar Navigation */}
-          <div className="space-y-2">
+          {/* Horizontal Navigation */}
+          <div className="flex flex-wrap gap-2 mb-2 p-1 bg-white rounded-xl border border-gray-200">
             {[
               { id: "profile", label: "Personal Info", icon: <FiUser /> },
               { id: "documents", label: "Verification Docs", icon: <FiFileText /> },
               { id: "vehicle", label: "Vehicle Info", icon: <FiTruck /> },
-              { id: "bank", label: "Payout Details", icon: <FiCreditCard /> },
             ].map((tab) => (
               <Button
                 key={tab.id}
                 variant={activeTab === tab.id ? 'primary' : 'ghost'}
-                fullWidth
                 size="sm"
-                className="justify-start"
+                className="flex-1 justify-center min-w-[150px]"
                 onClick={() => { setActiveTab(tab.id as any); setIsEditMode(false); }}
               >
                 {tab.icon} {tab.label}
@@ -134,7 +131,7 @@ export default function DriverProfilePage() {
           </div>
 
           {/* Main Display Area */}
-          <div className="lg:col-span-3">
+          <div className="w-full">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="p-6">
                 
@@ -145,7 +142,6 @@ export default function DriverProfilePage() {
                     {activeTab === "profile" && <DriverProfileForm initialData={profileData} onSuccess={handleUpdateSuccess} />}
                     {activeTab === "documents" && <DocumentUpload initialData={profileData} onSuccess={handleUpdateSuccess} />}
                     {activeTab === "vehicle" && <VehicleInformation initialData={profileData?.vehicle_info} onSuccess={handleUpdateSuccess} />}
-                    {/* BankDetails component would go here */}
                   </div>
                 ) : (
                   /* --- VIEW MODE --- */
@@ -162,18 +158,52 @@ export default function DriverProfilePage() {
                     )}
 
                     {activeTab === "documents" && (
-                      <div className="space-y-4">
-                        <div className="p-4 bg-gray-50 rounded-xl flex items-center justify-between border border-gray-100">
-                           <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><FiFileText /></div>
-                              <div>
-                                 <p className="font-bold text-sm">National ID Card</p>
-                                 <p className="text-[10px] text-gray-500 uppercase">Uploaded on {new Date(profileData?.created_at).toLocaleDateString()}</p>
-                              </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* National ID Card */}
+                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                           <div className="flex items-center justify-between">
+                             <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><FiFileText /></div>
+                                <div>
+                                   <p className="font-bold text-sm">National ID Card</p>
+                                   <p className="text-[10px] text-gray-500 uppercase">Uploaded on {new Date(profileData?.created_at).toLocaleDateString()}</p>
+                                </div>
+                             </div>
+                             <a href={profileData?.national_id_url} target="_blank" className="text-blue-600 font-bold text-xs hover:underline">Open Full</a>
                            </div>
-                           <a href={profileData?.national_id_url} target="_blank" className="text-blue-600 font-bold text-xs hover:underline">View Document</a>
+                           {profileData?.national_id_url ? (
+                             <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
+                               <img src={profileData.national_id_url} alt="National ID" className="w-full h-full object-cover hover:object-contain transition-all" />
+                             </div>
+                           ) : (
+                             <div className="w-full aspect-video bg-gray-100 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
+                               <span className="text-xs font-medium text-gray-400">No image available</span>
+                             </div>
+                           )}
                         </div>
-                        {/* Repeat for other docs */}
+
+                        {/* Driving License */}
+                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-4">
+                           <div className="flex items-center justify-between">
+                             <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><FiFileText /></div>
+                                <div>
+                                   <p className="font-bold text-sm">Driving License</p>
+                                   <p className="text-[10px] text-gray-500 uppercase">Uploaded on {new Date(profileData?.created_at).toLocaleDateString()}</p>
+                                </div>
+                             </div>
+                             <a href={profileData?.driving_license_url} target="_blank" className="text-blue-600 font-bold text-xs hover:underline">Open Full</a>
+                           </div>
+                           {profileData?.driving_license_url ? (
+                             <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
+                               <img src={profileData.driving_license_url} alt="Driving License" className="w-full h-full object-cover hover:object-contain transition-all" />
+                             </div>
+                           ) : (
+                             <div className="w-full aspect-video bg-gray-100 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
+                               <span className="text-xs font-medium text-gray-400">No image available</span>
+                             </div>
+                           )}
+                        </div>
                       </div>
                     )}
 

@@ -64,6 +64,7 @@ interface TripStats {
   scheduled: number
   assigned: number
   started: number
+  completed: number
   total: number
 }
 
@@ -90,10 +91,11 @@ export default function AdminTripsPage() {
     scheduled: 0,
     assigned: 0,
     started: 0,
+    completed: 0,
     total: 0
   })
   const [isLoading, setIsLoading] = useState(true)
-  const [statusFilter, setStatusFilter] = useState<'all' | 'scheduled' | 'assigned' | 'started'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'scheduled' | 'assigned' | 'started' | 'completed'>('all')
   const [pagination, setPagination] = useState({
     limit: 20,
     offset: 0,
@@ -105,15 +107,13 @@ export default function AdminTripsPage() {
     try {
       if (showSpinner) setIsLoading(true);
       
-      const response = await request<AdminTripsResponse>(() => 
-        apiClient.getAdminActiveTrips({
-          status: statusFilter,
-          limit: pagination.limit,
-          offset: pagination.offset
-        })
-      );
+      const response = await apiClient.getAdminActiveTrips({
+        status: statusFilter,
+        limit: pagination.limit,
+        offset: pagination.offset
+      }) as unknown as AdminTripsResponse;
 
-      if (response && response.data) {
+      if (response && response.success && response.data) {
         setActiveTrips(response.data);
         if (response.stats) setStats(response.stats);
         if (response.pagination) {
@@ -123,6 +123,8 @@ export default function AdminTripsPage() {
             hasMore: response.pagination.hasMore
           }));
         }
+      } else if (response && !response.success) {
+        if (showSpinner) toast.error(t('admin.failedLoadTrips'));
       }
       
     } catch (error: any) {
@@ -131,7 +133,7 @@ export default function AdminTripsPage() {
     } finally {
       if (showSpinner) setIsLoading(false);
     }
-  }, [statusFilter, pagination.limit, pagination.offset, request, t]);
+  }, [statusFilter, pagination.limit, pagination.offset, t]);
 
   useEffect(() => {
     loadActiveTrips(true);
@@ -162,6 +164,8 @@ export default function AdminTripsPage() {
       case 'scheduled': return 'bg-purple-100 text-purple-800'
       case 'assigned':  return 'bg-blue-100 text-blue-800'
       case 'started':   return 'bg-green-100 text-green-800'
+      case 'completed': return 'bg-gray-800 text-white'
+      case 'cancelled': return 'bg-red-100 text-red-800'
       default:          return 'bg-gray-100 text-gray-800'
     }
   }
@@ -171,6 +175,8 @@ export default function AdminTripsPage() {
       case 'scheduled': return '📋'
       case 'assigned':  return '✅'
       case 'started':   return '🚗'
+      case 'completed': return '🏆'
+      case 'cancelled': return '❌'
       default:          return '❓'
     }
   }
@@ -181,6 +187,8 @@ export default function AdminTripsPage() {
       case 'scheduled': return t('admin.scheduled')
       case 'assigned':  return t('admin.assigned')
       case 'started':   return t('admin.started')
+      case 'completed': return t('common.completed')
+      case 'cancelled': return t('client.tripCancelled')
       default:          return status.charAt(0).toUpperCase() + status.slice(1)
     }
   }
@@ -236,20 +244,24 @@ export default function AdminTripsPage() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-purple-500">
               <p className="text-sm text-gray-600">{t('admin.scheduled')}</p>
-              <p className="text-3xl font-bold text-purple-600 mt-2">{stats?.scheduled || 0}</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.scheduled || 0}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-blue-500">
               <p className="text-sm text-gray-600">{t('admin.assigned')}</p>
-              <p className="text-3xl font-bold text-blue-600 mt-2">{stats?.assigned || 0}</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.assigned || 0}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-green-500">
               <p className="text-sm text-gray-600">{t('admin.inProgress')}</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">{stats?.started || 0}</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.started || 0}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-gray-800">
+              <p className="text-sm text-gray-600">{t('common.completed')}</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.completed || 0}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-gray-200">
               <p className="text-sm text-gray-600">{t('admin.total')}</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.total || 0}</p>
             </div>
@@ -263,7 +275,7 @@ export default function AdminTripsPage() {
             </div>
 
             <div className="flex gap-2 flex-wrap">
-              {(['all', 'scheduled', 'assigned', 'started'] as const).map((status) => (
+              {(['all', 'scheduled', 'assigned', 'started', 'completed'] as const).map((status) => (
                 <Button
                   key={status}
                   variant={statusFilter === status ? 'primary' : 'ghost'}
@@ -333,7 +345,7 @@ export default function AdminTripsPage() {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm">
                               <p className="font-medium text-gray-900">{trip.client?.name || 'Unknown'}</p>
-                              <p className="text-gray-500">{trip.client?.rating?.toFixed(1) || '0.0'} ⭐</p>
+                              <p className="text-gray-500">{Number(trip.client?.rating || 0).toFixed(1)} ⭐</p>
                             </div>
                           </td>
 
@@ -355,7 +367,7 @@ export default function AdminTripsPage() {
                           </td>
 
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <p className="text-sm font-bold text-gray-900">${trip.totalPrice?.toFixed(2)}</p>
+                            <p className="text-sm font-bold text-gray-900">${Number(trip.totalPrice || 0).toFixed(2)}</p>
                           </td>
 
                           <td className="px-6 py-4 whitespace-nowrap">

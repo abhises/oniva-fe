@@ -8,7 +8,8 @@ import { Badge } from "@/components/common/Badge";
 import { Loader } from "@/components/common/Loader";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
-import { FiUser, FiCheck, FiX, FiPause } from "react-icons/fi";
+import { FiUser, FiCheck, FiX, FiPause, FiEye } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 
 interface Driver {
   id: number;
@@ -22,6 +23,7 @@ interface Driver {
 }
 
 export default function AdminDriversPage() {
+  const router = useRouter();
   const { t } = useTranslation();
   const { isLoading, request } = useApi({ showSuccess: true });
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -135,26 +137,36 @@ export default function AdminDriversPage() {
                 </div>
               </div>
 
-              {driver.verification_status === "pending" && (
-                <div className="flex gap-2">
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => handleApprove(driver.id)}
-                    isLoading={isLoading}
-                  >
-                    <FiCheck size={16} /> {t("admin.approveDriver")}
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleReject(driver.id)}
-                    isLoading={isLoading}
-                  >
-                    <FiX size={16} /> {t("admin.rejectDriver")}
-                  </Button>
-                </div>
-              )}
+              <div className="flex gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => router.push(`/en/admin/drivers/${driver.user_id}`)}
+                >
+                  <FiEye size={16} /> {t("common.viewDetails")}
+                </Button>
+                
+                {driver.verification_status === "pending" && (
+                  <>
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={() => handleApprove(driver.id)}
+                      isLoading={isLoading}
+                    >
+                      <FiCheck size={16} /> {t("admin.approveDriver")}
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleReject(driver.id)}
+                      isLoading={isLoading}
+                    >
+                      <FiX size={16} /> {t("admin.rejectDriver")}
+                    </Button>
+                  </>
+                )}
+              </div>
             </Card>
           ))}
         </div>

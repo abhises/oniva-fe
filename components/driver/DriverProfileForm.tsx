@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { useTranslation } from '@/hooks/useTranslation'
 import toast from 'react-hot-toast'
 import { FiSave, FiMail, FiPhone, FiUser, FiArrowRight, FiFileText, FiMapPin } from 'react-icons/fi'
+import { apiClient } from '@/services/api'
 
 /* =========================
    Types
@@ -74,16 +75,15 @@ export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
     // IF EDIT MODE: Perform the legacy PUT request
     try {
       setIsLoading(true)
-      const response = await fetch('/api/driver/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(formData),
-      })
+      const response = await apiClient.updateDriverProfile({
+        fullName: formData.fullName,
+        phone: formData.phone,
+        nationalId: formData.nationalId,
+        drivingLicense: formData.drivingLicense,
+        licenseExpiry: formData.licenseExpiry,
+        region: formData.region
+      });
 
-      if (!response.ok) throw new Error('Failed to update')
       toast.success('Profile updated')
       onSuccess(formData)
     } catch (error: any) {

@@ -194,6 +194,14 @@ class ApiClient {
     return data;
   }
 
+  async updateDriverProfile(profileData: any) {
+    const { data } = await this.instance.put<ApiResponse>(
+      "/api/driver/profile",
+      profileData,
+    );
+    return data;
+  }
+
   async updateLocation(locationData: { latitude: number; longitude: number }) {
     const { data } = await this.instance.post<ApiResponse>(
       "/api/driver/location",
@@ -281,7 +289,13 @@ class ApiClient {
   // ============================================================================
   // ADMIN ENDPOINTS
   // ============================================================================
-
+  async getAdminReportSummary(params: { startDate: string; endDate: string; period?: string }) {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/admin/reports/summary",
+      { params }
+    );
+    return data;
+  }
   async getAdminDashboard() {
     const { data } = await this.instance.get<ApiResponse>(
       "/api/admin/dashboard",
@@ -289,8 +303,22 @@ class ApiClient {
     return data;
   }
 
+  async getAdminTripDetails(tripId: string | number) {
+    const { data } = await this.instance.get<ApiResponse>(
+      `/api/admin/${tripId}`,
+    );
+    return data;
+  }
+
   async getAdminDrivers() {
     const { data } = await this.instance.get<ApiResponse>("/api/admin/drivers");
+    return data;
+  }
+
+  async getAdminDriverDetails(driverId: string | number) {
+    const { data } = await this.instance.get<ApiResponse>(
+      `/api/admin/drivers/${driverId}`,
+    );
     return data;
   }
 

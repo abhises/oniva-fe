@@ -35,7 +35,7 @@ export default function ReportsPage({ params }: ReportsPageProps) {
 // FIX: Use React.use() to unwrap params
 const { locale } = use(params)
 const { t } = useTranslation()
-const { isLoading, request } = useApi({ showError: true, showSuccess: true })
+const { isLoading, request } = useApi({ showError: true, showSuccess: false })
 const [reportData, setReportData] = useState<ReportData | null>(null)
 const [error, setError] = useState<string | null>(null)
 const [dateRange, setDateRange] = useState<DateRange>({
@@ -49,23 +49,20 @@ useEffect(() => {
 const fetchReport = async () => {
 try {
 setError(null)
-    // For now, we'll create mock data
-    // Replace with actual API call when backend is ready
-    const mockData: ReportData = {
-      period: `${dateRange.startDate} to ${dateRange.endDate}`,
-      totalTrips: 1250,
-      totalEarnings: 625000,
-      platformCommission: 156250,
-      driverEarnings: 468750,
-      averageFare: 500,
-      averageRating: 4.7,
-      activeUsers: 342,
-      activeDrivers: 58,
-      newUsers: 45,
-      newDrivers: 8,
-    }
+    const data = await request<ReportData>(() =>
+      apiClient.getAdminReportSummary({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        period: dateRange.period,
+      })
+    )
 
-    setReportData(mockData)
+    if (data) {
+      setReportData(data)
+    } else {
+      setError('Failed to load report data')
+      setReportData(null)
+    }
   } catch (err) {
     setError('Failed to load report data')
     setReportData(null)

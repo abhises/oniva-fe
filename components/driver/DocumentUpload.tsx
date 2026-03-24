@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { FiUpload, FiCheck, FiArrowLeft, FiArrowRight, FiFileText, FiCamera } from 'react-icons/fi'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
+import { apiClient } from '@/services/api'
 
 /* =========================
    Types
@@ -101,7 +102,19 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
       
       toast.success(`${friendlyName} uploaded`)
       
-      if (!isInitialSetup) onSuccess(updatedDocs)
+      if (!isInitialSetup) {
+          const updatePayload: any = {};
+          if (documentType === 'profilePhoto') updatePayload.profilePhoto = publicUrl;
+          if (documentType === 'nationalId') updatePayload.nationalIdUrl = publicUrl;
+          if (documentType === 'drivingLicense') updatePayload.drivingLicenseUrl = publicUrl;
+          
+          try {
+             await apiClient.updateDriverProfile(updatePayload);
+             onSuccess(updatedDocs);
+          } catch(e) {
+             toast.error('Failed to save document to profile in database');
+          }
+      }
     } catch (error: any) {
       toast.error(error.message || 'Upload failed')
     } finally {
