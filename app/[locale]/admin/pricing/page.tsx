@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useApi } from '@/hooks/useApi'
 import { apiClient } from '@/services/api'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { Button } from '@/components/common/Button'
 import toast from 'react-hot-toast'
 import { useTranslation } from "react-i18next";
 import { FiArrowLeft, FiLoader, FiCheck, FiDollarSign, FiClock, FiRefreshCw, FiSave } from 'react-icons/fi'
@@ -234,10 +235,10 @@ export default function AdminPricingPage() {
           {/* Header */}
           <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <button onClick={() => router.back()} className="flex items-center text-blue-600 hover:text-blue-700 mb-4">
-                <FiArrowLeft className="w-4 h-4 mr-2" />
+              <Button variant="ghost" size="sm" onClick={() => router.back()}>
+                <FiArrowLeft className="w-4 h-4" />
                 {t('common.back', 'Back')}
-              </button>
+              </Button>
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-blue-100 rounded-lg">
                   <FiDollarSign className="w-6 h-6 text-blue-600" />
@@ -248,10 +249,14 @@ export default function AdminPricingPage() {
                 </div>
               </div>
             </div>
-            <button onClick={loadPricingData} className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center gap-2 self-start">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={loadPricingData}
+            >
               <FiRefreshCw className="w-4 h-4" />
               {t('admin.pricing.refresh', 'Refresh Data')}
-            </button>
+            </Button>
           </div>
 
           {/* Configuration Form */}
@@ -440,23 +445,26 @@ export default function AdminPricingPage() {
                   : t('admin.pricing.status.upToDate', 'Configuration is up to date')}
               </span>
               <div className="flex gap-3">
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
-                     if(pricing) { setFormData(pricing); setHasChanges(false); setErrors({}); }
+                    if(pricing) { setFormData(pricing); setHasChanges(false); setErrors({}); }
                   }}
                   disabled={!hasChanges || isSaving}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium disabled:opacity-50"
                 >
                   {t('common.reset', 'Reset')}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={handleSave}
+                  isLoading={isSaving}
                   disabled={!hasChanges || isSaving}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
-                  {isSaving ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />}
+                  {!isSaving && <FiSave className="w-4 h-4" />}
                   {t('admin.pricing.actions.save', 'Save New Configuration')}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -510,14 +518,16 @@ export default function AdminPricingPage() {
                       </td>
                       <td className="px-6 py-4">
                         {!item.is_active && item.id && (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleActivateHistory(item.id!)}
+                            isLoading={isActivating === item.id}
                             disabled={isActivating === item.id}
-                            className="text-blue-600 hover:text-blue-900 text-sm font-medium flex items-center gap-1 hover:underline"
                           >
-                            {isActivating === item.id ? <FiLoader className="w-3 h-3 animate-spin" /> : <FiRefreshCw className="w-3 h-3" />}
+                            {isActivating !== item.id && <FiRefreshCw className="w-3 h-3" />}
                             {t('common.restore', 'Restore')}
-                          </button>
+                          </Button>
                         )}
                       </td>
                     </tr>

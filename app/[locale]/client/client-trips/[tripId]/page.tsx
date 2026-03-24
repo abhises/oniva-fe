@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { Button } from "@/components/common/Button";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import {
@@ -277,13 +278,10 @@ export default function ClientTripDetailPage() {
       <ProtectedRoute allowedRoles={["client"]}>
         <div className="min-h-screen bg-gray-50 py-8 px-4">
           <div className="max-w-2xl mx-auto">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
-            >
-              <FiArrowLeft className="w-4 h-4 mr-2" />
+            <Button variant="ghost" size="sm" onClick={() => router.back()}>
+              <FiArrowLeft className="w-4 h-4" />
               Back
-            </button>
+            </Button>
 
             <div className="bg-white rounded-lg shadow p-8 text-center">
               <FiAlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -312,13 +310,10 @@ export default function ClientTripDetailPage() {
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
-            >
-              <FiArrowLeft className="w-4 h-4 mr-2" />
+            <Button variant="ghost" size="sm" onClick={() => router.back()}>
+              <FiArrowLeft className="w-4 h-4" />
               Back to Trips
-            </button>
+            </Button>
 
             <div className="flex items-center justify-between bg-white rounded-lg shadow-lg p-6">
               <div>
@@ -571,16 +566,17 @@ export default function ClientTripDetailPage() {
                 {/* Contact and Car Details */}
                 <div className="space-y-3">
                   {(trip.driver?.phone || trip.driver_phone) && (
-                    <button
+                    <Button
+                      variant="primary"
+                      fullWidth
                       onClick={() => {
                         const phone = trip.driver?.phone || trip.driver_phone;
                         if (phone) window.location.href = `tel:${phone}`;
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition font-medium"
                     >
                       <FiPhone className="w-5 h-5" />
                       {trip.driver?.phone || trip.driver_phone}
-                    </button>
+                    </Button>
                   )}
 
                   {trip.driver?.car && (
@@ -645,13 +641,15 @@ export default function ClientTripDetailPage() {
               <p className="text-gray-600 mb-4">
                 Please rate your experience with the driver
               </p>
-              <button
+              <Button
+                variant="secondary"
+                fullWidth
                 onClick={() => setShowRatingModal(true)}
                 disabled={isApiLoading}
-                className="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition disabled:opacity-50 font-medium"
               >
+                <FiStar className="w-4 h-4" />
                 Rate Driver
-              </button>
+              </Button>
             </div>
           )}
 
@@ -691,14 +689,15 @@ export default function ClientTripDetailPage() {
           {/* Cancel Button */}
           {["pending", "scheduled", "assigned", "accepted"].includes(trip.status) && (
             <div className="mb-6">
-              <button
+              <Button
+                variant="danger"
+                fullWidth
                 onClick={() => setShowCancelModal(true)}
                 disabled={isApiLoading}
-                className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 font-medium flex items-center justify-center gap-2"
               >
                 <FiX className="w-5 h-5" />
                 Cancel Trip
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -752,35 +751,29 @@ export default function ClientTripDetailPage() {
 
               {/* Buttons */}
               <div className="flex gap-3">
-                <button
+                <Button
+                  variant="ghost"
+                  fullWidth
                   onClick={() => {
                     setShowRatingModal(false);
                     setSelectedRating(5);
                     setReviewText("");
                   }}
                   disabled={isSubmittingRating}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 font-medium"
                 >
                   Cancel
-                </button>
+                </Button>
 
-                <button
+                <Button
+                  variant="primary"
+                  fullWidth
+                  isLoading={isSubmittingRating}
                   onClick={handleRateTrip}
                   disabled={isSubmittingRating}
-                  className="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition disabled:opacity-50 font-medium flex items-center justify-center gap-2"
                 >
-                  {isSubmittingRating ? (
-                    <>
-                      <FiLoader className="w-4 h-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <FiStar className="w-4 h-4" />
-                      Submit Rating
-                    </>
-                  )}
-                </button>
+                  {!isSubmittingRating && <FiStar className="w-4 h-4" />}
+                  {isSubmittingRating ? 'Submitting...' : 'Submit Rating'}
+                </Button>
               </div>
             </div>
           </div>
@@ -817,34 +810,28 @@ export default function ClientTripDetailPage() {
               </div>
 
               <div className="flex gap-3">
-                <button
+                <Button
+                  variant="ghost"
+                  fullWidth
                   onClick={() => {
                     setShowCancelModal(false);
                     setCancelReason("");
                   }}
                   disabled={isCancelling}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 font-medium"
                 >
                   Keep Trip
-                </button>
+                </Button>
 
-                <button
+                <Button
+                  variant="danger"
+                  fullWidth
+                  isLoading={isCancelling}
                   onClick={handleCancelTrip}
                   disabled={isCancelling || !cancelReason.trim()}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2 border-none"
                 >
-                  {isCancelling ? (
-                    <>
-                      <FiLoader className="w-4 h-4 animate-spin" />
-                      Cancelling...
-                    </>
-                  ) : (
-                    <>
-                      <FiX className="w-4 h-4" />
-                      Cancel Trip
-                    </>
-                  )}
-                </button>
+                  {!isCancelling && <FiX className="w-4 h-4" />}
+                  {isCancelling ? 'Cancelling...' : 'Cancel Trip'}
+                </Button>
               </div>
             </div>
           </div>

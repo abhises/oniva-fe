@@ -90,9 +90,9 @@ export default function RequestDetailPage({
   return (
     <div className="max-w-md mx-auto p-4 pb-24 space-y-4">
       <div className="flex items-center gap-4 mb-2">
-        <button onClick={() => router.back()} className="p-2 hover:bg-gray-100 rounded-full">
+        <Button variant="ghost" size="sm" onClick={() => router.back()}>
           <FiArrowLeft size={20} />
-        </button>
+        </Button>
         <h1 className="text-xl font-bold">{t("driver.newRequest")}</h1>
       </div>
 

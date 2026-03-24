@@ -63,8 +63,9 @@ select:disabled,
 textarea:disabled {
   @apply bg-gray-100 cursor-not-allowed;
 }
-input::placeholder {
-  @apply text-gray-500;
+input::placeholder,
+textarea::placeholder {
+  @apply text-gray-400 opacity-100 font-normal;
 }
 
 /* Button Base Styles */

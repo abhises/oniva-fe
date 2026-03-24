@@ -14,6 +14,7 @@ import {
   FiPhone, FiCheckCircle, FiAlertCircle, FiNavigation, FiKey
 } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
+import { Button } from "@/components/common/Button";
 
 // Dynamically import the map component with SSR disabled
 const MapRoute = dynamic(() => import('./MapRoute'), {
@@ -110,9 +111,9 @@ export default function DriverTripDetailPage() {
   return (
     <ProtectedRoute allowedRoles={["driver"]}>
       <div className="max-w-2xl mx-auto py-8 px-4">
-        <button onClick={() => router.back()} className="flex items-center text-primary mb-6">
+        <Button variant="ghost" size="sm" onClick={() => router.back()}>
           <FiArrowLeft className="mr-2" /> Back
-        </button>
+        </Button>
 
         {/* Status Header */}
         <div className="bg-white rounded-xl shadow-md p-6 mb-6 flex justify-between items-center border-t-4 border-primary">
@@ -148,18 +149,20 @@ export default function DriverTripDetailPage() {
           </div>
           
           <div className="mt-6 flex gap-4">
-            <button 
+            <Button
+              variant="primary"
+              fullWidth
               onClick={() => window.open(`https://maps.google.com/?q=${trip.pickup_latitude},${trip.pickup_longitude}`)}
-              className="flex-1 bg-blue-50 text-blue-600 py-3 rounded-lg font-bold flex items-center justify-center gap-2"
             >
               <FiNavigation /> Navigate
-            </button>
-            <button 
+            </Button>
+            <Button
+              variant="success"
+              fullWidth
               onClick={() => window.location.href = `tel:${trip.client_phone}`}
-              className="flex-1 bg-green-50 text-green-600 py-3 rounded-lg font-bold flex items-center justify-center gap-2"
             >
               <FiPhone /> Call Client
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -179,25 +182,29 @@ export default function DriverTripDetailPage() {
                 placeholder="Enter 6-digit OTP"
                 className="flex-1 border rounded-lg px-4 py-2 text-center text-xl tracking-widest focus:ring-2 focus:ring-primary outline-none"
               />
-              <button 
-                onClick={handleStartTrip}
+              <Button
+                variant="primary"
+                isLoading={isApiLoading}
                 disabled={isApiLoading}
-                className="bg-primary text-white px-6 py-2 rounded-lg font-bold disabled:opacity-50"
+                onClick={handleStartTrip}
               >
                 Start
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
         {/* Complete Trip Action */}
         {trip.status === 'in_progress' && (
-          <button 
+          <Button
+            variant="success"
+            fullWidth
+            size="lg"
+            isLoading={isApiLoading}
             onClick={handleEndTrip}
-            className="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-2"
           >
             <FiCheckCircle /> Complete Trip
-          </button>
+          </Button>
         )}
 
         {/* Fare Card */}

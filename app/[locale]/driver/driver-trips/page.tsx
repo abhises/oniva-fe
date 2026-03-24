@@ -10,6 +10,7 @@ import { Loader } from '@/components/common/Loader'
 import { useApi } from '@/hooks/useApi'
 import { apiClient } from '@/services/api'
 import { FiMapPin, FiClock, FiDollarSign, FiCheck, FiChevronRight } from 'react-icons/fi'
+import { Button } from '@/components/common/Button'
 
 interface DriverTrip {
   id: number
@@ -66,17 +67,14 @@ export default function DriverTripsPage() {
         {/* Filter */}
         <div className="flex gap-2 mb-8 flex-wrap">
           {['all', 'completed', 'in_progress', 'accepted'].map((f) => (
-            <button
+            <Button
               key={f}
+              variant={filter === f ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
-                filter === f
-                  ? 'bg-primary text-white shadow-md'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
             >
               {t(`common.${f}`)}
-            </button>
+            </Button>
           ))}
         </div>
 

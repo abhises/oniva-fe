@@ -7,6 +7,7 @@ import { useApi } from '@/hooks/useApi'
 import { useLocale } from '@/hooks/useLocale'
 import { apiClient } from '@/services/api'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { Button } from '@/components/common/Button'
 import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
 import {
@@ -207,13 +208,14 @@ export default function AdminTripsPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => router.back()}
-              className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
             >
-              <FiArrowLeft className="w-4 h-4 mr-2" />
+              <FiArrowLeft className="w-4 h-4" />
               {t('common.back')}
-            </button>
+            </Button>
 
             <div className="flex items-center justify-between bg-white rounded-lg shadow-lg p-6">
               <div>
@@ -221,14 +223,15 @@ export default function AdminTripsPage() {
                 <p className="text-gray-600 mt-1">{t('admin.activeTripsMonitoring')}</p>
               </div>
 
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => loadActiveTrips(true)}
                 disabled={isApiLoading}
-                className="p-2 text-blue-600 hover:text-blue-700 disabled:opacity-50"
                 title="Refresh"
               >
-                <FiRefreshCw className="w-6 h-6" />
-              </button>
+                <FiRefreshCw className="w-4 h-4" />
+              </Button>
             </div>
           </div>
 
@@ -261,20 +264,17 @@ export default function AdminTripsPage() {
 
             <div className="flex gap-2 flex-wrap">
               {(['all', 'scheduled', 'assigned', 'started'] as const).map((status) => (
-                <button
+                <Button
                   key={status}
+                  variant={statusFilter === status ? 'primary' : 'ghost'}
+                  size="sm"
                   onClick={() => {
                     setStatusFilter(status)
                     setPagination(prev => ({ ...prev, offset: 0 }))
                   }}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    statusFilter === status
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
                 >
                   {getStatusLabel(status)}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -363,14 +363,15 @@ export default function AdminTripsPage() {
                           </td>
 
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <button
-                              onClick={() => handleViewTrip(trip.id)}
-                              className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition"
-                              title={t('common.viewDetails')}
-                            >
-                              <FiEye className="w-4 h-4" />
-                              {t('admin.view')}
-                            </button>
+                            <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleViewTrip(trip.id)}
+                            title={t('common.viewDetails')}
+                          >
+                            <FiEye className="w-4 h-4" />
+                            {t('admin.view')}
+                          </Button>
                           </td>
                         </tr>
                       ))}
@@ -389,7 +390,9 @@ export default function AdminTripsPage() {
                   </div>
 
                   <div className="flex gap-2">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() =>
                         setPagination(prev => ({
                           ...prev,
@@ -397,13 +400,14 @@ export default function AdminTripsPage() {
                         }))
                       }
                       disabled={pagination.offset === 0 || isApiLoading}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <FiChevronLeft className="w-4 h-4" />
                       {t('admin.previous')}
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() =>
                         setPagination(prev => ({
                           ...prev,
@@ -411,11 +415,10 @@ export default function AdminTripsPage() {
                         }))
                       }
                       disabled={!pagination.hasMore || isApiLoading}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {t('common.next')}
                       <FiChevronRight className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </>

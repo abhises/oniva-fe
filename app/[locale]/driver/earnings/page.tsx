@@ -81,19 +81,21 @@ export default function EarningsPage() {
           </h1>
 
           {/* Quick Filters */}
-          <div className="flex bg-gray-100 p-1 rounded-lg">
-            <button 
+          <div className="flex bg-gray-100 p-1 rounded-lg gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setQuickRange(7)}
-              className="px-4 py-2 text-sm font-medium rounded-md hover:bg-white hover:shadow-sm transition-all"
             >
               7 {t("common.days")}
-            </button>
-            <button 
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setQuickRange(30)}
-              className="px-4 py-2 text-sm font-medium rounded-md hover:bg-white hover:shadow-sm transition-all"
             >
               30 {t("common.days")}
-            </button>
+            </Button>
           </div>
         </div>
 

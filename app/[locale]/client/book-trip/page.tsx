@@ -10,6 +10,7 @@ import { PassengerSelector } from "@/components/booking/PassengerSelector";
 import { PaymentSelector } from "@/components/booking/PaymentSelector";
 import { FareEstimate } from "@/components/booking/FareEstimate";
 import toast from "react-hot-toast";
+import { Button } from "@/components/common/Button";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import {
@@ -264,8 +265,10 @@ export default function BookTripPage() {
               {formData.bookingType === 'point-to-point' && <div className="border p-4 rounded"><p className="text-xs text-gray-500">Dropoff</p><p className="font-bold">{formData.dropoffLocation.address}</p></div>}
               <div className="border p-4 rounded"><p className="text-xs text-gray-500">Price</p><p className="text-xl font-bold text-blue-600">{fareEstimate.estimatedFare.toLocaleString()} FCFA</p></div>
               <div className="flex gap-4 pt-4 border-t">
-                <button onClick={() => setBookingStep("details")} className="flex-1 px-6 py-3 border rounded">Back</button>
-                <button onClick={handleConfirmBooking} disabled={isLoading} className="flex-1 px-6 py-3 bg-blue-600 text-white rounded">{isLoading ? "Processing..." : "Confirm"}</button>
+                <Button variant="ghost" fullWidth onClick={() => setBookingStep("details")}>Back</Button>
+                <Button variant="primary" fullWidth isLoading={isLoading} onClick={handleConfirmBooking}>
+                  {!isLoading && 'Confirm'}
+                </Button>
               </div>
             </div>
           </div>
@@ -311,9 +314,14 @@ export default function BookTripPage() {
                 <input type="time" name="time" value={formData.time} onChange={handleInputChange} className="p-2 border rounded" />
               </div>
               
-              <button onClick={handleEstimateFare} disabled={isEstimating} className="w-full py-3 bg-orange-600 text-white rounded font-bold">
-                {isEstimating ? "Calculating..." : "Estimate price"}
-              </button>
+              <Button
+                variant="success"
+                fullWidth
+                isLoading={isEstimating}
+                onClick={handleEstimateFare}
+              >
+                {!isEstimating && 'Estimate price'}
+              </Button>
 
               <PassengerSelector value={formData.passengers} onChange={(passengers) => setFormData((prev) => ({ ...prev, passengers }))} maxPassengers={6} />
               <PaymentSelector value={formData.paymentMethod} onChange={(method) => setFormData((prev) => ({ ...prev, paymentMethod: method }))} />
@@ -335,7 +343,9 @@ export default function BookTripPage() {
                 {errors.terms && <p className="text-red-500 text-xs mt-2 ml-8">{errors.terms}</p>}
               </div>
 
-              <button onClick={handleProceedToConfirmation} className="w-full py-4 bg-blue-600 text-white rounded-lg font-bold text-xl hover:bg-blue-700 transition shadow-md">Proceed to Confirmation</button>
+              <Button variant="primary" fullWidth size="lg" onClick={handleProceedToConfirmation}>
+                Proceed to Confirmation
+              </Button>
             </div>
             <div className="lg:col-span-1">
               <FareEstimate estimate={fareEstimate} bookingType={formData.bookingType} passengers={formData.passengers} isLoading={isEstimating} />

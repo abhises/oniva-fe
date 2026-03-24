@@ -13,6 +13,7 @@ import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import { FiEdit2, FiUser, FiTruck, FiFileText, FiCreditCard, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
 import toast from "react-hot-toast";
+import { Button } from "@/components/common/Button";
 
 /* =========================
    Component
@@ -99,14 +100,13 @@ export default function DriverProfilePage() {
                 <span className="text-gray-500 text-sm flex items-center gap-1"><FiUser /> Driver ID: #{profileData?.user_id}</span>
               </div>
             </div>
-            <button 
+            <Button
+              variant={isEditMode ? 'ghost' : 'primary'}
+              size="sm"
               onClick={() => setIsEditMode(!isEditMode)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition ${
-                isEditMode ? "bg-gray-100 text-gray-700" : "bg-blue-600 text-white shadow-lg shadow-blue-200 hover:bg-blue-700"
-              }`}
             >
-              {isEditMode ? "Cancel" : <><FiEdit2 /> Edit Profile</>}
-            </button>
+              {isEditMode ? 'Cancel' : <><FiEdit2 /> Edit Profile</>}
+            </Button>
           </div>
         </div>
 
@@ -120,15 +120,16 @@ export default function DriverProfilePage() {
               { id: "vehicle", label: "Vehicle Info", icon: <FiTruck /> },
               { id: "bank", label: "Payout Details", icon: <FiCreditCard /> },
             ].map((tab) => (
-              <button
+              <Button
                 key={tab.id}
+                variant={activeTab === tab.id ? 'primary' : 'ghost'}
+                fullWidth
+                size="sm"
+                className="justify-start"
                 onClick={() => { setActiveTab(tab.id as any); setIsEditMode(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition ${
-                  activeTab === tab.id ? "bg-blue-50 text-blue-700 shadow-sm" : "text-gray-600 hover:bg-gray-100"
-                }`}
               >
                 {tab.icon} {tab.label}
-              </button>
+              </Button>
             ))}
           </div>
 

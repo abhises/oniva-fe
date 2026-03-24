@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { Button } from "@/components/common/Button";
 import toast from "react-hot-toast";
 import {
   FiArrowLeft,
@@ -399,21 +400,17 @@ export default function AdminUsersPage() {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               {user.status === "active" && (
-                                <button
+                                <Button
+                                  variant="danger"
+                                  size="sm"
                                   onClick={() => handleSuspendClick(user)}
-                                  disabled={
-                                    suspendingUserId === user.id || isApiLoading
-                                  }
-                                  className="inline-flex items-center border-none gap-1 px-3 py-1 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={suspendingUserId === user.id || isApiLoading}
+                                  isLoading={suspendingUserId === user.id}
                                   title="Suspend user"
                                 >
-                                  {suspendingUserId === user.id ? (
-                                    <FiLoader className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <FiTrash2 className="w-4 h-4" />
-                                  )}
+                                  {suspendingUserId !== user.id && <FiTrash2 className="w-4 h-4" />}
                                   Suspend
-                                </button>
+                                </Button>
                               )}
 
                               {user.status === "suspended" && (
@@ -423,19 +420,17 @@ export default function AdminUsersPage() {
                                 </span>
                               )}
 
-                              <button
+                              <Button
+                                variant="primary"
+                                size="sm"
                                 onClick={() => {
                                   // TODO: View user details
-                                  //   toast.info(
-                                  //     "View details feature coming soon",
-                                  //   );
                                 }}
                                 disabled={isApiLoading}
-                                className="inline-flex items-center border-none gap-1 px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition disabled:opacity-50"
                                 title="View details"
                               >
                                 <FiEye className="w-4 h-4" />
-                              </button>
+                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -461,23 +456,25 @@ export default function AdminUsersPage() {
                   </div>
 
                   <div className="flex gap-2">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={handlePrevPage}
                       disabled={pagination.offset === 0 || isApiLoading}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <FiChevronLeft className="w-4 h-4" />
                       Previous
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={handleNextPage}
                       disabled={!pagination.hasMore || isApiLoading}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Next
                       <FiChevronRight className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </>
@@ -519,38 +516,29 @@ export default function AdminUsersPage() {
                   </div>
 
                   <div className="flex gap-3">
-                    <button
+                    <Button
+                      variant="ghost"
+                      fullWidth
                       onClick={() => {
                         setShowSuspendModal(false);
                         setSuspendReason("");
                         setSelectedUser(null);
                       }}
                       disabled={suspendingUserId === selectedUser.id}
-                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 font-medium"
                     >
                       Cancel
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
+                      variant="danger"
+                      fullWidth
                       onClick={handleSuspendConfirm}
-                      disabled={
-                        suspendingUserId === selectedUser.id ||
-                        !suspendReason.trim()
-                      }
-                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
+                      isLoading={suspendingUserId === selectedUser.id}
+                      disabled={suspendingUserId === selectedUser.id || !suspendReason.trim()}
                     >
-                      {suspendingUserId === selectedUser.id ? (
-                        <>
-                          <FiLoader className="w-4 h-4 animate-spin" />
-                          Suspending...
-                        </>
-                      ) : (
-                        <>
-                          <FiTrash2 className="w-4 h-4" />
-                          Suspend User
-                        </>
-                      )}
-                    </button>
+                      {suspendingUserId !== selectedUser.id && <FiTrash2 className="w-4 h-4" />}
+                      {suspendingUserId === selectedUser.id ? 'Suspending...' : 'Suspend User'}
+                    </Button>
                   </div>
                 </div>
               </div>

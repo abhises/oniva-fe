@@ -80,17 +80,14 @@ export default function AdminDriversPage() {
       {/* Filter */}
       <div className="flex gap-2 mb-8 flex-wrap">
         {["all", "pending", "approved", "rejected"].map((f) => (
-          <button
+          <Button
             key={f}
+            variant={filter === f ? 'primary' : 'ghost'}
+            size="sm"
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-lg font-semibold transition ${
-              filter === f
-                ? "bg-primary text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
           >
             {t(`common.${f}`)}
-          </button>
+          </Button>
         ))}
       </div>
 

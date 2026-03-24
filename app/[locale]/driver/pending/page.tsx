@@ -3,6 +3,7 @@
 
 import { Clock, ShieldCheck, LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { Button } from '@/components/common/Button'
 
 export default function PendingVerificationPage() {
   const { logout } = useAuth()
@@ -29,13 +30,14 @@ export default function PendingVerificationPage() {
           </div>
         </div>
 
-        <button 
+        <Button
+          variant="ghost"
+          fullWidth
           onClick={logout}
-          className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition"
         >
           <LogOut className="w-4 h-4" />
           Sign Out
-        </button>
+        </Button>
       </div>
     </div>
   )

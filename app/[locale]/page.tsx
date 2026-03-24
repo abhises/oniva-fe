@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useTranslation } from '@/hooks/useTranslation'
 import Link from 'next/link'
 import { FiMapPin, FiCheck, FiSmartphone, FiAward, FiArrowRight } from 'react-icons/fi'
+import { Button } from '@/components/common/Button'
 import dynamic from "next/dynamic";
 
 const SenegalMap = dynamic(
@@ -54,15 +55,15 @@ export default function LandingPage() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href={`/${locale}/register?role=client`}>
-                  <button className="bg-blue-600 text-white rounded-lg p-2 hover:scale-105 hover:bg-blue-800 btn-lg w-full border-none sm:w-auto flex items-center justify-center gap-2">
+                  <Button variant="primary" className="hover:scale-105 w-full sm:w-auto">
                     {locale === 'en' ? 'Book a Ride' : 'Réserver un Trajet'}
                     <FiArrowRight />
-                  </button>
+                  </Button>
                 </Link>
                 <Link href={`/${locale}/login`}>
-                  <button className="bg-blue-600 text-white rounded-lg p-2 hover:scale-105 hover:bg-blue-800  border-none btn-lg w-full sm:w-auto">
+                  <Button variant="primary" className="hover:scale-105 w-full sm:w-auto">
                     {locale === 'en' ? 'Sign In' : 'Se Connecter'}
-                  </button>
+                  </Button>
                 </Link>
               </div>
 
@@ -248,14 +249,14 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href={`/${locale}/register?role=client`}>
-              <button className="btn bg-white text-blue-600 hover:bg-gray-100 btn-lg w-full sm:w-auto">
+              <Button className="bg-white text-blue-600 hover:bg-gray-100 hover:text-blue-700 w-full sm:w-auto shadow-sm! py-3! px-6! text-lg!">
                 {locale === 'en' ? 'Book Now' : 'Réserver Maintenant'}
-              </button>
+              </Button>
             </Link>
             <Link href={`/${locale}/register?role=driver`}>
-              <button className="btn btn-outline border-white text-white hover:bg-white hover:text-blue-600 btn-lg w-full sm:w-auto">
+              <Button className="bg-transparent border border-white text-white hover:bg-white hover:text-blue-600 w-full sm:w-auto py-3! px-6! text-lg!">
                 {locale === 'en' ? 'Become a Driver' : 'Devenir Chauffeur'}
-              </button>
+              </Button>
             </Link>
           </div>
         </div>
