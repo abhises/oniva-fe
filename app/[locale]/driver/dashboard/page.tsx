@@ -60,14 +60,18 @@ export default function DriverDashboard({
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
             });
-            console.log("📍 Location updated:", position.coords.latitude, position.coords.longitude);
+            console.log(
+              "📍 Location updated:",
+              position.coords.latitude,
+              position.coords.longitude,
+            );
           } catch (err) {
             console.error("Failed to update location", err);
           }
         },
         (error) => {
           console.error("Location error:", error);
-        }
+        },
       );
     }
   }, []);
@@ -76,7 +80,9 @@ export default function DriverDashboard({
   useEffect(() => {
     const fetchInitialData = async () => {
       // Fetch Stats
-      const statsResult = await request<any>(() => apiClient.getDriverDashboardStats());
+      const statsResult = await request<any>(() =>
+        apiClient.getDriverDashboardStats(),
+      );
       if (statsResult) {
         setStats({
           totalTrips: Number(statsResult.total_trips) || 0,
@@ -87,29 +93,31 @@ export default function DriverDashboard({
       }
 
       // Fetch Profile to see if they are ALREADY online in the database
-      const profileResult = await request<any>(() => apiClient.getDriverProfile());
+      const profileResult = await request<any>(() =>
+        apiClient.getDriverProfile(),
+      );
       const actualProfile = profileResult?.data || profileResult;
-      
+
       if (actualProfile && actualProfile.is_online) {
         setIsOnline(true);
         updateLocation(); // Push location since they are already active
       }
     };
-    
+
     fetchInitialData();
   }, [request, updateLocation]);
 
   // 3. Handle explicit button click to toggle status
   const handleToggleOnline = async () => {
     const newStatus = !isOnline;
-    
+
     // Update UI immediately for responsiveness
-    setIsOnline(newStatus); 
-    
+    setIsOnline(newStatus);
+
     try {
       // Send explicit request to backend
       await apiClient.setOnlineStatus(newStatus);
-      
+
       if (newStatus) {
         toast.success(t("driver.wentOnline") || "You are now online!");
         updateLocation();
@@ -144,22 +152,23 @@ export default function DriverDashboard({
   // Socket connection
   useEffect(() => {
     if (isOnline && user?.id) {
-      const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      const socket = io(socketUrl); 
-      
-      socket.emit('auth', { userId: user.id, userRole: 'driver' });
-      
-      socket.on('new_booking_request', (data) => {
-          console.log("New booking received via socket:", data);
-          fetchRequests(); 
+      const socketUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const socket = io(socketUrl);
+
+      socket.emit("auth", { userId: user.id, userRole: "driver" });
+
+      socket.on("new_booking_request", (data) => {
+        console.log("New booking received via socket:", data);
+        fetchRequests();
       });
-      
+
       return () => {
         socket.disconnect();
       };
     }
   }, [isOnline, user?.id, fetchRequests]);
- 
+
   const handleAccept = async (requestId: string) => {
     const result = await request<AcceptResponse>(() =>
       apiClient.acceptRequest(requestId),
@@ -177,13 +186,15 @@ export default function DriverDashboard({
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">
-          {t("common.welcome")} {user?.fullName}!
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold">
+          {t("common.welcome")}{" "}
+          <span className="text-primary">{user?.fullName}</span>!
         </h1>
         <Button
+          className="w-full sm:w-auto" // Button takes full width on mobile
           variant={isOnline ? "danger" : "success"}
-          onClick={handleToggleOnline} // 👈 Using the new handler
+          onClick={handleToggleOnline}
           isLoading={isLoading}
         >
           {isOnline ? t("driver.goOffline") : t("driver.goOnline")}
@@ -230,9 +241,13 @@ export default function DriverDashboard({
                   key={req.request_id}
                   className="border rounded-lg p-4 hover:shadow-md transition"
                 >
-                  <div 
+                  <div
                     className="flex justify-between items-start mb-4"
-                    onClick={() => router.push(`/${locale}/driver/requests/${req.request_id}`)}
+                    onClick={() =>
+                      router.push(
+                        `/${locale}/driver/requests/${req.request_id}`,
+                      )
+                    }
                   >
                     <div>
                       <h3 className="font-semibold flex items-center gap-2">

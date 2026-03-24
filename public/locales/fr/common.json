@@ -23,7 +23,13 @@
     "in_progress": "En Cours",
     "accepted": "Accepté",
     "viewDetails": "Voir les Détails",
-    "restore": "Restaurer"
+    "restore": "Restaurer",
+    "startDate": "Date de Début",
+    "endDate": "Date de Fin",
+    "apply": "Appliquer",
+    "days": "Jours",
+    "period": "Période",
+    "status": "Statut"
   },
   "navigation": {
     "home": "Accueil",

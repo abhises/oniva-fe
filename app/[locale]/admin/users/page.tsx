@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
           role: selectedRole,
         });
       });
-
+console.log("Loaded users:", data);
       if (data) {
         setUsers(data);
         // Check if there are more results

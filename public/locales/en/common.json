@@ -23,7 +23,13 @@
     "in_progress": "In Progress",
     "accepted": "Accepted",
     "viewDetails": "View Details",
-    "restore": "Restore"
+    "restore": "Restore",
+    "apply": "Apply",
+    "days": "Days",
+    "period": "Period",
+    "status": "Status",
+    "startDate": "Start Date",
+    "endDate": "End Date"
   },
   "navigation": {
     "home": "Home",
