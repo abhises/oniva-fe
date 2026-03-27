@@ -157,9 +157,12 @@ const AuthButton = ({ user, logout, t, locale, mobile, onClick }: any) => {
           logout();
           if (onClick) onClick();
         }}
-        className={`flex items-center p-1 gap-2 text-blue-600 font-medium ${mobile ? "w-full justify-center py-2 bg-red-50 rounded-lg" : ""}`}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all duration-200 border border-transparent hover:border-blue-800 ${
+          mobile ? "w-full justify-center" : "ml-2 shadow-sm"
+        }`}
       >
-        <FiLogOut /> {t("common.logout")}
+        <FiLogOut className="w-[18px] h-[18px]" /> 
+        <span>{t("common.logout")}</span>
       </button>
     );
   }

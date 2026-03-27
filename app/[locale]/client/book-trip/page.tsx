@@ -84,7 +84,7 @@ export default function BookTripPage() {
     hourlyDuration: 1, 
     passengers: 1,
     specialRequests: "",
-    paymentMethod: "card",
+    paymentMethod: "cash",
     promoCode: "",
     termsAccepted: false,
   });
@@ -309,7 +309,7 @@ export default function BookTripPage() {
               <LocationPicker value={formData.pickupLocation} onChange={handlePickupChange} placeholder="Pickup Location" error={errors.pickup} />
               {formData.bookingType === 'point-to-point' && <LocationPicker value={formData.dropoffLocation} onChange={handleDropoffChange} placeholder="Dropoff Location" error={errors.dropoff} />}
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input type="date" name="date" value={formData.date} onChange={handleInputChange} className="p-2 border rounded" />
                 <input type="time" name="time" value={formData.time} onChange={handleInputChange} className="p-2 border rounded" />
               </div>
@@ -328,16 +328,16 @@ export default function BookTripPage() {
               
               {/* FIXED ALIGNMENT HERE */}
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <label className="flex items-center gap-3 cursor-pointer">
+                <label className="flex items-start gap-3 cursor-pointer">
                   <input 
                     type="checkbox" 
                     name="termsAccepted" 
                     checked={formData.termsAccepted} 
                     onChange={handleInputChange} 
-                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 transition shrink-0"
+                    className="w-5 h-5 mt-0.5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 transition shrink-0"
                   />
-                  <span className="text-sm text-gray-700 leading-tight">
-                    I agree to the <a href="#" className="text-blue-600 underline">terms and conditions</a> and <a href="#" className="text-blue-600 underline">privacy policy</a>
+                  <span className="text-sm text-gray-700 leading-snug">
+                    I agree to the <a href="#" className="text-blue-600 underline hover:text-blue-800">terms and conditions</a> and <a href="#" className="text-blue-600 underline hover:text-blue-800">privacy policy</a>
                   </span>
                 </label>
                 {errors.terms && <p className="text-red-500 text-xs mt-2 ml-8">{errors.terms}</p>}

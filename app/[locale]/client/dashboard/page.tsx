@@ -18,24 +18,17 @@ export default function ClientDashboard() {
           {t('common.welcome')}, {user?.fullName}!
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
           <Link href={`/${locale}/client/book-trip`}>
             <Button variant="primary" size="lg" fullWidth>
               {t('client.bookTrip')}
             </Button>
           </Link>
 
-          <Link href={`/${locale}/client/estimate-fare`}>
-            <Button variant="secondary" size="lg" fullWidth>
-              {t('client.estimateFare')}
-            </Button>
-          </Link>
+
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold mb-4">{t('client.myTrips')}</h2>
-          <p className="text-gray-600">{t('common.loading')}</p>
-        </div>
+
       </div>
     </ProtectedRoute>
   );

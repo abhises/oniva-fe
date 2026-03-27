@@ -9,9 +9,7 @@ interface PaymentSelectorProps {
 }
 
 const paymentMethods = [
-  { id: 'card', name: 'Credit/Debit Card', icon: FiCreditCard },
   { id: 'cash', name: 'Cash', icon: FiDollarSign },
-//   { id: 'wallet', name: 'Wallet', icon: FiWallet },
 ]
 
 export const PaymentSelector: React.FC<PaymentSelectorProps> = ({
@@ -19,7 +17,7 @@ export const PaymentSelector: React.FC<PaymentSelectorProps> = ({
   onChange,
 }) => {
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
       {paymentMethods.map(method => {
         const Icon = method.icon
         return (

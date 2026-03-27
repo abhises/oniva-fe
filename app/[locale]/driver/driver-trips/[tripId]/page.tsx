@@ -152,6 +152,7 @@ export default function DriverTripDetailPage() {
             <Button
               variant="primary"
               fullWidth
+              className="!py-2 md:!py-3 text-sm md:text-base"
               onClick={() => window.open(`https://maps.google.com/?q=${trip.pickup_latitude},${trip.pickup_longitude}`)}
             >
               <FiNavigation /> Navigate
@@ -159,6 +160,7 @@ export default function DriverTripDetailPage() {
             <Button
               variant="success"
               fullWidth
+              className="!py-2 md:!py-3 text-sm md:text-base"
               onClick={() => window.location.href = `tel:${trip.client_phone}`}
             >
               <FiPhone /> Call Client
