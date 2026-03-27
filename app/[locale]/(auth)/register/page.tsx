@@ -165,7 +165,7 @@ return (
         {/* Role Selection */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            Register as
+            {t('auth.registerAs')}
           </label>
           <select
             name="role"
@@ -174,8 +174,8 @@ return (
             disabled={isLoading}
             className="w-full"
           >
-            <option value="client">Client - Book Rides</option>
-            <option value="driver">Driver - Provide Rides</option>
+            <option value="client">{t('auth.clientRoleDesc')}</option>
+            <option value="driver">{t('auth.driverRoleDesc')}</option>
           </select>
         </div>
 
@@ -215,7 +215,7 @@ return (
       {/* Login Link */}
       <div className="text-center">
         <p className="text-gray-600">
-          Already have an account?{' '}
+          {t('auth.hasAccount')}{' '}
           <Link
             href={`/${locale}/login`}
             className="text-blue-600 font-semibold hover:text-blue-700"

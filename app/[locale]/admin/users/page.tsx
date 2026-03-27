@@ -8,6 +8,7 @@ import { apiClient } from "@/services/api";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Button } from "@/components/common/Button";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import {
   FiArrowLeft,
   FiLoader,
@@ -43,6 +44,7 @@ export default function AdminUsersPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { request, isLoading: isApiLoading } = useApi({ showSuccess: true });
+  const { t } = useTranslation();
 
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -107,7 +109,7 @@ export default function AdminUsersPage() {
         }));
       }
     } catch (error: any) {
-      toast.error("Failed to load users");
+      toast.error(t('admin.failedLoadUsers'));
       console.error(error);
     } finally {
       setIsLoadingInitial(false);
@@ -124,7 +126,7 @@ export default function AdminUsersPage() {
     if (!selectedUser) return;
 
     if (!suspendReason.trim()) {
-      toast.error("Please provide a reason for suspension");
+      toast.error(t('admin.suspensionReasonRequired'));
       return;
     }
 
@@ -148,10 +150,10 @@ export default function AdminUsersPage() {
         setShowSuspendModal(false);
         setSuspendReason("");
         setSelectedUser(null);
-        toast.success("User suspended successfully");
+        toast.success(t('admin.userSuspended'));
       }
     } catch (error: any) {
-      toast.error("Failed to suspend user");
+      toast.error(t('admin.failedSuspend'));
       console.error(error);
     } finally {
       setSuspendingUserId(null);
@@ -204,7 +206,7 @@ export default function AdminUsersPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
             <FiLoader className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading users...</p>
+            <p className="text-gray-600">{t('admin.loadingUsers')}</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -222,7 +224,7 @@ export default function AdminUsersPage() {
               className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
             >
               <FiArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              {t('common.back')}
             </button>
 
             <div className="flex items-center justify-between">
@@ -232,10 +234,10 @@ export default function AdminUsersPage() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">
-                    User Management
+                    {t('admin.userManagement')}
                   </h1>
                   <p className="text-gray-600">
-                    Manage and monitor platform users
+                    {t('admin.manageUsers')}
                   </p>
                 </div>
               </div>
@@ -244,7 +246,7 @@ export default function AdminUsersPage() {
                 <p className="text-2xl font-bold text-blue-600">
                   {filteredUsers.length}
                 </p>
-                <p className="text-sm text-gray-600">Total Users</p>
+                <p className="text-sm text-gray-600">{t('admin.totalUsers')}</p>
               </div>
             </div>
           </div>
@@ -255,13 +257,13 @@ export default function AdminUsersPage() {
               {/* Search */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Search Users
+                  {t('admin.searchUsers')}
                 </label>
                 <div className="relative">
                   <FiSearch className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="Search by name, phone, or email..."
+                    placeholder={t('admin.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     disabled={isApiLoading}
@@ -273,7 +275,7 @@ export default function AdminUsersPage() {
               {/* Role Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Filter by Role
+                  {t('admin.filterByRole')}
                 </label>
                 <select
                   value={selectedRole}
@@ -286,10 +288,10 @@ export default function AdminUsersPage() {
                   disabled={isApiLoading}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 >
-                  <option value="client">Clients</option>
-                  <option value="driver">Drivers</option>
-                  <option value="admin">Admins</option>
-                  <option value="all">All Users</option>
+                  <option value="client">{t('admin.clients')}</option>
+                  <option value="driver">{t('admin.drivers')}</option>
+                  <option value="admin">{t('admin.admins')}</option>
+                  <option value="all">{t('admin.allUsers')}</option>
                 </select>
               </div>
             </div>
@@ -300,7 +302,7 @@ export default function AdminUsersPage() {
             {filteredUsers.length === 0 ? (
               <div className="p-8 text-center">
                 <FiUsers className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No users found</p>
+                <p className="text-gray-600">{t('admin.noUsersFound')}</p>
               </div>
             ) : (
               <>
@@ -309,25 +311,25 @@ export default function AdminUsersPage() {
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">
                         <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          User
+                          {t('admin.user')}
                         </th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Contact
+                          {t('admin.contact')}
                         </th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Role
+                          {t('admin.role')}
                         </th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Status
+                          {t('common.status')}
                         </th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Language
+                          {t('admin.language')}
                         </th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Joined
+                          {t('admin.joined')}
                         </th>
                         <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                          Actions
+                          {t('admin.actions')}
                         </th>
                       </tr>
                     </thead>
@@ -370,7 +372,7 @@ export default function AdminUsersPage() {
 
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 capitalize">
-                              {user.role}
+                              {t(`auth.${user.role}`)}
                             </span>
                           </td>
 
@@ -381,7 +383,7 @@ export default function AdminUsersPage() {
                               )}`}
                             >
                               {getStatusIcon(user.status)}
-                              <span className="capitalize">{user.status}</span>
+                              <span className="capitalize">{t(`common.${user.status}`)}</span>
                             </span>
                           </td>
 
@@ -409,14 +411,14 @@ export default function AdminUsersPage() {
                                   title="Suspend user"
                                 >
                                   {suspendingUserId !== user.id && <FiTrash2 className="w-4 h-4" />}
-                                  Suspend
+                                  {t('admin.suspend')}
                                 </Button>
                               )}
 
                               {user.status === "suspended" && (
                                 <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-red-600 bg-red-50 rounded-lg">
                                   <FiAlertCircle className="w-4 h-4 mr-1" />
-                                  Suspended
+                                  {t('admin.suspended')}
                                 </span>
                               )}
 
@@ -442,7 +444,7 @@ export default function AdminUsersPage() {
                 {/* Pagination */}
                 <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                   <div className="text-sm text-gray-600">
-                    Showing{" "}
+                    {t('admin.showing')}{" "}
                     <span className="font-medium">
                       {pagination.offset + 1}-
                       {Math.min(
@@ -450,9 +452,9 @@ export default function AdminUsersPage() {
                         filteredUsers.length,
                       )}
                     </span>{" "}
-                    of{" "}
+                    {t('admin.of')}{" "}
                     <span className="font-medium">{filteredUsers.length}</span>{" "}
-                    users
+                    {t('admin.users').toLowerCase()}
                   </div>
 
                   <div className="flex gap-2">
@@ -463,7 +465,7 @@ export default function AdminUsersPage() {
                       disabled={pagination.offset === 0 || isApiLoading}
                     >
                       <FiChevronLeft className="w-4 h-4" />
-                      Previous
+                      {t('admin.previous')}
                     </Button>
 
                     <Button
@@ -472,7 +474,7 @@ export default function AdminUsersPage() {
                       onClick={handleNextPage}
                       disabled={!pagination.hasMore || isApiLoading}
                     >
-                      Next
+                      {t('common.next')}
                       <FiChevronRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -491,11 +493,11 @@ export default function AdminUsersPage() {
                   </div>
 
                   <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
-                    Suspend User
+                    {t('admin.suspendUser')}
                   </h3>
 
                   <p className="text-sm text-gray-600 text-center mb-4">
-                    You are about to suspend{" "}
+                    {t('admin.youAreAboutToSuspend')}{" "}
                     <span className="font-semibold">
                       {selectedUser.full_name}
                     </span>
@@ -503,12 +505,12 @@ export default function AdminUsersPage() {
 
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Reason for Suspension
+                      {t('admin.reasonForSuspension')}
                     </label>
                     <textarea
                       value={suspendReason}
                       onChange={(e) => setSuspendReason(e.target.value)}
-                      placeholder="Provide a reason for suspending this user..."
+                      placeholder={t('admin.suspensionReasonPlaceholder')}
                       rows={3}
                       disabled={suspendingUserId === selectedUser.id}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-gray-100"
@@ -526,7 +528,7 @@ export default function AdminUsersPage() {
                       }}
                       disabled={suspendingUserId === selectedUser.id}
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </Button>
 
                     <Button
@@ -537,7 +539,7 @@ export default function AdminUsersPage() {
                       disabled={suspendingUserId === selectedUser.id || !suspendReason.trim()}
                     >
                       {suspendingUserId !== selectedUser.id && <FiTrash2 className="w-4 h-4" />}
-                      {suspendingUserId === selectedUser.id ? 'Suspending...' : 'Suspend User'}
+                      {suspendingUserId === selectedUser.id ? t('admin.suspendingUser') : t('admin.suspendUser')}
                     </Button>
                   </div>
                 </div>

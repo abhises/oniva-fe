@@ -128,12 +128,12 @@ function FlyToDakar() {
   return null;
 }
 
-export default function SenegalMap() {
+function AnimatedCars() {
   const numCars = 3;
   const [positions, setPositions] = useState<number[]>(
     Array.from({ length: numCars }, (_, i) => i * 5),
   );
-  const [directions, setDirections] = useState<number[]>(
+  const [directions] = useState<number[]>(
     Array(numCars).fill(1),
   );
 
@@ -157,6 +157,18 @@ export default function SenegalMap() {
   }, [directions]);
 
   return (
+    <>
+      {positions.map((posIndex, i) => (
+        <Marker key={i} position={route[posIndex]} icon={carIcon}>
+          <Popup>Car {i + 1}</Popup>
+        </Marker>
+      ))}
+    </>
+  );
+}
+
+export default function SenegalMap() {
+  return (
     <MapContainer
       center={center}
       zoom={13}
@@ -173,12 +185,7 @@ export default function SenegalMap() {
         <Popup>Dakar</Popup>
       </Marker>
 
-      {positions.map((posIndex, i) => (
-        <Marker key={i} position={route[posIndex]} icon={carIcon}>
-          <Popup>Car {i + 1}</Popup>
-        </Marker>
-      ))}
-
+      <AnimatedCars />
       <FlyToDakar />
     </MapContainer>
   );

@@ -90,11 +90,11 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
         {/* FIX: Show error message if present */}
         {error && (
           <Card className="mb-8 bg-red-50 border-2 border-red-200">
-            <div className="text-red-700 font-semibold">❌ Backend Issue</div>
+            <div className="text-red-700 font-semibold">❌ {t('admin.backendIssue')}</div>
             <p className="text-red-600 text-sm mt-2">{error}</p>
             <div className="mt-3 text-xs text-red-500 bg-red-100 p-2 rounded">
-              <p className="font-mono">API Endpoint: /api/admin/dashboard</p>
-              <p className="font-mono">Expected Response:</p>
+              <p className="font-mono">{t('admin.apiEndpoint')} /api/admin/dashboard</p>
+              <p className="font-mono">{t('admin.expectedResponse')}</p>
               <pre className="mt-1 text-xs overflow-x-auto">
                 {/* {{   "totalUsers": 342,   "totalDrivers": 58,   "totalEarnings": 625000,   "totalTrips": 1250,   "pendingDriverApprovals": 5,   "activeTrips": 12 }} */}
               </pre>
@@ -115,14 +115,14 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                 value={stats.totalUsers}
                 icon={<FiUsers />}
                 trend="up"
-                trendValue="12 new this week"
+                trendValue={`12 ${t('admin.newThisWeek')}`}
               />
               <StatsCard
                 label={t("admin.totalDrivers")}
                 value={stats.totalDrivers}
                 icon={<FiUsers />}
                 trend="up"
-                trendValue="5 new this week"
+                trendValue={`5 ${t('admin.newThisWeek')}`}
               />
               {/* FIX: Format earnings as string before passing to StatsCard */}
               <StatsCard
@@ -130,14 +130,14 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                 value={`${(stats.totalEarnings || 0).toLocaleString("en-US")} XOF`}
                 icon={<FiDollarSign />}
                 trend="up"
-                trendValue="15% from last month"
+                trendValue={`15% ${t('admin.fromLastMonth')}`}
               />
               <StatsCard
                 label={t("admin.totalTrips")}
                 value={stats.totalTrips}
                 icon={<FiTrendingUp />}
                 trend="up"
-                trendValue="250 this week"
+                trendValue={`250 ${t('admin.thisWeek')}`}
               />
             </div>
 
@@ -154,14 +154,14 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                       {stats.pendingDriverApprovals}
                     </p>
                     <p className="text-sm text-gray-600 mt-2">
-                      Drivers awaiting approval
+                      {t('admin.driversAwaitingApproval')}
                     </p>
                   </div>
-                  <Badge variant="warning" label="Pending" />
+                  <Badge variant="warning" label={t('common.pending')} />
                 </div>
                 <Link href={`/${locale}/admin/drivers`}>
                   <Button variant="primary" fullWidth className="mt-4">
-                    Review Drivers
+                    {t('admin.reviewDrivers')}
                   </Button>
                 </Link>
               </Card>
@@ -177,14 +177,14 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                       {stats.activeTrips}
                     </p>
                     <p className="text-sm text-gray-600 mt-2">
-                      Trips in progress
+                      {t('admin.tripsInProgress')}
                     </p>
                   </div>
-                  <Badge variant="success" label="Active" />
+                  <Badge variant="success" label={t('admin.active')} />
                 </div>
                 <Link href={`/${locale}/admin/trips`}>
                   <Button variant="secondary" fullWidth className="mt-4">
-                    Monitor Trips
+                    {t('admin.monitorTrips')}
                   </Button>
                 </Link>
               </Card>
@@ -202,7 +202,7 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                       {t("admin.drivers")}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Approve, reject, or suspend drivers
+                      {t('admin.manageDriversDesc')}
                     </p>
                   </div>
                 </Link>
@@ -215,7 +215,7 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                       {t("admin.reports")}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      View detailed reports and analytics
+                      {t('admin.reportsAnalyticsDesc')}
                     </p>
                   </div>
                 </Link>
@@ -228,7 +228,7 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                       {t("admin.earnings")}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Monitor platform earnings and commissions
+                      {t('admin.earningsManagementDesc')}
                     </p>
                   </div>
                 </Link>

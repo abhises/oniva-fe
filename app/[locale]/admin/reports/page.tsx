@@ -147,7 +147,7 @@ return (
            className="flex items-center gap-2"
          >
 <FiDownload size={16} />
-Export PDF
+{t('admin.exportPdf')}
 </Button>
 <Button
            variant="secondary"
@@ -156,7 +156,7 @@ Export PDF
            className="flex items-center gap-2"
          >
 <FiDownload size={16} />
-Export CSV
+{t('admin.exportCsv')}
 </Button>
 </div>
 </div>
@@ -171,13 +171,13 @@ Export CSV
     <Card className="mb-8">
       <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
         <FiFilter size={20} />
-        Filter Options
+        {t('admin.filterOptions')}
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium mb-2">
             <FiCalendar size={16} className="inline mr-2" />
-            Start Date
+            {t('common.startDate')}
           </label>
           <input
             type="date"
@@ -192,7 +192,7 @@ Export CSV
         <div>
           <label className="block text-sm font-medium mb-2">
             <FiCalendar size={16} className="inline mr-2" />
-            End Date
+            {t('common.endDate')}
           </label>
           <input
             type="date"
@@ -206,7 +206,7 @@ Export CSV
 
         <div>
           <label className="block text-sm font-medium mb-2">
-            Report Period
+            {t('admin.reportPeriod')}
           </label>
           <select
             value={dateRange.period}
@@ -218,9 +218,9 @@ Export CSV
             }
             className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-600"
           >
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
+            <option value="daily">{t('admin.daily')}</option>
+            <option value="weekly">{t('admin.weekly')}</option>
+            <option value="monthly">{t('admin.monthly')}</option>
           </select>
         </div>
       </div>
@@ -232,16 +232,16 @@ Export CSV
       <>
         {/* Report Period */}
         <Card className="mb-8 bg-blue-50 border-l-4 border-blue-600">
-          <p className="text-sm text-gray-600">Report Period</p>
-          <p className="text-2xl font-bold text-blue-600">
-            {reportData.period}
+          <p className="text-sm text-gray-600">{t('admin.reportPeriod')}</p>
+          <p className="text-2xl font-bold text-blue-600 capitalize">
+            {t(`admin.${reportData.period}`)}
           </p>
         </Card>
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
-            <p className="text-sm text-gray-600 mb-2">Total Trips</p>
+            <p className="text-sm text-gray-600 mb-2">{t('admin.totalTrips')}</p>
             <p className="text-3xl font-bold text-primary">
               {reportData.totalTrips.toLocaleString()}
             </p>
@@ -249,7 +249,7 @@ Export CSV
 
           <Card>
             <p className="text-sm text-gray-600 mb-2">
-              Platform Earnings
+              {t('admin.platformEarnings')}
             </p>
             <p className="text-3xl font-bold text-green-600">
               {reportData.platformCommission.toLocaleString()} XOF
@@ -257,14 +257,14 @@ Export CSV
           </Card>
 
           <Card>
-            <p className="text-sm text-gray-600 mb-2">Driver Earnings</p>
+            <p className="text-sm text-gray-600 mb-2">{t('admin.driverEarnings')}</p>
             <p className="text-3xl font-bold text-blue-600">
               {reportData.driverEarnings.toLocaleString()} XOF
             </p>
           </Card>
 
           <Card>
-            <p className="text-sm text-gray-600 mb-2">Average Rating</p>
+            <p className="text-sm text-gray-600 mb-2">{t('admin.averageRating')}</p>
             <p className="text-3xl font-bold text-yellow-600">
               {reportData.averageRating.toFixed(1)} ★
             </p>
@@ -273,19 +273,19 @@ Export CSV
 
         {/* Detailed Report Table */}
         <Card>
-          <h2 className="text-2xl font-bold mb-6">Detailed Metrics</h2>
+          <h2 className="text-2xl font-bold mb-6">{t('admin.detailedMetrics')}</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b bg-gray-50">
-                  <th className="text-left p-4 font-semibold">Metric</th>
-                  <th className="text-right p-4 font-semibold">Value</th>
-                  <th className="text-right p-4 font-semibold">Change</th>
+                  <th className="text-left p-4 font-semibold">{t('admin.metric')}</th>
+                  <th className="text-right p-4 font-semibold">{t('admin.value')}</th>
+                  <th className="text-right p-4 font-semibold">{t('admin.change')}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b hover:bg-gray-50">
-                  <td className="p-4">Total Trips</td>
+                  <td className="p-4">{t('admin.totalTrips')}</td>
                   <td className="p-4 text-right font-semibold">
                     {reportData.totalTrips}
                   </td>
@@ -295,7 +295,7 @@ Export CSV
                 </tr>
 
                 <tr className="border-b hover:bg-gray-50">
-                  <td className="p-4">Total Platform Earnings</td>
+                  <td className="p-4">{t('admin.totalPlatformEarnings')}</td>
                   <td className="p-4 text-right font-semibold">
                     {reportData.platformCommission.toLocaleString()} XOF
                   </td>
@@ -305,7 +305,7 @@ Export CSV
                 </tr>
 
                 <tr className="border-b hover:bg-gray-50">
-                  <td className="p-4">Driver Earnings</td>
+                  <td className="p-4">{t('admin.driverEarnings')}</td>
                   <td className="p-4 text-right font-semibold">
                     {reportData.driverEarnings.toLocaleString()} XOF
                   </td>
@@ -315,7 +315,7 @@ Export CSV
                 </tr>
 
                 <tr className="border-b hover:bg-gray-50">
-                  <td className="p-4">Average Fare per Trip</td>
+                  <td className="p-4">{t('admin.averageFarePerTrip')}</td>
                   <td className="p-4 text-right font-semibold">
                     {reportData.averageFare.toLocaleString()} XOF
                   </td>
@@ -325,7 +325,7 @@ Export CSV
                 </tr>
 
                 <tr className="border-b hover:bg-gray-50">
-                  <td className="p-4">Average Rating</td>
+                  <td className="p-4">{t('admin.averageRating')}</td>
                   <td className="p-4 text-right font-semibold">
                     {reportData.averageRating.toFixed(1)} ★
                   </td>
@@ -335,7 +335,7 @@ Export CSV
                 </tr>
 
                 <tr className="border-b hover:bg-gray-50">
-                  <td className="p-4">Active Users</td>
+                  <td className="p-4">{t('admin.activeUsers')}</td>
                   <td className="p-4 text-right font-semibold">
                     {reportData.activeUsers}
                   </td>
@@ -345,7 +345,7 @@ Export CSV
                 </tr>
 
                 <tr className="border-b hover:bg-gray-50">
-                  <td className="p-4">Active Drivers</td>
+                  <td className="p-4">{t('admin.activeDrivers')}</td>
                   <td className="p-4 text-right font-semibold">
                     {reportData.activeDrivers}
                   </td>
@@ -355,7 +355,7 @@ Export CSV
                 </tr>
 
                 <tr className="border-b hover:bg-gray-50">
-                  <td className="p-4">New Users</td>
+                  <td className="p-4">{t('admin.newUsers')}</td>
                   <td className="p-4 text-right font-semibold">
                     {reportData.newUsers}
                   </td>
@@ -365,7 +365,7 @@ Export CSV
                 </tr>
 
                 <tr className="hover:bg-gray-50">
-                  <td className="p-4">New Drivers</td>
+                  <td className="p-4">{t('admin.newDrivers')}</td>
                   <td className="p-4 text-right font-semibold">
                     {reportData.newDrivers}
                   </td>
@@ -381,16 +381,16 @@ Export CSV
         {/* Revenue Trends Table */}
         {revenueData.length > 0 && (
           <Card className="mt-8">
-            <h2 className="text-2xl font-bold mb-6">Revenue Breakdown</h2>
+            <h2 className="text-2xl font-bold mb-6">{t('admin.revenueBreakdown')}</h2>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b bg-gray-50">
-                    <th className="text-left p-4 font-semibold">Period</th>
-                    <th className="text-right p-4 font-semibold">Trips</th>
-                    <th className="text-right p-4 font-semibold">Gross Revenue</th>
-                    <th className="text-right p-4 font-semibold">Commission</th>
-                    <th className="text-right p-4 font-semibold">Avg. Trip Value</th>
+                    <th className="text-left p-4 font-semibold">{t('common.period')}</th>
+                    <th className="text-right p-4 font-semibold">{t('admin.trips')}</th>
+                    <th className="text-right p-4 font-semibold">{t('admin.grossRevenue')}</th>
+                    <th className="text-right p-4 font-semibold">{t('admin.platformCommission')}</th>
+                    <th className="text-right p-4 font-semibold">{t('admin.avgTripValue')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -412,16 +412,16 @@ Export CSV
         {/* Regional Performance Table */}
         {regionalData.length > 0 && (
           <Card className="mt-8">
-            <h2 className="text-2xl font-bold mb-6">Regional Performance</h2>
+            <h2 className="text-2xl font-bold mb-6">{t('admin.regionalPerformance')}</h2>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b bg-gray-50">
-                    <th className="text-left p-4 font-semibold">Region</th>
-                    <th className="text-right p-4 font-semibold">Trips</th>
-                    <th className="text-right p-4 font-semibold">Total Revenue</th>
-                    <th className="text-right p-4 font-semibold">Platform Commission</th>
-                    <th className="text-right p-4 font-semibold">Active Drivers</th>
+                    <th className="text-left p-4 font-semibold">{t('admin.region')}</th>
+                    <th className="text-right p-4 font-semibold">{t('admin.trips')}</th>
+                    <th className="text-right p-4 font-semibold">{t('admin.totalRevenue')}</th>
+                    <th className="text-right p-4 font-semibold">{t('admin.platformCommission')}</th>
+                    <th className="text-right p-4 font-semibold">{t('admin.activeDrivers')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -442,39 +442,39 @@ Export CSV
 
         {/* Summary */}
         <Card className="mt-8 bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-600">
-          <h3 className="font-bold text-lg mb-4">Report Summary</h3>
+          <h3 className="font-bold text-lg mb-4">{t('admin.reportSummaryTitle')}</h3>
           <p className="text-gray-700 text-sm leading-relaxed">
-            During this period, the platform processed{' '}
+            {t('admin.reportSummaryText_part1')}{' '}
             <span className="font-semibold">
-              {reportData.totalTrips} trips
+              {reportData.totalTrips} {t('admin.trips').toLowerCase()}
             </span>
-            , generating{' '}
+            , {t('admin.reportSummaryText_part2')}{' '}
             <span className="font-semibold">
               {reportData.totalEarnings.toLocaleString()} XOF
             </span>{' '}
-            in total revenue. The platform commission was{' '}
+            {t('admin.reportSummaryText_part3')}{' '}
             <span className="font-semibold">
               {reportData.platformCommission.toLocaleString()} XOF
             </span>{' '}
-            while drivers earned{' '}
+            {t('admin.reportSummaryText_part4')}{' '}
             <span className="font-semibold">
               {reportData.driverEarnings.toLocaleString()} XOF
             </span>
-            . With{' '}
+            {t('admin.reportSummaryText_part5')}{' '}
             <span className="font-semibold">
-              {reportData.activeUsers} active users
+              {reportData.activeUsers} {t('admin.activeUsers').toLowerCase()}
             </span>{' '}
-            and{' '}
+            {t('common.and') || 'and'}{' '}
             <span className="font-semibold">
-              {reportData.activeDrivers} active drivers
+              {reportData.activeDrivers} {t('admin.activeDrivers').toLowerCase()}
             </span>
-            , the platform continues to grow steadily.
+            , {t('admin.reportSummaryText_part7')}
           </p>
         </Card>
       </>
     ) : (
       <Card className="text-center py-12">
-        <p className="text-gray-600">No report data available</p>
+        <p className="text-gray-600">{t('admin.noReportData')}</p>
       </Card>
     )}
   </div>
