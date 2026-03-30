@@ -1,6 +1,6 @@
  'use client'
 
-import { useCallback,useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { apiClient } from '@/services/api'
@@ -25,6 +25,30 @@ export const useAuth = () => {
   const { t ,locale} = useTranslation()
   const { user, isInitialized, setAuth, logout: storeLogout } = useAuthStore()
   const [loading, setLoading] = useState(false)
+  const [sessionChecked, setSessionChecked] = useState(false)
+
+  useEffect(() => {
+    const checkSession = async () => {
+      if (sessionChecked) return
+
+      try {
+        const response = await apiClient.getCurrentUser()
+        if (response.success && response.data?.user) {
+          setAuth(response.data.user)
+        } else {
+          storeLogout()
+        }
+      } catch (error) {
+        storeLogout()
+      } finally {
+        setSessionChecked(true)
+      }
+    }
+
+    checkSession()
+  }, [sessionChecked, setAuth, storeLogout])
+
+  const authReady = isInitialized && sessionChecked
 
   const register = useCallback(
   async (
@@ -113,7 +137,7 @@ export const useAuth = () => {
   return {
     user,
     isAuthenticated: !!user,
-    isInitialized,  // ← NEW: Return this for Header/ProtectedRoute
+    isInitialized: authReady,  // ← NEW: Return this for Header/ProtectedRoute
     register,
     login,
     logout,

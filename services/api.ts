@@ -101,6 +101,13 @@ class ApiClient {
     return response;
   }
 
+  async getCurrentUser() {
+    const { data: response } = await this.instance.get<ApiResponse>(
+      "/api/auth/me",
+    );
+    return response;
+  }
+
   // ============================================================================
   // CLIENT ENDPOINTS
   // ============================================================================
