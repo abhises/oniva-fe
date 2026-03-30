@@ -23,15 +23,31 @@ type ApiResult = {
 export const useAuth = () => {
   const router = useRouter()
   const { t ,locale} = useTranslation()
-  const { user, isInitialized, setAuth, logout: storeLogout } = useAuthStore()
+  const { 
+    user, 
+    isInitialized, 
+    sessionChecked, 
+    isCheckingSession,
+    setAuth, 
+    logout: storeLogout, 
+    setSessionChecked,
+    setIsCheckingSession
+  } = useAuthStore()
   const [loading, setLoading] = useState(false)
-  const [sessionChecked, setSessionChecked] = useState(false)
 
   useEffect(() => {
     const checkSession = async () => {
-      if (sessionChecked) return
+      // Don't check if we already checked session or currently checking
+      if (sessionChecked || isCheckingSession) return
+
+      // If user is already set from store persistence
+      if (user) {
+        setSessionChecked(true)
+        return
+      }
 
       try {
+        setIsCheckingSession(true)
         const response = await apiClient.getCurrentUser()
         if (response.success && response.data?.user) {
           setAuth(response.data.user)
@@ -42,11 +58,12 @@ export const useAuth = () => {
         storeLogout()
       } finally {
         setSessionChecked(true)
+        setIsCheckingSession(false)
       }
     }
 
     checkSession()
-  }, [sessionChecked, setAuth, storeLogout])
+  }, [sessionChecked, isCheckingSession, setAuth, storeLogout, user, setSessionChecked, setIsCheckingSession])
 
   const authReady = isInitialized && sessionChecked
 
@@ -64,7 +81,6 @@ export const useAuth = () => {
       role,
     });
 
-    // 🔥 MANUAL ERROR THROW
     if (!response.success) {
       throw {
         response: {
@@ -74,7 +90,7 @@ export const useAuth = () => {
     }
 
     // success path
-        setAuth(response.data!.user);
+    setAuth(response.data!.user);
     const message = response.messageKey
       ? t(response.messageKey)
       : response.message;
@@ -86,6 +102,7 @@ export const useAuth = () => {
   },
   [setAuth, router, locale, t]
 );
+
   const login = useCallback(
     async (phone: string, password: string) => {
       try {
@@ -108,9 +125,6 @@ export const useAuth = () => {
     },
     [setAuth, router, locale, t]
   );
-
-
-
 
   const logout = useCallback(async () => {
     try {
@@ -137,7 +151,7 @@ export const useAuth = () => {
   return {
     user,
     isAuthenticated: !!user,
-    isInitialized: authReady,  // ← NEW: Return this for Header/ProtectedRoute
+    isInitialized: authReady,
     register,
     login,
     logout,

@@ -12,11 +12,15 @@ interface User {
 interface AuthState {
   user: User | null
   isAuthenticated: boolean
-  isInitialized: boolean  // ← NEW: Track if store is initialized
+  isInitialized: boolean
+  sessionChecked: boolean
+  isCheckingSession: boolean
   setAuth: (user: User) => void
   logout: () => void
   setUser: (user: User) => void
-  setInitialized: () => void  // ← NEW: Mark as initialized
+  setInitialized: () => void
+  setSessionChecked: (checked: boolean) => void
+  setIsCheckingSession: (checking: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -25,34 +29,42 @@ export const useAuthStore = create<AuthState>()(
       // Initial state
       user: null,
       isAuthenticated: false,
-      isInitialized: false,  // ← NEW: Start as not initialized
+      isInitialized: false,
+      sessionChecked: false,
+      isCheckingSession: false,
 
       // Methods
       setAuth: (user) =>
         set({
           user,
           isAuthenticated: true,
-          isInitialized: true,  // ← NEW: Mark as initialized when auth
+          isInitialized: true,
+          sessionChecked: true,
+          isCheckingSession: false,
         }),
 
       logout: () =>
         set({
           user: null,
-          token: null,
           isAuthenticated: false,
-          isInitialized: true,  // ← NEW: Stay initialized (just logged out)
+          isInitialized: true,
+          sessionChecked: true,
+          isCheckingSession: false,
         }),
 
       setUser: (user) => set({ user }),
 
-      setInitialized: () => set({ isInitialized: true }),  // ← NEW: Simple setter
+      setInitialized: () => set({ isInitialized: true }),
+
+      setSessionChecked: (checked) => set({ sessionChecked: checked }),
+      
+      setIsCheckingSession: (checking) => set({ isCheckingSession: checking }),
     }),
     {
       name: 'auth-storage',
-      // ← NEW: This hook runs AFTER loading from localStorage
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.setInitialized()  // Tell others we're done loading
+          state.setInitialized()
         }
       },
     }

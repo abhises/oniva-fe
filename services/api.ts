@@ -50,9 +50,9 @@ class ApiClient {
       (response) => response,
       (error: AxiosError<ApiResponse>) => {
         if (error.response?.status === 401) {
-          useAuthStore.getState().logout();
-          if (typeof window !== "undefined") {
-            window.location.href = "/en/login";
+          // Only logout if not already on the login page to avoid loops
+          if (typeof window !== "undefined" && !window.location.pathname.includes('/login')) {
+            useAuthStore.getState().logout();
           }
         }
         return Promise.reject(error);

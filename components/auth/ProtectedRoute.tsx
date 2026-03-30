@@ -15,19 +15,22 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
   const params = useParams()
   const locale = params.locale as string
 
-  const { isAuthenticated, user, loading, isInitialized } = useAuth()
+  const { isAuthenticated, user, isInitialized } = useAuth()
+  
+  // Memoize roles to avoid useEffect triggers on every parent render
+  const rolesString = JSON.stringify(allowedRoles)
 
   useEffect(() => {
-    if (loading || !isInitialized) return // Wait for auth state
+    if (!isInitialized) return // Wait for auth state
 
     if (!isAuthenticated) {
-      router.replace(`/${locale}`)
+      router.replace(`/${locale}/login`) // Better to redirect to login
     } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-      router.replace(`/${locale}/`)  // only if user role is not allowed
+      router.replace(`/${locale}/`)
     }
-  }, [loading, isAuthenticated, user, allowedRoles, router, locale, isInitialized])
+  }, [isAuthenticated, user, rolesString, router, locale, isInitialized])
 
-  if (loading || !isInitialized) {
+  if (!isInitialized) {
     return <Loader fullScreen />
   }
 
