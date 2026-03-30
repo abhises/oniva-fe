@@ -101,6 +101,30 @@ class ApiClient {
     return response;
   }
 
+  async forgotPassword(phone: string) {
+    const { data: response } = await this.instance.post<ApiResponse>(
+      "/api/auth/forgot-password",
+      { phone },
+    );
+    return response;
+  }
+
+  async resetPassword(data: { phone: string; otp: string; newPassword: string }) {
+    const { data: response } = await this.instance.post<ApiResponse>(
+      "/api/auth/reset-password",
+      data,
+    );
+    return response;
+  }
+
+  async changePassword(data: { oldPassword: string; newPassword: string }) {
+    const { data: response } = await this.instance.post<ApiResponse>(
+      "/api/auth/change-password",
+      data,
+    );
+    return response;
+  }
+
   async getCurrentUser() {
     const { data: response } = await this.instance.get<ApiResponse>(
       "/api/auth/me",

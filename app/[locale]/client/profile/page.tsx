@@ -8,6 +8,7 @@ import { Card } from '@/components/common/Card'
 import { Input } from '@/components/common/Input'
 import { Button } from '@/components/common/Button'
 import { FiUser, FiPhone, FiGlobe } from 'react-icons/fi'
+import { ChangePasswordForm } from '@/components/auth/ChangePasswordForm'
 
 export default function ClientProfilePage() {
   const { user } = useAuth()
@@ -74,6 +75,8 @@ export default function ClientProfilePage() {
               </div>
             </div>
           )}
+
+          <ChangePasswordForm />
         </Card>
       </div>
     </ProtectedRoute>

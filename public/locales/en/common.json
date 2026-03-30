@@ -68,7 +68,17 @@
     "LOGOUT_SUCCESS": "Logged out successfully",
     "phoneRequired": "Phone number is required",
     "fullNameRequired": "Full name is required",
-    "passwordRequired": "Password is required"
+    "passwordRequired": "Password is required",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "sendResetCode": "Send Reset Code",
+    "resetCode": "Verification Code",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "passwordResetSuccess": "Password reset successfully!",
+    "changePassword": "Change Password",
+    "oldPassword": "Current Password",
+    "passwordChangedSuccess": "Password changed successfully!"
   },
   "client": {
     "bookTrip": "Book Trip",
