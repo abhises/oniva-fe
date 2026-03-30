@@ -20,6 +20,18 @@ import {
   FiFilter,
   FiRefreshCw,
 } from 'react-icons/fi'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+
+const DriverMarkerIcon = new L.Icon({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+})
 
 // --- Interfaces ---
 interface ActiveTrip {
@@ -36,7 +48,7 @@ interface ActiveTrip {
   createdAt: string
   assignedAt?: string
   startedAt?: string
-  
+
   client: {
     id: string | number
     name: string
@@ -44,7 +56,7 @@ interface ActiveTrip {
     email: string
     rating: number
   }
-  
+
   driver?: {
     id: string | number
     name: string
@@ -52,6 +64,10 @@ interface ActiveTrip {
     email: string
     rating: number
     isOnline: boolean
+    location?: {
+      latitude: number
+      longitude: number
+    }
     car?: {
       model: string
       licensePlate: string
@@ -106,7 +122,7 @@ export default function AdminTripsPage() {
   const loadActiveTrips = useCallback(async (showSpinner = true) => {
     try {
       if (showSpinner) setIsLoading(true);
-      
+
       const response = await apiClient.getAdminActiveTrips({
         status: statusFilter,
         limit: pagination.limit,
@@ -126,7 +142,7 @@ export default function AdminTripsPage() {
       } else if (response && !response.success) {
         if (showSpinner) toast.error(t('admin.failedLoadTrips'));
       }
-      
+
     } catch (error: any) {
       console.error('Error loading trips:', error);
       if (showSpinner) toast.error(t('admin.failedLoadTrips'));
@@ -162,34 +178,34 @@ export default function AdminTripsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'scheduled': return 'bg-purple-100 text-purple-800'
-      case 'assigned':  return 'bg-blue-100 text-blue-800'
-      case 'started':   return 'bg-green-100 text-green-800'
+      case 'assigned': return 'bg-blue-100 text-blue-800'
+      case 'started': return 'bg-green-100 text-green-800'
       case 'completed': return 'bg-gray-800 text-white'
       case 'cancelled': return 'bg-red-100 text-red-800'
-      default:          return 'bg-gray-100 text-gray-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'scheduled': return '📋'
-      case 'assigned':  return '✅'
-      case 'started':   return '🚗'
+      case 'assigned': return '✅'
+      case 'started': return '🚗'
       case 'completed': return '🏆'
       case 'cancelled': return '❌'
-      default:          return '❓'
+      default: return '❓'
     }
   }
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'all':       return t('common.all')
+      case 'all': return t('common.all')
       case 'scheduled': return t('admin.scheduled')
-      case 'assigned':  return t('admin.assigned')
-      case 'started':   return t('admin.started')
+      case 'assigned': return t('admin.assigned')
+      case 'started': return t('admin.started')
       case 'completed': return t('common.completed')
       case 'cancelled': return t('client.tripCancelled')
-      default:          return status.charAt(0).toUpperCase() + status.slice(1)
+      default: return status.charAt(0).toUpperCase() + status.slice(1)
     }
   }
 
@@ -231,15 +247,24 @@ export default function AdminTripsPage() {
                 <p className="text-gray-600 mt-1">{t('admin.activeTripsMonitoring')}</p>
               </div>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => loadActiveTrips(true)}
-                disabled={isApiLoading}
-                title="Refresh"
-              >
-                <FiRefreshCw className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => router.push(`/en/admin/incidents`)}
+                >
+                  {t('admin.viewIncidents')}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => loadActiveTrips(true)}
+                  disabled={isApiLoading}
+                  title="Refresh"
+                >
+                  <FiRefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -265,6 +290,52 @@ export default function AdminTripsPage() {
               <p className="text-sm text-gray-600">{t('admin.total')}</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.total || 0}</p>
             </div>
+          </div>
+
+          {/* Live Map */}
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-3">{t('admin.liveFleetMap')}</h2>
+            {activeTrips.length > 0 ? (
+              <div className="h-80 rounded-lg overflow-hidden border border-gray-200">
+                <MapContainer
+                  center={
+                    activeTrips[0]?.driver?.location?.latitude && activeTrips[0]?.driver?.location?.longitude
+                      ? [activeTrips[0].driver.location.latitude, activeTrips[0].driver.location.longitude]
+                      : [14.695, -17.444] // default Senegal center
+                  }
+                  zoom={12}
+                  style={{ width: '100%', height: '100%' }}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  {activeTrips.map((trip) => {
+                    const driverLocation = trip.driver?.location
+                    if (!driverLocation?.latitude || !driverLocation?.longitude) return null
+
+                    return (
+                      <Marker
+                        key={`driver-${trip.id}`}
+                        position={[driverLocation.latitude, driverLocation.longitude]}
+                        icon={DriverMarkerIcon}
+                      >
+                        <Popup>
+                          <div className="text-sm">
+                            {/* CHANGE THIS LINE BELOW: Use trip.driver.name */}
+                            <strong>{t('admin.driver')}</strong>: {trip.driver?.name || t('admin.unknown')}<br />
+                            <strong>{t('admin.tripId')}</strong>: #{trip.id}<br />
+                            <strong>{t('common.status')}</strong>: {getStatusLabel(trip.status)}
+                          </div>
+                        </Popup>
+                      </Marker>
+                    )
+                  })}
+                </MapContainer>
+              </div>
+            ) : (
+              <p className="text-gray-500">{t('admin.noActiveTripsMap')}</p>
+            )}
           </div>
 
           {/* Filter */}
@@ -376,14 +447,14 @@ export default function AdminTripsPage() {
 
                           <td className="px-6 py-4 whitespace-nowrap">
                             <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => handleViewTrip(trip.id)}
-                            title={t('common.viewDetails')}
-                          >
-                            <FiEye className="w-4 h-4" />
-                            {t('admin.view')}
-                          </Button>
+                              variant="primary"
+                              size="sm"
+                              onClick={() => handleViewTrip(trip.id)}
+                              title={t('common.viewDetails')}
+                            >
+                              <FiEye className="w-4 h-4" />
+                              {t('admin.view')}
+                            </Button>
                           </td>
                         </tr>
                       ))}

@@ -333,6 +333,37 @@ class ApiClient {
     return data;
   }
 
+  async getAdminActiveTrips(params?: { status?: string; limit?: number; offset?: number }) {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/admin/trips/active",
+      { params }
+    );
+    return data;
+  }
+
+  async getAdminIncidents(params?: { status?: string; limit?: number; offset?: number }) {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/admin/incidents",
+      { params }
+    );
+    return data;
+  }
+
+  async getAdminIncident(incidentId: number | string) {
+    const { data } = await this.instance.get<ApiResponse>(
+      `/api/admin/incidents/${incidentId}`
+    );
+    return data;
+  }
+
+  async updateAdminIncident(incidentId: number | string, updates: any) {
+    const { data } = await this.instance.put<ApiResponse>(
+      `/api/admin/incidents/${incidentId}`,
+      updates
+    );
+    return data;
+  }
+
   async getAdminDrivers() {
     const { data } = await this.instance.get<ApiResponse>("/api/admin/drivers");
     return data;
@@ -425,18 +456,6 @@ class ApiClient {
     );
     // We return the whole 'data' object (ApiResponse)
     // so your 'useApi' hook can handle success/error states
-    return data;
-  }
-  // Add to the ApiClient class in app/services/api.ts
-  async getAdminActiveTrips(params?: {
-    status?: string;
-    limit?: number;
-    offset?: number;
-  }) {
-    const { data } = await this.instance.get<ApiResponse>(
-      "/api/admin/trips/active",
-      { params },
-    );
     return data;
   }
 
