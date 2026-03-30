@@ -16,7 +16,6 @@ type ApiResult = {
   messageKey?: string;
   data?: {
     user: any;
-    token: string;
   };
 };
 
@@ -24,13 +23,8 @@ type ApiResult = {
 export const useAuth = () => {
   const router = useRouter()
   const { t ,locale} = useTranslation()
-  const { user, token, isInitialized, setAuth, logout: storeLogout } = useAuthStore()
+  const { user, isInitialized, setAuth, logout: storeLogout } = useAuthStore()
   const [loading, setLoading] = useState(false)
-
-  // ← NEW: Helper to set token in cookie (for middleware)
-  const setTokenCookie = (token: string) => {
-    document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}`
-  }
 
   const register = useCallback(
   async (
@@ -56,8 +50,7 @@ export const useAuth = () => {
     }
 
     // success path
-    setAuth(response.data!.user, response.data!.token);
-
+        setAuth(response.data!.user);
     const message = response.messageKey
       ? t(response.messageKey)
       : response.message;
@@ -75,7 +68,7 @@ export const useAuth = () => {
         const response = await apiClient.login({phone, password});
 
         if (response.success && response.data) {
-          setAuth(response.data.user, response.data.token);
+          setAuth(response.data.user);
           
           // Use messageKey from response
           const message = response.messageKey ? t(response.messageKey) : response.message;
@@ -95,10 +88,13 @@ export const useAuth = () => {
 
 
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await apiClient.logout();
+    } catch (error) {
+      // continue with client logout even if backend logout fails
+    }
     storeLogout()
-    // ← NEW: Clear cookie on logout
-    document.cookie = 'token=; path=/; max-age=0'
     toast.success(t('common.logout'))
     router.push('/')
   }, [storeLogout, router, t])
@@ -116,8 +112,7 @@ export const useAuth = () => {
 
   return {
     user,
-    token,
-    isAuthenticated: !!token,
+    isAuthenticated: !!user,
     isInitialized,  // ← NEW: Return this for Header/ProtectedRoute
     register,
     login,

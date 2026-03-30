@@ -42,15 +42,7 @@ class ApiClient {
       headers: {
         "Content-Type": "application/json",
       },
-    });
-
-    // Add token to requests
-    this.instance.interceptors.request.use((config) => {
-      const { token } = useAuthStore.getState();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
+      withCredentials: true,
     });
 
     // Handle responses and errors
@@ -98,6 +90,13 @@ class ApiClient {
     const { data: response } = await this.instance.post<ApiResponse>(
       "/api/auth/verify-token",
       { token },
+    );
+    return response;
+  }
+
+  async logout() {
+    const { data: response } = await this.instance.post<ApiResponse>(
+      "/api/auth/logout",
     );
     return response;
   }

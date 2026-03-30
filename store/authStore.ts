@@ -11,10 +11,9 @@ interface User {
 
 interface AuthState {
   user: User | null
-  token: string | null
   isAuthenticated: boolean
   isInitialized: boolean  // ← NEW: Track if store is initialized
-  setAuth: (user: User, token: string) => void
+  setAuth: (user: User) => void
   logout: () => void
   setUser: (user: User) => void
   setInitialized: () => void  // ← NEW: Mark as initialized
@@ -25,15 +24,13 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       // Initial state
       user: null,
-      token: null,
       isAuthenticated: false,
       isInitialized: false,  // ← NEW: Start as not initialized
 
       // Methods
-      setAuth: (user, token) =>
+      setAuth: (user) =>
         set({
           user,
-          token,
           isAuthenticated: true,
           isInitialized: true,  // ← NEW: Mark as initialized when auth
         }),

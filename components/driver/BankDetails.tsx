@@ -55,9 +55,9 @@ export const BankDetails: React.FC<BankDetailsProps> = ({
       setIsLoading(true)
       const response = await fetch('/api/driver/bank-details', {
         method: 'PUT',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(formData),
       })
