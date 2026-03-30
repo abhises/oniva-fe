@@ -45,7 +45,8 @@
     "SERVER_ERROR": "Une erreur serveur s'est produite",
     "NETWORK_ERROR": "Erreur réseau",
     "INVALID_TOKEN": "Token invalide ou expiré",
-    "INSUFFICIENT_PERMISSIONS": "Permissions insuffisantes"
+    "INSUFFICIENT_PERMISSIONS": "Permissions insuffisantes",
+    "INVALID_OTP": "Code OTP invalide"
   },
   "auth": {
     "login": "Connexion",
@@ -87,7 +88,16 @@
     "tripDetails": "Détails du Trajet",
     "pointToPoint": "Point à Point",
     "hourly": "Horaire",
-    "distance": "Distance"
+    "distance": "Distance",
+    "selectDuration": "Sélectionner la Durée",
+    "proceedToConfirmation": "Procéder à la Confirmation",
+    "reviewBooking": "Vérifier la Réservation",
+    "confirm": "Confirmer",
+    "bookingConfirmed": "Réservation Confirmée!",
+    "redirecting": "Redirection...",
+    "pickup": "Départ",
+    "total": "Total",
+    "price": "Prix"
   },
   "driver": {
     "goOnline": "Aller en Ligne",
@@ -109,7 +119,33 @@
     "completedTrips": "Trajets Complétés",
     "averagePerTrip": "Gains Moyens par Trajet",
     "myTrips": "Mes Trajets",
-    "noTrips": "Aucun trajet trouvé"
+    "noTrips": "Aucun trajet trouvé",
+    "tripDetails": "Détails du Trajet",
+    "pickupAddress": "Adresse de Départ",
+    "destinationAddress": "Adresse de Destination",
+    "openDestination": "Destination Libre",
+    "navigate": "Naviguer",
+    "callClient": "Appeler le Client",
+    "startTripVerification": "Vérification de Début de Trajet",
+    "otpInstruction": "Demandez au client le code OTP à 6 chiffres pour commencer le trajet.",
+    "otpPlaceholder": "Entrez l'OTP à 6 chiffres",
+    "start": "Démarrer",
+    "completeTrip": "Terminer le Trajet",
+    "estimatedEarnings": "Gains Estimés",
+    "totalFare": "Tarif Total",
+    "tripNotFound": "Trajet non trouvé",
+    "id": "ID",
+    "back": "Retour",
+    "newRequest": "Nouvelle Demande",
+    "expiresIn": "Expire dans",
+    "rides": "trajets",
+    "pickup": "Départ",
+    "destination": "Destination",
+    "distance": "Distance",
+    "fare": "Tarif",
+    "decline": "Décliner",
+    "requestNotFoundOrExpired": "Demande non trouvée ou expirée",
+    "backToDashboard": "Retour au Tableau de Bord"
   },
   "admin": {
     "dashboard": "Tableau de Bord",

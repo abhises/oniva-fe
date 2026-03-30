@@ -44,7 +44,8 @@
     "SERVER_ERROR": "Server error occurred",
     "NETWORK_ERROR": "Network error",
     "INVALID_TOKEN": "Invalid or expired token",
-    "INSUFFICIENT_PERMISSIONS": "Insufficient permissions"
+    "INSUFFICIENT_PERMISSIONS": "Insufficient permissions",
+    "INVALID_OTP": "Invalid OTP code"
   },
   "auth": {
     "login": "Login",
@@ -85,7 +86,16 @@
     "tripDetails": "Trip Details",
     "pointToPoint": "Point-to-Point",
     "hourly": "Hourly",
-    "distance": "Distance"
+    "distance": "Distance",
+    "selectDuration": "Select Duration",
+    "proceedToConfirmation": "Proceed to Confirmation",
+    "reviewBooking": "Review Booking",
+    "confirm": "Confirm",
+    "bookingConfirmed": "Booking Confirmed!",
+    "redirecting": "Redirecting...",
+    "pickup": "Pickup",
+    "total": "Total",
+    "price": "Price"
   },
   "driver": {
     "goOnline": "Go Online",
@@ -107,7 +117,33 @@
     "completedTrips": "Completed Trips",
     "averagePerTrip": "Average Earnings per Trip",
     "myTrips": "My Trips",
-    "noTrips": "No trips found"
+    "noTrips": "No trips found",
+    "tripDetails": "Trip Details",
+    "pickupAddress": "Pickup Address",
+    "destinationAddress": "Destination Address",
+    "openDestination": "Open Destination",
+    "navigate": "Navigate",
+    "callClient": "Call Client",
+    "startTripVerification": "Start Trip Verification",
+    "otpInstruction": "Ask the client for the 6-digit OTP code to begin the ride.",
+    "otpPlaceholder": "Enter 6-digit OTP",
+    "start": "Start",
+    "completeTrip": "Complete Trip",
+    "estimatedEarnings": "Estimated Earnings",
+    "totalFare": "Total Fare",
+    "tripNotFound": "Trip not found",
+    "id": "ID",
+    "back": "Back",
+    "newRequest": "New Request",
+    "expiresIn": "Expires in",
+    "rides": "rides",
+    "pickup": "Pickup",
+    "destination": "Destination",
+    "distance": "Distance",
+    "fare": "Fare",
+    "decline": "Decline",
+    "requestNotFoundOrExpired": "Request not found or expired",
+    "backToDashboard": "Back to Dashboard"
   },
   "admin": {
     "dashboard": "Dashboard",

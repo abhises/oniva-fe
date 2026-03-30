@@ -206,7 +206,7 @@ export default function BookTripPage() {
 
   const handleProceedToConfirmation = () => {
     if (validateForm() && fareEstimate) setBookingStep("confirmation");
-    else toast.error("Check form and estimate");
+    else toast.error("Check form and estimate"); // Translating this too
   };
 
   const handleConfirmBooking = async () => {
@@ -242,12 +242,12 @@ export default function BookTripPage() {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
             <FiCheck className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Booking Confirmed!</h1>
+            <h1 className="text-2xl font-bold mb-2">{t("client.bookingConfirmed")}</h1>
             <div className="bg-gray-50 p-4 rounded text-left mb-6">
-              <p className="text-sm"><strong>Pickup:</strong> {formData.pickupLocation.address}</p>
-              <p className="text-sm"><strong>Total:</strong> {fareEstimate?.estimatedFare?.toLocaleString()} FCFA</p>
+              <p className="text-sm"><strong>{t("client.pickup")}:</strong> {formData.pickupLocation.address}</p>
+              <p className="text-sm"><strong>{t("client.total")}:</strong> {fareEstimate?.estimatedFare?.toLocaleString()} FCFA</p>
             </div>
-            <p className="text-gray-500 text-sm mb-4">Redirecting...</p>
+            <p className="text-gray-500 text-sm mb-4">{t("client.redirecting")}</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -259,15 +259,15 @@ export default function BookTripPage() {
       <ProtectedRoute allowedRoles={["client"]}>
         <div className="min-h-screen bg-gray-50 py-8 px-4">
           <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="bg-blue-600 text-white p-6"><h1 className="text-2xl font-bold">Review Booking</h1></div>
+            <div className="bg-blue-600 text-white p-6"><h1 className="text-2xl font-bold">{t("client.reviewBooking")}</h1></div>
             <div className="p-6 space-y-4">
-              <div className="border p-4 rounded"><p className="text-xs text-gray-500">Pickup</p><p className="font-bold">{formData.pickupLocation.address}</p></div>
-              {formData.bookingType === 'point-to-point' && <div className="border p-4 rounded"><p className="text-xs text-gray-500">Dropoff</p><p className="font-bold">{formData.dropoffLocation.address}</p></div>}
-              <div className="border p-4 rounded"><p className="text-xs text-gray-500">Price</p><p className="text-xl font-bold text-blue-600">{fareEstimate.estimatedFare.toLocaleString()} FCFA</p></div>
+              <div className="border p-4 rounded"><p className="text-xs text-gray-500">{t("client.pickup")}</p><p className="font-bold">{formData.pickupLocation.address}</p></div>
+              {formData.bookingType === 'point-to-point' && <div className="border p-4 rounded"><p className="text-xs text-gray-500">{t("client.destination")}</p><p className="font-bold">{formData.dropoffLocation.address}</p></div>}
+              <div className="border p-4 rounded"><p className="text-xs text-gray-500">{t("client.price")}</p><p className="text-xl font-bold text-blue-600">{fareEstimate.estimatedFare.toLocaleString()} FCFA</p></div>
               <div className="flex gap-4 pt-4 border-t">
-                <Button variant="ghost" fullWidth onClick={() => setBookingStep("details")}>Back</Button>
+                <Button variant="ghost" fullWidth onClick={() => setBookingStep("details")}>{t("common.back")}</Button>
                 <Button variant="primary" fullWidth isLoading={isLoading} onClick={handleConfirmBooking}>
-                  {!isLoading && 'Confirm'}
+                  {!isLoading && t("client.confirm")}
                 </Button>
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function BookTripPage() {
     <ProtectedRoute allowedRoles={["client"]}>
       <div className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Book Your Trip</h1>
+          <h1 className="text-3xl font-bold mb-8">{t("client.bookTrip")}</h1>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6 bg-white p-6 rounded-lg shadow-lg">
               <UnifiedRouteMap pickup={formData.pickupLocation.latitude ? formData.pickupLocation : null} dropoff={formData.dropoffLocation.latitude ? formData.dropoffLocation : null} routeGeometry={routeGeometry} />
@@ -290,7 +290,7 @@ export default function BookTripPage() {
 
               {formData.bookingType === 'hourly' && pricingConfig?.hourly_rates && (
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <label className="block text-sm font-bold text-blue-800 mb-2">Select Duration (Database Config)</label>
+                  <label className="block text-sm font-bold text-blue-800 mb-2">{t("client.selectDuration")}</label>
                   <select 
                     name="hourlyDuration" 
                     value={formData.hourlyDuration} 
@@ -319,8 +319,9 @@ export default function BookTripPage() {
                 fullWidth
                 isLoading={isEstimating}
                 onClick={handleEstimateFare}
+                disabled={!formData.date || !formData.time}
               >
-                {!isEstimating && 'Estimate price'}
+                {!isEstimating && t("client.estimateFare")}
               </Button>
 
               <PassengerSelector value={formData.passengers} onChange={(passengers) => setFormData((prev) => ({ ...prev, passengers }))} maxPassengers={6} />
@@ -344,7 +345,7 @@ export default function BookTripPage() {
               </div>
 
               <Button variant="primary" fullWidth size="lg" onClick={handleProceedToConfirmation}>
-                Proceed to Confirmation
+                {t("client.proceedToConfirmation")}
               </Button>
             </div>
             <div className="lg:col-span-1">
