@@ -47,6 +47,7 @@ export default function DriverDashboard({
     earnings: 0,
     rating: 5.0,
     tripsThisWeek: 0,
+    totalKm: 0,
   });
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
 
@@ -89,6 +90,7 @@ export default function DriverDashboard({
           earnings: Number(statsResult.total_earnings) || 0,
           rating: Number(statsResult.rating) || 0,
           tripsThisWeek: Number(statsResult.trips_this_week) || 0,
+          totalKm: Number(statsResult.total_km) || 0,
         });
       }
 
@@ -201,7 +203,7 @@ export default function DriverDashboard({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatsCard
           label={t("driver.totalTrips")}
           value={stats.totalTrips}
@@ -222,6 +224,13 @@ export default function DriverDashboard({
           icon={<FiStar />}
           trend="up"
           trendValue="Average"
+        />
+        <StatsCard
+          label={t("driver.totalKm")}
+          value={`${stats.totalKm.toFixed(1)} km`}
+          icon={<FiTrendingUp />}
+          trend="up"
+          trendValue={t("driver.totalKmCovered")}
         />
       </div>
 
