@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState, useMemo, use } from "react";
 import { useTranslation } from "react-i18next";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
