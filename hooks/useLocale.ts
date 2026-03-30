@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 export const useLocale = () => {
   const params = useParams();
@@ -17,13 +17,13 @@ export const useLocale = () => {
       const pathWithoutLocale = currentPath.replace(/^\/[a-z]{2}/, '');
       window.location.href = `/${newLocale}${pathWithoutLocale}`;
     },
-    []
+    [i18n]
   );
 
-  return {
+  return useMemo(() => ({
     locale,
     t,
     changeLocale,
     i18n,
-  };
+  }), [locale, t, changeLocale, i18n]);
 };

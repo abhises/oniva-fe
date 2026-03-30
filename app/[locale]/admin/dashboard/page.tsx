@@ -1,6 +1,4 @@
-"use client";
-import { useEffect, useState } from "react";
-import { use } from "react";
+import { useEffect, useState, useMemo, use } from "react";
 import { useTranslation } from "react-i18next";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Card } from "@/components/common/Card";
@@ -41,7 +39,8 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
   // FIX: Use React.use() to unwrap params
   const { locale } = use(params);
   const { t } = useTranslation();
-  const { isLoading, request } = useApi({ showSuccess: false });
+  const statsOptions = useMemo(() => ({ showSuccess: false }), []);
+  const { isLoading, request } = useApi(statsOptions);
   // FIX: Initialize with default values
   const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS);
   const [error, setError] = useState<string | null>(null);
