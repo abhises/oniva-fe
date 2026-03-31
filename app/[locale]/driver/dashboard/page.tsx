@@ -48,6 +48,7 @@ export default function DriverDashboard({
     rating: 5.0,
     tripsThisWeek: 0,
     totalKm: 0,
+    earningsThisWeek: 0,
   });
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
 
@@ -91,6 +92,7 @@ export default function DriverDashboard({
           rating: Number(statsResult.rating) || 0,
           tripsThisWeek: Number(statsResult.trips_this_week) || 0,
           totalKm: Number(statsResult.total_km) || 0,
+          earningsThisWeek: Number(statsResult.earnings_this_week) || 0,
         });
       }
 
@@ -186,6 +188,9 @@ export default function DriverDashboard({
     fetchRequests(); // Refresh list after rejecting
   };
 
+  const avgEarningPerTrip = stats.totalTrips > 0 ? stats.earnings / stats.totalTrips : 0;
+  const avgKmPerTrip = stats.totalTrips > 0 ? stats.totalKm / stats.totalTrips : 0;
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -231,6 +236,34 @@ export default function DriverDashboard({
           icon={<FiTrendingUp />}
           trend="up"
           trendValue={t("driver.totalKmCovered")}
+        />
+        <StatsCard
+          label={t("driver.averagePerTrip")}
+          value={`${avgEarningPerTrip.toFixed(0)} XOF`}
+          icon={<FiDollarSign />}
+          trend="up"
+          trendValue="Average"
+        />
+        <StatsCard
+          label={t("driver.avgKmPerTrip")}
+          value={`${avgKmPerTrip.toFixed(1)} km`}
+          icon={<FiMapPin />}
+          trend="up"
+          trendValue="Average"
+        />
+        <StatsCard
+          label={t("driver.tripsThisWeek")}
+          value={stats.tripsThisWeek}
+          icon={<FiTrendingUp />}
+          trend="up"
+          trendValue="This Week"
+        />
+        <StatsCard
+          label={t("driver.earningsThisWeek")}
+          value={`${stats.earningsThisWeek.toLocaleString()} XOF`}
+          icon={<FiDollarSign />}
+          trend="up"
+          trendValue="This Week"
         />
       </div>
 

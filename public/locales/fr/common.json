@@ -106,7 +106,13 @@
     "redirecting": "Redirection...",
     "pickup": "Départ",
     "total": "Total",
-    "price": "Prix"
+    "price": "Prix",
+    "totalDistance": "Distance Totale",
+    "totalCovered": "Total Parcouru",
+    "totalRides": "Trajets Totaux",
+    "totalTaken": "Total Effectués",
+    "avgDistance": "Distance Moyenne",
+    "avgPerRide": "Par Trajet"
   },
   "driver": {
     "goOnline": "Aller en Ligne",
@@ -129,6 +135,9 @@
     "totalKmCovered": "Distance totale parcourue",
     "completedTrips": "Trajets Terminés",
     "averagePerTrip": "Gains Moyens par Trajet",
+    "avgKmPerTrip": "KM Moyens par Trajet",
+    "tripsThisWeek": "Trajets de cette Semaine",
+    "earningsThisWeek": "Gains de cette Semaine",
     "myTrips": "Mes Trajets",
     "noTrips": "Aucun trajet trouvé",
     "tripDetails": "Détails du Trajet",

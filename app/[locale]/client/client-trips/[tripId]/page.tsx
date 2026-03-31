@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/useAuth";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
@@ -25,6 +26,15 @@ import {
   FiUser,
 } from "react-icons/fi";
 
+const MapRoute = dynamic(() => import('./MapRoute'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center mb-6">
+      <FiLoader className="animate-spin text-blue-600 w-6 h-6" />
+    </div>
+  )
+});
+
 // Interface strictly matching your API response
 interface Trip {
   id: string | number;
@@ -34,6 +44,8 @@ interface Trip {
   destination_address?: string | null;
   pickup_latitude?: string | number;
   pickup_longitude?: string | number;
+  destination_latitude?: string | number;
+  destination_longitude?: string | number;
   estimated_distance?: string | number;
   estimated_duration?: number;
   total_price?: string | number;
@@ -358,6 +370,16 @@ export default function ClientTripDetailPage() {
                 </p>
               </div>
             )}
+
+          {/* Leaflet Map Component */}
+          {trip.pickup_latitude && trip.pickup_longitude && trip.destination_latitude && trip.destination_longitude && (
+            <div className="mb-6">
+              <MapRoute 
+                pickup={[parseFloat(trip.pickup_latitude.toString()), parseFloat(trip.pickup_longitude.toString())]}
+                destination={[parseFloat(trip.destination_latitude.toString()), parseFloat(trip.destination_longitude.toString())]}
+              />
+            </div>
+          )}
 
           {/* Trip Status Timeline */}
           <div className="bg-white rounded-lg shadow-lg p-6 mb-6">

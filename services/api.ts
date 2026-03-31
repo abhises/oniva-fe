@@ -143,6 +143,13 @@ class ApiClient {
     return data;
   }
 
+  async getClientDashboardStats() {
+    const { data } = await this.instance.get<ApiResponse>(
+      "/api/client/dashboard-stats",
+    );
+    return data;
+  }
+
   async getActivePrice() {
     const { data } = await this.instance.get<ApiResponse>(
       "/api/client/pricing/active",

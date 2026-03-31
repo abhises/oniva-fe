@@ -105,7 +105,13 @@
     "redirecting": "Redirecting...",
     "pickup": "Pickup",
     "total": "Total",
-    "price": "Price"
+    "price": "Price",
+    "totalDistance": "Total Distance",
+    "totalCovered": "Total Covered",
+    "totalRides": "Total Rides",
+    "totalTaken": "Total Taken",
+    "avgDistance": "Average Avg. Distance",
+    "avgPerRide": "Per Ride"
   },
   "driver": {
     "goOnline": "Go Online",
@@ -128,6 +134,9 @@
     "totalKmCovered": "Total distance covered",
     "completedTrips": "Completed Trips",
     "averagePerTrip": "Average Earnings per Trip",
+    "avgKmPerTrip": "Average KM per Trip",
+    "tripsThisWeek": "Trips This Week",
+    "earningsThisWeek": "Earnings This Week",
     "myTrips": "My Trips",
     "noTrips": "No trips found",
     "tripDetails": "Trip Details",

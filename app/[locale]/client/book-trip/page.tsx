@@ -324,6 +324,10 @@ export default function BookTripPage() {
                 {!isEstimating && t("client.estimateFare")}
               </Button>
 
+              <div className="block lg:hidden">
+                <FareEstimate estimate={fareEstimate} bookingType={formData.bookingType} passengers={formData.passengers} isLoading={isEstimating} />
+              </div>
+
               <PassengerSelector value={formData.passengers} onChange={(passengers) => setFormData((prev) => ({ ...prev, passengers }))} maxPassengers={6} />
               <PaymentSelector value={formData.paymentMethod} onChange={(method) => setFormData((prev) => ({ ...prev, paymentMethod: method }))} />
               
@@ -348,7 +352,7 @@ export default function BookTripPage() {
                 {t("client.proceedToConfirmation")}
               </Button>
             </div>
-            <div className="lg:col-span-1">
+            <div className="hidden lg:block lg:col-span-1">
               <FareEstimate estimate={fareEstimate} bookingType={formData.bookingType} passengers={formData.passengers} isLoading={isEstimating} />
             </div>
           </div>
