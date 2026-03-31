@@ -143,6 +143,11 @@ class ApiClient {
     return data;
   }
 
+  async updateClientProfile(payload: { fullName: string; email?: string; language: string; profilePhoto?: string }) {
+    const { data } = await this.instance.put<ApiResponse>("/api/client/profile", payload);
+    return data;
+  }
+
   async getClientDashboardStats() {
     const { data } = await this.instance.get<ApiResponse>(
       "/api/client/dashboard-stats",
@@ -477,6 +482,13 @@ class ApiClient {
       { params },
     );
     return data; // Return the full ApiResponse object
+  }
+
+  async getAdminUserDetails(userId: string | number) {
+    const { data } = await this.instance.get<ApiResponse>(
+      `/api/admin/users/${userId}`
+    );
+    return data;
   }
 
   async suspendUser(userId: string, reason?: string) {

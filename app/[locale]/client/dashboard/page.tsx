@@ -16,10 +16,7 @@ export default function ClientDashboard() {
   const { t, locale } = useLocale();
   const { request } = useApi({ showSuccess: false });
 
-  const [stats, setStats] = useState({
-    totalDistance: 0,
-    totalRides: 0,
-  });
+  const [stats, setStats] = useState({ totalDistance: 0, totalRides: 0 });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -42,15 +39,15 @@ export default function ClientDashboard() {
         <h1 className="text-4xl font-bold mb-8">
           {t('common.welcome')}, {user?.fullName}!
         </h1>
-        <div className="flex gap-4 mb-4 justify-end">
+
+        <div className="flex gap-4 mb-6 justify-end">
           <Link href={`/${locale}/client/book-trip`}>
-            <Button variant="primary" size="lg" fullWidth>
+            <Button variant="primary" size="lg">
               {t('client.bookTrip')}
             </Button>
           </Link>
-
-
         </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <StatsCard
             label={t('client.totalDistance')}
@@ -74,10 +71,6 @@ export default function ClientDashboard() {
             trendValue={t('client.avgPerRide')}
           />
         </div>
-
-
-
-
       </div>
     </ProtectedRoute>
   );

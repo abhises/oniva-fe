@@ -305,7 +305,7 @@ export default function AdminDriverDetailsPage() {
                       <thead className="bg-gray-50 font-semibold text-gray-900 uppercase text-xs">
                         <tr>
                           <th className="px-6 py-3">{t("admin.tripId")}</th>
-                          <th className="px-6 py-3">{t("client.client")}</th>
+                          <th className="px-6 py-3">{t("admin.client")}</th>
                           <th className="px-6 py-3">{t("common.status")}</th>
                           <th className="px-6 py-3">{t("admin.fare")}</th>
                           <th className="px-6 py-3">{t("common.startDate")}</th>

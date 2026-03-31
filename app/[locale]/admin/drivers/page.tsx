@@ -20,6 +20,7 @@ interface Driver {
   is_online: boolean;
   rating: number;
   total_trips: number;
+  profile_photo?: string;
 }
 
 export default function AdminDriversPage() {
@@ -101,9 +102,17 @@ export default function AdminDriversPage() {
             <Card key={driver.id} hoverable>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center">
-                    <FiUser size={20} />
-                  </div>
+                  {driver.profile_photo ? (
+                    <img
+                      src={driver.profile_photo}
+                      alt={driver.fullName}
+                      className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl">
+                      {driver.fullName?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div className="flex-1">
                     <h3 className="font-bold text-lg">{driver.fullName}</h3>
                     <p className="text-sm text-gray-600">{driver.phone}</p>

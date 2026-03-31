@@ -32,6 +32,7 @@ interface User {
   status: "active" | "suspended" | "pending";
   language: string;
   created_at: string;
+  profile_photo?: string;
 }
 
 interface PaginationState {
@@ -65,6 +66,10 @@ export default function AdminUsersPage() {
   const [showSuspendModal, setShowSuspendModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [suspendReason, setSuspendReason] = useState("");
+
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [userDetails, setUserDetails] = useState<any>(null);
+  const [isFetchingDetails, setIsFetchingDetails] = useState(false);
 
   // Load users on mount and when filters change
   useEffect(() => {
@@ -341,11 +346,19 @@ export default function AdminUsersPage() {
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-semibold text-blue-600">
-                                  {user.full_name.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
+                              {(user as any).profile_photo ? (
+                                <img
+                                  src={(user as any).profile_photo}
+                                  alt={user.full_name}
+                                  className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <span className="text-sm font-semibold text-blue-600">
+                                    {user.full_name.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
                               <div>
                                 <p className="font-medium text-gray-900">
                                   {user.full_name}
@@ -406,7 +419,7 @@ export default function AdminUsersPage() {
                                   variant="danger"
                                   size="sm"
                                   onClick={() => handleSuspendClick(user)}
-                                  disabled={suspendingUserId === user.id || isApiLoading}
+                                  disabled={user.role === 'admin' || suspendingUserId === user.id || isApiLoading}
                                   isLoading={suspendingUserId === user.id}
                                   title="Suspend user"
                                 >
@@ -425,10 +438,22 @@ export default function AdminUsersPage() {
                               <Button
                                 variant="primary"
                                 size="sm"
-                                onClick={() => {
-                                  // TODO: View user details
+                                onClick={async () => {
+                                  try {
+                                    setIsFetchingDetails(true);
+                                    setSelectedUser(user);
+                                    const res = await request<any>(async () => await apiClient.getAdminUserDetails(user.id));
+                                    if (res && res.user) {
+                                      setUserDetails(res);
+                                      setShowDetailsModal(true);
+                                    }
+                                  } catch (e) {
+                                    toast.error("Failed to load user details");
+                                  } finally {
+                                    setIsFetchingDetails(false);
+                                  }
                                 }}
-                                disabled={isApiLoading}
+                                disabled={isApiLoading || isFetchingDetails}
                                 title="View details"
                               >
                                 <FiEye className="w-4 h-4" />
@@ -546,6 +571,100 @@ export default function AdminUsersPage() {
               </div>
             </div>
           )}
+
+          {/* User Details Modal */}
+          {showDetailsModal && userDetails && selectedUser && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-6 border-b pb-4">
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                        {selectedUser.profile_photo ? (
+                          <img
+                            src={selectedUser.profile_photo}
+                            alt={selectedUser.full_name}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-blue-100"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xl">
+                            {selectedUser.full_name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        {selectedUser.full_name}
+                      </h3>
+                      <p className="text-gray-500 mt-1 capitalize">{selectedUser.role} - ID: {selectedUser.id}</p>
+                    </div>
+                    <button onClick={() => setShowDetailsModal(false)} className="text-gray-400 hover:text-gray-600 p-2">
+                       <FiX className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                      <h4 className="font-semibold text-gray-900 mb-4">Contact Information</h4>
+                      <p className="text-sm text-gray-600 mb-2"><span className="font-medium mr-2">Phone:</span> {selectedUser.phone}</p>
+                      <p className="text-sm text-gray-600 mb-2"><span className="font-medium mr-2">Email:</span> {selectedUser.email || "N/A"}</p>
+                      <p className="text-sm text-gray-600 mb-2"><span className="font-medium mr-2">Language:</span> <span className="uppercase">{selectedUser.language}</span></p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                      <h4 className="font-semibold text-gray-900 mb-4">Account Status</h4>
+                      <div className="mb-2">
+                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeColor(selectedUser.status)}`}>
+                            {getStatusIcon(selectedUser.status)}
+                            <span className="capitalize">{t(`common.${selectedUser.status}`)}</span>
+                         </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-3"><span className="font-medium mr-2">Joined:</span> {new Date(selectedUser.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                     <h4 className="font-bold text-lg text-gray-900 mb-4 border-b pb-2">Recent Trips</h4>
+                     {userDetails.recentTrips && userDetails.recentTrips.length > 0 ? (
+                       <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+                            <tr>
+                              <th className="px-4 py-3">Trip ID</th>
+                              <th className="px-4 py-3">Date</th>
+                              <th className="px-4 py-3">Role Info</th>
+                              <th className="px-4 py-3">Status</th>
+                              <th className="px-4 py-3">Distance</th>
+                              <th className="px-4 py-3">Fare</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                             {userDetails.recentTrips.map((trip: any) => (
+                               <tr key={trip.id}>
+                                  <td className="px-4 py-3 font-mono text-xs">#{trip.id}</td>
+                                  <td className="px-4 py-3">{new Date(trip.created_at).toLocaleDateString()}</td>
+                                  <td className="px-4 py-3 font-medium text-gray-900">
+                                    {selectedUser.role === 'client' ? (trip.driver_name || "Unassigned") : trip.client_name}
+                                  </td>
+                                  <td className="px-4 py-3 capitalize">
+                                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                      trip.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                      {trip.status}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3">{trip.estimated_distance || trip.actual_distance || 0} km</td>
+                                  <td className="px-4 py-3 font-bold text-gray-900">${Number(trip.total_price || 0).toFixed(2)}</td>
+                               </tr>
+                             ))}
+                          </tbody>
+                        </table>
+                       </div>
+                     ) : (
+                       <p className="text-gray-500 italic py-4">No recent trips found for this user.</p>
+                     )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </ProtectedRoute>
