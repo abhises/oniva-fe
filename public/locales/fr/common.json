@@ -34,7 +34,8 @@
   "navigation": {
     "home": "Accueil",
     "profile": "Profil",
-    "bookTrip": "Réserver un Trajet"
+    "bookTrip": "Réserver un Trajet",
+    "settings": "Paramètres"
   },
 
   "errors": {

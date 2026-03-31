@@ -34,7 +34,8 @@
   "navigation": {
     "home": "Home",
     "profile": "Profile",
-    "bookTrip": "Book Trip"
+    "bookTrip": "Book Trip",
+    "settings": "Settings"
   },
   "errors": {
     "INVALID_CREDENTIALS": "Invalid phone number or password",
