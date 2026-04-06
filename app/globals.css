@@ -75,11 +75,11 @@ h3 { @apply text-2xl md:text-3xl; }
 
 /* Beautiful Animated Backgrounds */
 .bg-mesh {
-  background-color: hsl(var(--background));
+  background-color: #ffffff;
   background-image: 
-    radial-gradient(at 0% 0%, hsla(221, 83.2%, 53.3%, 0.1) 0px, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(200, 100%, 50%, 0.08) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(221, 83.2%, 53.3%, 0.1) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, hsla(221, 83.2%, 53.3%, 0.04) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(200, 100%, 50%, 0.02) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(221, 83.2%, 53.3%, 0.04) 0px, transparent 50%);
 }
 
 /* Global Interactive Elements */

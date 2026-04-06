@@ -60,7 +60,7 @@ export default function LandingPage() {
                   </Button>
                 </Link>
                 <Link href={`/${locale}/login`}>
-                  <Button variant="outline" className="w-full sm:w-auto px-8 py-3 rounded-xl border-2 border-primary text-primary font-medium hover:bg-primary/5 transition-all">
+                  <Button variant="outline" className="w-full sm:w-auto px-8">
                     {t('landing.signIn')}
                   </Button>
                 </Link>

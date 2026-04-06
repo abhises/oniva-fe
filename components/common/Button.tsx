@@ -4,7 +4,7 @@ import React from 'react'
 import clsx from 'clsx'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost' | 'outline'
   size?: 'sm' | 'md' | 'lg'
   isLoading?: boolean
   fullWidth?: boolean
@@ -29,6 +29,7 @@ export const Button: React.FC<ButtonProps> = ({
     danger: 'bg-danger text-white hover:bg-opacity-90',
     success: 'bg-success text-white hover:bg-opacity-90',
     ghost: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50',
+    outline: 'bg-transparent border-2 border-primary text-primary hover:bg-primary/5',
   }
 
   const sizeStyles = {
