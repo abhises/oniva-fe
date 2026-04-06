@@ -25,8 +25,12 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
 
     if (!isAuthenticated) {
       router.replace(`/${locale}/login`) // Better to redirect to login
-    } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-      router.replace(`/${locale}/`)
+    } else if (allowedRoles && user) {
+      const userRole = user.role.toLowerCase()
+      const isAllowed = allowedRoles.some(r => r.toLowerCase() === userRole)
+      if (!isAllowed) {
+        router.replace(`/${locale}/`)
+      }
     }
   }, [isAuthenticated, user, rolesString, router, locale, isInitialized])
 
@@ -36,7 +40,11 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
 
   if (!isAuthenticated) return null
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) return null
+  if (allowedRoles && user) {
+    const userRole = user.role.toLowerCase()
+    const isAllowed = allowedRoles.some(r => r.toLowerCase() === userRole)
+    if (!isAllowed) return null
+  }
 
   return <>{children}</>
 }

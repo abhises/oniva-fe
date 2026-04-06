@@ -96,7 +96,7 @@ export const useAuth = () => {
       : response.message;
 
     toast.success(message || 'Registration successful!');
-    router.push(`/${locale}/${role}/dashboard`);
+    router.push(`/${locale}/${role.toLowerCase()}/dashboard`);
 
     return response;
   },
@@ -115,7 +115,7 @@ export const useAuth = () => {
           const message = response.messageKey ? t(response.messageKey) : response.message;
           toast.success(message || 'Login successful!');
           
-          router.push(`/${locale}/${response.data.user.role}/dashboard`);
+          router.push(`/${locale}/${response.data.user.role.toLowerCase()}/dashboard`);
         }
       } catch (error: any) {
         const errorKey = error.response?.data?.messageKey || 'errors.INVALID_CREDENTIALS';

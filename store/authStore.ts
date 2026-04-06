@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
       // Methods
       setAuth: (user) =>
         set({
-          user,
+          user: { ...user, role: (user.role as string).toLowerCase() as any },
           isAuthenticated: true,
           isInitialized: true,
           sessionChecked: true,
@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthState>()(
           isCheckingSession: false,
         }),
 
-      setUser: (user) => set({ user }),
+      setUser: (user) => set({ user: { ...user, role: (user.role as string).toLowerCase() as any } }),
 
       setInitialized: () => set({ isInitialized: true }),
 

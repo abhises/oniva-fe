@@ -26,10 +26,11 @@ export default function LandingPage() {
 
   // Redirect authenticated users to their dashboard
   useEffect(() => {
-    if (isAuthenticated && user) {
-      router.push(`/${locale}/${user.role}/dashboard`)
+    if (isAuthenticated && user && isReady) {
+      const targetPath = `/${locale}/${user.role.toLowerCase()}/dashboard`;
+      router.push(targetPath);
     }
-  }, [isAuthenticated, user, locale, router])
+  }, [isAuthenticated, user, locale, router, isReady])
 
   if (!isReady) return null;
 

@@ -15,6 +15,7 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 interface AcceptResponse {
   success: boolean;
@@ -192,7 +193,8 @@ export default function DriverDashboard({
   const avgKmPerTrip = stats.totalTrips > 0 ? stats.totalKm / stats.totalTrips : 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <ProtectedRoute allowedRoles={["driver"]}>
+      <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <h1 className="text-2xl md:text-3xl font-bold">
           {t("common.welcome")}{" "}
@@ -369,5 +371,6 @@ export default function DriverDashboard({
         </Link>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
