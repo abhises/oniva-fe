@@ -7,9 +7,10 @@ import { Card } from '@/components/common/Card'
 import { Button } from '@/components/common/Button'
 import { Badge } from '@/components/common/Badge'
 import { Loader } from '@/components/common/Loader'
+import { StatsCard } from '@/components/common/StatsCard'
 import { useApi } from '@/hooks/useApi'
 import { apiClient } from '@/services/api'
-import { FiDownload, FiFilter, FiCalendar } from 'react-icons/fi'
+import { FiDownload, FiFilter, FiCalendar, FiTrendingUp, FiDollarSign, FiStar } from 'react-icons/fi'
 interface ReportData {
 period: string
 totalTrips: number
@@ -239,36 +240,31 @@ return (
         </Card>
 
         {/* Key Metrics */}
+        {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <p className="text-sm text-gray-600 mb-2">{t('admin.totalTrips')}</p>
-            <p className="text-3xl font-bold text-primary">
-              {reportData.totalTrips.toLocaleString()}
-            </p>
-          </Card>
+          <StatsCard
+            label={t('admin.totalTrips')}
+            value={reportData.totalTrips.toLocaleString()}
+            icon={<FiTrendingUp className="text-blue-500" />}
+          />
 
-          <Card>
-            <p className="text-sm text-gray-600 mb-2">
-              {t('admin.platformEarnings')}
-            </p>
-            <p className="text-3xl font-bold text-green-600">
-              {reportData.platformCommission.toLocaleString()} XOF
-            </p>
-          </Card>
+          <StatsCard
+            label={t('admin.platformEarnings')}
+            value={`${reportData.platformCommission.toLocaleString()} XOF`}
+            icon={<FiDollarSign className="text-green-600" />}
+          />
 
-          <Card>
-            <p className="text-sm text-gray-600 mb-2">{t('admin.driverEarnings')}</p>
-            <p className="text-3xl font-bold text-blue-600">
-              {reportData.driverEarnings.toLocaleString()} XOF
-            </p>
-          </Card>
+          <StatsCard
+            label={t('admin.driverEarnings')}
+            value={`${reportData.driverEarnings.toLocaleString()} XOF`}
+            icon={<FiDollarSign className="text-blue-600" />}
+          />
 
-          <Card>
-            <p className="text-sm text-gray-600 mb-2">{t('admin.averageRating')}</p>
-            <p className="text-3xl font-bold text-yellow-600">
-              {reportData.averageRating.toFixed(1)} ★
-            </p>
-          </Card>
+          <StatsCard
+            label={t('admin.averageRating')}
+            value={`${reportData.averageRating.toFixed(1)} ★`}
+            icon={<FiStar className="text-yellow-500" />}
+          />
         </div>
 
         {/* Detailed Report Table */}

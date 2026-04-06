@@ -8,6 +8,7 @@ import { useLocale } from '@/hooks/useLocale'
 import { apiClient } from '@/services/api'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { Button } from '@/components/common/Button'
+import { StatsCard } from '@/components/common/StatsCard'
 import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
 import {
@@ -19,19 +20,30 @@ import {
   FiEye,
   FiFilter,
   FiRefreshCw,
+  FiPlay,
+  FiCheckCircle,
+  FiList,
 } from 'react-icons/fi'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 
-const DriverMarkerIcon = new L.Icon({
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+const OnlineDriverIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-})
+  shadowSize: [41, 41]
+});
+
+const OfflineDriverIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 
 // --- Interfaces ---
 interface ActiveTrip {
@@ -64,6 +76,7 @@ interface ActiveTrip {
     email: string
     rating: number
     isOnline: boolean
+    profilePhoto?: string
     location?: {
       latitude: number
       longitude: number
@@ -170,6 +183,41 @@ export default function AdminTripsPage() {
     socket.on('driver_accepted', handleSocketUpdate);
     socket.on('driver_rejected', handleSocketUpdate);
 
+    // Live location updates for the map
+    socket.on('driver_location_updated', (data: any) => {
+      setActiveTrips(prevTrips => prevTrips.map(trip => {
+        if (trip.driver?.id === data.driverId) {
+          return {
+            ...trip,
+            driver: {
+              ...trip.driver,
+              location: {
+                latitude: data.latitude,
+                longitude: data.longitude
+              }
+            }
+          };
+        }
+        return trip;
+      }));
+    });
+
+    // Handle online/offline changes
+    socket.on('driver_status_changed', (data: any) => {
+      setActiveTrips(prevTrips => prevTrips.map(trip => {
+        if (trip.driver?.id === data.driverId) {
+          return {
+            ...trip,
+            driver: {
+              ...trip.driver,
+              isOnline: data.isOnline
+            }
+          };
+        }
+        return trip;
+      }));
+    });
+
     return () => {
       socket.disconnect();
     };
@@ -270,26 +318,31 @@ export default function AdminTripsPage() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-purple-500">
-              <p className="text-sm text-gray-600">{t('admin.scheduled')}</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.scheduled || 0}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-blue-500">
-              <p className="text-sm text-gray-600">{t('admin.assigned')}</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.assigned || 0}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-green-500">
-              <p className="text-sm text-gray-600">{t('admin.inProgress')}</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.started || 0}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-gray-800">
-              <p className="text-sm text-gray-600">{t('common.completed')}</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.completed || 0}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6 border-b-4 border-gray-200">
-              <p className="text-sm text-gray-600">{t('admin.total')}</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats?.total || 0}</p>
-            </div>
+            <StatsCard
+              label={t('admin.scheduled')}
+              value={stats?.scheduled || 0}
+              icon={<FiLoader className="text-purple-500" />}
+            />
+            <StatsCard
+              label={t('admin.assigned')}
+              value={stats?.assigned || 0}
+              icon={<FiRefreshCw className="text-blue-500" />}
+            />
+            <StatsCard
+              label={t('admin.inProgress')}
+              value={stats?.started || 0}
+              icon={<FiPlay className="text-green-500" />}
+            />
+            <StatsCard
+              label={t('common.completed')}
+              value={stats?.completed || 0}
+              icon={<FiCheckCircle className="text-gray-800" />}
+            />
+            <StatsCard
+              label={t('admin.total')}
+              value={stats?.total || 0}
+              icon={<FiList className="text-gray-400" />}
+            />
           </div>
 
           {/* Live Map */}
@@ -318,14 +371,33 @@ export default function AdminTripsPage() {
                       <Marker
                         key={`driver-${trip.id}`}
                         position={[driverLocation.latitude, driverLocation.longitude]}
-                        icon={DriverMarkerIcon}
+                        icon={trip.driver?.isOnline ? OnlineDriverIcon : OfflineDriverIcon}
                       >
-                        <Popup>
-                          <div className="text-sm">
-                            {/* CHANGE THIS LINE BELOW: Use trip.driver.name */}
-                            <strong>{t('admin.driver')}</strong>: {trip.driver?.name || t('admin.unknown')}<br />
-                            <strong>{t('admin.tripId')}</strong>: #{trip.id}<br />
-                            <strong>{t('common.status')}</strong>: {getStatusLabel(trip.status)}
+                        <Popup minWidth={200}>
+                          <div className="p-1">
+                            <div className="flex items-center gap-3 mb-3 border-b pb-2">
+                              <div className="relative">
+                                <img 
+                                  src={trip.driver?.profilePhoto || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'} 
+                                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
+                                  onError={(e: any) => { e.target.src = 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }}
+                                />
+                                <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${trip.driver?.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                              </div>
+                              <div>
+                                <h3 className="font-bold text-gray-900 leading-tight">{trip.driver?.name || t('admin.unknown')}</h3>
+                                <p className="text-xs text-gray-500">{trip.driver?.phone || 'No phone'}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-1.5 text-xs text-gray-700">
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">{t('common.status')}:</span>
+                                <span className={`font-medium ${trip.driver?.isOnline ? 'text-green-600' : 'text-gray-500'}`}>
+                                  {trip.driver?.isOnline ? t('admin.online') : t('admin.offline')}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </Popup>
                       </Marker>

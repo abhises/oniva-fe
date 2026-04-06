@@ -7,6 +7,8 @@ import { apiClient } from "@/services/api";
 import { Loader } from "@/components/common/Loader";
 import { useApi } from "@/hooks/useApi";
 
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+
 interface DriverStatusData {
   success: boolean;
   status: "none" | "pending" | "approved" | "rejected";
@@ -17,6 +19,14 @@ export default function DriverLayout({
 }: {
   children: React.ReactNode;
 }) {
+  return (
+    <ProtectedRoute allowedRoles={["driver"]}>
+      <DriverGuard>{children}</DriverGuard>
+    </ProtectedRoute>
+  );
+}
+
+function DriverGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
@@ -30,17 +40,13 @@ export default function DriverLayout({
 
     const checkOnboardingStatus = async () => {
       try {
-        // Pass the interface <DriverStatusData> here
         const result = await request<DriverStatusData>(() =>
           apiClient.checkDriverStatus(),
         );
 
-        // result is now typed as { status: 'none' | 'pending' ... } | null
         if (!result) return;
 
-        console.log("Onboarding Status Result:", result.status);
-
-        const status = result.status; // No more TS error!
+        const status = result.status;
 
         const isOnSetup = pathname.endsWith("/driver/setup");
         const isOnPending = pathname.endsWith("/driver/pending");
@@ -65,9 +71,9 @@ export default function DriverLayout({
     };
 
     checkOnboardingStatus();
-  }, [isInitialized, pathname, locale, router]);
-  // IMPORTANT: Do not render children until we are sure they are on the right page
-  if (!isInitialized || isVerifying) {
+  }, [isInitialized, pathname, locale, router, request]);
+
+  if (isVerifying) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <Loader />

@@ -53,6 +53,11 @@ class ApiClient {
           // Only logout if not already on the login page to avoid loops
           if (typeof window !== "undefined" && !window.location.pathname.includes('/login')) {
             useAuthStore.getState().logout();
+            
+            // Redirect to login page
+            const pathParts = window.location.pathname.split('/');
+            const locale = pathParts[1] || 'en';
+            window.location.href = `/${locale}/login`;
           }
         }
         return Promise.reject(error);

@@ -60,7 +60,8 @@ export const useApi = (options: UseApiOptions = {}) => {
         const errorMessage = errorKey ? t(errorKey) : (responseData?.message || t('errors.NETWORK_ERROR'));
         setError(errorMessage);
 
-        if (showError) {
+        // Don't show toast for 401 as it's handled by global interceptor redirect
+        if (showError && error.response?.status !== 401) {
           toast.error(errorMessage);
         }
         return null;
