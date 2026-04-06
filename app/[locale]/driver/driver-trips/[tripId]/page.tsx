@@ -177,19 +177,21 @@ export default function DriverTripDetailPage() {
               <FiKey /> {t("driver.startTripVerification")}
             </h3>
             <p className="text-sm text-gray-600 mb-4">{t("driver.otpInstruction")}</p>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-4">
               <input 
                 type="text" 
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 placeholder={t("driver.otpPlaceholder")}
-                className="flex-1 border rounded-lg px-4 py-2 text-center text-xl tracking-widest focus:ring-2 focus:ring-primary outline-none"
+                className="w-full border rounded-lg px-4 py-3 text-center text-2xl font-bold tracking-[0.5em] focus:ring-2 focus:ring-primary outline-none"
               />
               <Button
                 variant="primary"
+                fullWidth
+                size="lg"
                 isLoading={isApiLoading}
-                disabled={isApiLoading}
+                disabled={isApiLoading || otp.length < 4}
                 onClick={handleStartTrip}
               >
                 {t("driver.start")}

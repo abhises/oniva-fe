@@ -323,8 +323,8 @@ export default function DriverDashboard({
                     />
                   </div>
 
-                  <div className="flex justify-between items-center pt-4 border-t">
-                    <div>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t">
+                    <div className="w-full sm:w-auto">
                       <p className="text-sm text-gray-600">
                         {t("client.estimatedFare")}
                       </p>
@@ -332,8 +332,9 @@ export default function DriverDashboard({
                         {req.total_price} XOF
                       </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                       <Button
+                        className="w-full sm:w-auto"
                         variant="success"
                         size="sm"
                         onClick={(e) => {
@@ -345,6 +346,7 @@ export default function DriverDashboard({
                         {t("driver.accept")}
                       </Button>
                       <Button
+                        className="w-full sm:w-auto"
                         variant="danger"
                         size="sm"
                         onClick={(e) => {

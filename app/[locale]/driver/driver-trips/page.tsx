@@ -93,35 +93,55 @@ export default function DriverTripsPage() {
                 className="cursor-pointer transition-transform hover:scale-[1.01]"
               >
                 <Card hoverable>
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <h3 className="font-semibold flex items-center gap-2 text-gray-900">
-                        <FiMapPin size={16} className="text-primary" />
-                        {trip.pickup_address}
-                      </h3>
-                      <p className="text-sm text-gray-600 ml-6">→ {trip.destination_address}</p>
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                    <div className="flex-1 w-full">
+                      <div className="flex items-start gap-2 mb-2">
+                        <FiMapPin size={18} className="text-primary mt-1 shrink-0" />
+                        <div>
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t("driver.pickupAddress")}</p>
+                          <h3 className="font-semibold text-gray-900 text-sm md:text-base leading-tight">
+                            {trip.pickup_address}
+                          </h3>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2 ml-0.5 sm:ml-0">
+                        <div className="w-[18px] flex justify-center shrink-0">
+                          <div className="w-0.5 h-4 bg-gray-200 border-dashed border-l"></div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="w-[18px] flex justify-center shrink-0">
+                           <div className="w-2 h-2 rounded-full bg-gray-300 mt-1.5"></div>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t("driver.destinationAddress")}</p>
+                          <p className="text-sm text-gray-600 leading-tight">
+                            {trip.destination_address || t("driver.openDestination")}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-0 border-gray-50">
                       <Badge variant={getStatusColor(trip.status)} label={trip.status} />
-                      <FiChevronRight className="text-gray-400" />
+                      <FiChevronRight className="text-gray-400 hidden sm:block" />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 border-t pt-4">
-                    <div className="flex items-center gap-2">
-                      <FiDollarSign size={16} className="text-green-600" />
-                      <span className="font-semibold text-gray-900">{trip.total_price} XOF</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FiClock size={16} />
-                      {new Date(trip.created_at).toLocaleDateString()}
-                    </div>
-                    {trip.status === 'completed' && (
-                      <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <FiCheck size={16} />
-                        {t('common.completed')}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm text-gray-600 border-t pt-4">
+                    <div className="flex items-center gap-2 bg-gray-50 sm:bg-transparent p-2 sm:p-0 rounded-lg">
+                      <FiDollarSign size={16} className="text-green-600 shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-gray-400 uppercase sm:hidden font-bold">{t("driver.totalFare")}</p>
+                        <span className="font-bold text-gray-900">{trip.total_price.toLocaleString()} XOF</span>
                       </div>
-                    )}
+                    </div>
+                    <div className="flex items-center gap-2 bg-gray-50 sm:bg-transparent p-2 sm:p-0 rounded-lg">
+                      <FiClock size={16} className="shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-gray-400 uppercase sm:hidden font-bold">{t("driver.date")}</p>
+                        <span className="text-gray-700">{new Date(trip.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                    </div>
                   </div>
                 </Card>
               </div>
