@@ -43,18 +43,36 @@ export const LocationPicker = ({ value, onChange, placeholder = "Search location
     }
   }, [value.address]);
 
-  const handleSearch = async (val: string) => {
-    setSearch(val);
-    if (val.length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (debouncedSearch.length < 2) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        return;
+      }
+      setIsSearching(true);
+      const results = await searchLocation(debouncedSearch);
+      setSuggestions(results);
+      setShowSuggestions(true);
+      setIsSearching(false);
+    };
+
+    if (debouncedSearch !== value.address) {
+      fetchSuggestions();
     }
-    setIsSearching(true);
-    const results = await searchLocation(val);
-    setSuggestions(results);
-    setShowSuggestions(true);
-    setIsSearching(false);
+  }, [debouncedSearch, value.address]);
+
+  const handleSearch = (val: string) => {
+    setSearch(val);
   };
 
   const handleSelectSuggestion = (place: any) => {

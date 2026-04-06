@@ -20,6 +20,8 @@ import {
   FiDollarSign,
   FiTag,
   FiCheck,
+  FiAlertCircle,
+  FiNavigation
 } from "react-icons/fi";
 import dynamic from "next/dynamic";
 
@@ -33,7 +35,6 @@ const UnifiedRouteMap = dynamic(
   { ssr: false },
 );
 
-// 1. ADDED INTERFACE TO FIX TS(2339) ERROR
 interface PricingConfig {
   base_fare: number;
   per_km_rate: number;
@@ -89,7 +90,6 @@ export default function BookTripPage() {
     termsAccepted: false,
   });
 
-  // 2. TYPED THE STATE TO FIX TS(2339)
   const [pricingConfig, setPricingConfig] = useState<PricingConfig | null>(null);
 
   useEffect(() => {
@@ -108,8 +108,8 @@ export default function BookTripPage() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.pickupLocation.address.trim()) newErrors.pickup = "Required";
-    if (formData.bookingType === "point-to-point" && !formData.dropoffLocation.address.trim()) newErrors.dropoff = "Required";
+    if (!formData.pickupLocation?.address?.trim()) newErrors.pickup = "Required";
+    if (formData.bookingType === "point-to-point" && !formData.dropoffLocation?.address?.trim()) newErrors.dropoff = "Required";
     if (!formData.date) newErrors.date = "Required";
     if (!formData.time) newErrors.time = "Required";
     if (!formData.termsAccepted) newErrors.terms = "Required";
@@ -118,7 +118,7 @@ export default function BookTripPage() {
   };
 
   const handleEstimateFare = async () => {
-    if (!formData.pickupLocation.latitude || (formData.bookingType === 'point-to-point' && !formData.dropoffLocation.latitude)) {
+    if (!formData.pickupLocation?.latitude || (formData.bookingType === 'point-to-point' && !formData.dropoffLocation?.latitude)) {
       toast.error("Please select valid locations");
       return;
     }
@@ -206,7 +206,7 @@ export default function BookTripPage() {
 
   const handleProceedToConfirmation = () => {
     if (validateForm() && fareEstimate) setBookingStep("confirmation");
-    else toast.error("Check form and estimate"); // Translating this too
+    else toast.error("Please complete the form and get an estimate first.");
   };
 
   const handleConfirmBooking = async () => {
@@ -229,7 +229,7 @@ export default function BookTripPage() {
         region: "Dakar",
       }));
       if (result?.trip) {
-        toast.success("Confirmed!");
+        toast.success("Booking confirmed!");
         setBookingStep("success");
         setTimeout(() => router.push(`/${locale}/client/client-trips/${result.trip.id}`), 3000);
       }
@@ -239,15 +239,37 @@ export default function BookTripPage() {
   if (bookingStep === "success") {
     return (
       <ProtectedRoute allowedRoles={["client"]}>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
-            <FiCheck className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-2">{t("client.bookingConfirmed")}</h1>
-            <div className="bg-gray-50 p-4 rounded text-left mb-6">
-              <p className="text-sm"><strong>{t("client.pickup")}:</strong> {formData.pickupLocation.address}</p>
-              <p className="text-sm"><strong>{t("client.total")}:</strong> {fareEstimate?.estimatedFare?.toLocaleString()} FCFA</p>
+        <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-transparent">
+          <div className="bg-white/90 backdrop-blur-3xl rounded-[40px] shadow-[0_20px_60px_rgba(0,0,0,0.08)] p-12 max-w-lg w-full text-center border border-white/40 animate-in fade-in slide-in-from-bottom-5 duration-700">
+            <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8 relative">
+                <div className="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-20"></div>
+                <FiCheck className="w-12 h-12 text-green-500 relative z-10" />
             </div>
-            <p className="text-gray-500 text-sm mb-4">{t("client.redirecting")}</p>
+            <h1 className="text-4xl font-black text-gray-900 mb-6 tracking-tight">{t('client.bookingConfirmed')}</h1>
+            <p className="text-gray-500 mb-10 leading-relaxed font-medium">{t('landing.heroSubtitle')}</p>
+            
+            <div className="bg-gray-50/50 backdrop-blur-sm p-8 rounded-[32px] text-left mb-10 border border-gray-100 space-y-4 shadow-inner">
+                <div className="flex gap-5">
+                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 shadow-sm">
+                      <FiMapPin className="text-primary w-6 h-6" />
+                   </div>
+                   <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">{t('client.pickup')}</p>
+                      <p className="text-base font-bold text-gray-800 line-clamp-1">{formData.pickupLocation?.address || 'N/A'}</p>
+                   </div>
+                </div>
+                <div className="flex gap-5">
+                   <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center shrink-0 shadow-sm">
+                      <FiDollarSign className="text-orange-600 w-6 h-6" />
+                   </div>
+                   <div>
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1.5">{t('client.total')}</p>
+                      <p className="text-base font-black text-gray-900">{fareEstimate?.estimatedFare?.toLocaleString()} FCFA</p>
+                   </div>
+                </div>
+            </div>
+            
+            <p className="text-gray-300 text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">{t('client.redirecting')}</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -257,17 +279,61 @@ export default function BookTripPage() {
   if (bookingStep === "confirmation") {
     return (
       <ProtectedRoute allowedRoles={["client"]}>
-        <div className="min-h-screen bg-gray-50 py-8 px-4">
-          <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="bg-blue-600 text-white p-6"><h1 className="text-2xl font-bold">{t("client.reviewBooking")}</h1></div>
-            <div className="p-6 space-y-4">
-              <div className="border p-4 rounded"><p className="text-xs text-gray-500">{t("client.pickup")}</p><p className="font-bold">{formData.pickupLocation.address}</p></div>
-              {formData.bookingType === 'point-to-point' && <div className="border p-4 rounded"><p className="text-xs text-gray-500">{t("client.destination")}</p><p className="font-bold">{formData.dropoffLocation.address}</p></div>}
-              <div className="border p-4 rounded"><p className="text-xs text-gray-500">{t("client.price")}</p><p className="text-xl font-bold text-blue-600">{fareEstimate.estimatedFare.toLocaleString()} FCFA</p></div>
-              <div className="flex gap-4 pt-4 border-t">
-                <Button variant="ghost" fullWidth onClick={() => setBookingStep("details")}>{t("common.back")}</Button>
-                <Button variant="primary" fullWidth isLoading={isLoading} onClick={handleConfirmBooking}>
-                  {!isLoading && t("client.confirm")}
+        <div className="min-h-screen bg-[#F8FAFC] py-8 px-4 flex items-center justify-center">
+          <div className="max-w-xl w-full bg-white/90 backdrop-blur-3xl rounded-[48px] shadow-[0_40px_80px_rgba(0,0,0,0.1)] overflow-hidden border border-white/50">
+            <div className="bg-primary p-8 text-white flex justify-between items-center relative overflow-hidden">
+               <div className="relative z-10">
+                <h1 className="text-3xl font-black tracking-tighter mb-1">{t('client.reviewRide')}</h1>
+                <p className="text-blue-100/80 font-medium text-sm">{t('client.reviewBooking')}</p>
+               </div>
+               <div className="w-16 h-16 bg-white/10 rounded-3xl rotate-12 flex items-center justify-center backdrop-blur-lg">
+                  <FiClock size={32} />
+               </div>
+               <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[80px]"></div>
+            </div>
+            
+            <div className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="bg-gray-50/50 p-6 rounded-[28px] border border-gray-100 flex items-start gap-4">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('client.pickup')}</p>
+                    <p className="font-bold text-gray-900 leading-snug">{formData.pickupLocation?.address}</p>
+                  </div>
+                </div>
+                
+                {formData.bookingType === 'point-to-point' && (
+                <div className="bg-gray-50/50 p-6 rounded-[28px] border border-gray-100 flex items-start gap-4">
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2"></div>
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('client.destination')}</p>
+                    <p className="font-bold text-gray-900 leading-snug">{formData.dropoffLocation?.address}</p>
+                  </div>
+                </div>
+                )}
+                
+                <div className="bg-primary/5 p-6 rounded-[32px] border-2 border-primary/20 flex flex-col items-center text-center">
+                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-3">{t('client.totalPrice')}</p>
+                    <p className="text-5xl font-black text-primary tracking-tighter">{fareEstimate?.estimatedFare?.toLocaleString()} <span className="text-base font-bold ml-1 uppercase">FCFA</span></p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-col-reverse">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setBookingStep("details")}
+                  className="!rounded-3xl font-black text-gray-400 uppercase tracking-widest text-xs py-3"
+                >
+                  {t("common.back")}
+                </Button>
+                <Button 
+                  variant="primary" 
+                  size="lg"
+                  className="!rounded-[24px] shadow-[0_15px_35px_rgba(var(--primary-rgb),0.3)] font-black text-base py-3"
+                  isLoading={isLoading} 
+                  onClick={handleConfirmBooking}
+                >
+                  {!isLoading && t('client.confirm')}
                 </Button>
               </div>
             </div>
@@ -279,81 +345,191 @@ export default function BookTripPage() {
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">{t("client.bookTrip")}</h1>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6 bg-white p-6 rounded-lg shadow-lg">
-              <UnifiedRouteMap pickup={formData.pickupLocation.latitude ? formData.pickupLocation : null} dropoff={formData.dropoffLocation.latitude ? formData.dropoffLocation : null} routeGeometry={routeGeometry} />
-              
-              <RideTypeSelector value={formData.bookingType} onChange={(bookingType) => setFormData((prev) => ({ ...prev, bookingType }))} />
+      <div className="min-h-screen bg-[#F8FAFC] py-8 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto">
+          
+          {/* Header */}
+          <div className="text-center mb-4">
+            <h1 className="text-4xl sm:text-5xl font-black text-gray-900 tracking-tighter mb-4">{t('client.bookRide')}</h1>
+            <p className="text-gray-400 font-medium max-w-md mx-auto">{t('landing.heroSubtitle')}</p>
+          </div>
 
-              {formData.bookingType === 'hourly' && pricingConfig?.hourly_rates && (
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <label className="block text-sm font-bold text-blue-800 mb-2">{t("client.selectDuration")}</label>
-                  <select 
-                    name="hourlyDuration" 
-                    value={formData.hourlyDuration} 
-                    onChange={handleInputChange} 
-                    className="w-full p-2 border rounded"
-                  >
-                    {Object.entries(pricingConfig.hourly_rates).map(([hours, rate]) => (
-                      <option key={hours} value={hours}>
-                        {hours} Hour{Number(hours) > 1 ? 's' : ''} ({Number(rate).toLocaleString()} FCFA)
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <LocationPicker value={formData.pickupLocation} onChange={handlePickupChange} placeholder="Pickup Location" error={errors.pickup} />
-              {formData.bookingType === 'point-to-point' && <LocationPicker value={formData.dropoffLocation} onChange={handleDropoffChange} placeholder="Dropoff Location" error={errors.dropoff} />}
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input type="date" name="date" value={formData.date} onChange={handleInputChange} className="p-2 border rounded" />
-                <input type="time" name="time" value={formData.time} onChange={handleInputChange} className="p-2 border rounded" />
-              </div>
-              
-              <Button
-                variant="success"
-                fullWidth
-                isLoading={isEstimating}
-                onClick={handleEstimateFare}
-                disabled={!formData.date || !formData.time}
-              >
-                {!isEstimating && t("client.estimateFare")}
-              </Button>
-
-              <div className="block lg:hidden">
-                <FareEstimate estimate={fareEstimate} bookingType={formData.bookingType} passengers={formData.passengers} isLoading={isEstimating} />
-              </div>
-
-              <PassengerSelector value={formData.passengers} onChange={(passengers) => setFormData((prev) => ({ ...prev, passengers }))} maxPassengers={6} />
-              <PaymentSelector value={formData.paymentMethod} onChange={(method) => setFormData((prev) => ({ ...prev, paymentMethod: method }))} />
-              
-              {/* FIXED ALIGNMENT HERE */}
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    name="termsAccepted" 
-                    checked={formData.termsAccepted} 
-                    onChange={handleInputChange} 
-                    className="w-5 h-5 mt-0.5 text-blue-600 rounded focus:ring-blue-500 border-gray-300 transition shrink-0"
-                  />
-                  <span className="text-sm text-gray-700 leading-snug">
-                    I agree to the <a href="#" className="text-blue-600 underline hover:text-blue-800">terms and conditions</a> and <a href="#" className="text-blue-600 underline hover:text-blue-800">privacy policy</a>
-                  </span>
-                </label>
-                {errors.terms && <p className="text-red-500 text-xs mt-2 ml-8">{errors.terms}</p>}
-              </div>
-
-              <Button variant="primary" fullWidth size="lg" onClick={handleProceedToConfirmation}>
-                {t("client.proceedToConfirmation")}
-              </Button>
+          {/* Centered Map Card */}
+          <div className="sticky top-6 bg-white rounded-[40px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.06)] border border-white h-[300px] sm:h-[400px] transition-all group z-30">
+             <UnifiedRouteMap 
+              pickup={formData.pickupLocation?.latitude ? formData.pickupLocation : null} 
+              dropoff={formData.dropoffLocation?.latitude ? formData.dropoffLocation : null} 
+              routeGeometry={routeGeometry} 
+            />
+            {/* Live Status Overlay */}
+            <div className="absolute top-6 left-6 z-10">
+               <div className="bg-white/90 backdrop-blur-xl py-2 px-4 rounded-2xl shadow-lg border border-white/50 flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-800">{t('client.liveTripInfo')}</span>
+               </div>
             </div>
-            <div className="hidden lg:block lg:col-span-1">
-              <FareEstimate estimate={fareEstimate} bookingType={formData.bookingType} passengers={formData.passengers} isLoading={isEstimating} />
+          </div>
+
+          {/* Centered Booking Card */}
+          <div className="bg-white/70 backdrop-blur-3xl rounded-[48px] shadow-[0_40px_100px_rgba(0,0,0,0.05)] border border-white/50 overflow-hidden relative z-10 -mt-6">
+            <div className="p-6 sm:p-8 space-y-6">
+              
+              {/* Type Selector */}
+              <div className="bg-gray-100/50 p-2 rounded-[28px] flex gap-2">
+                <button 
+                  onClick={() => setFormData(p => ({...p, bookingType: 'point-to-point'}))}
+                  className={`flex-1 py-3 px-4 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 ${formData.bookingType === 'point-to-point' ? 'bg-white text-primary shadow-sm scale-[1.02]' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  {t('client.ride')}
+                </button>
+                <button 
+                  onClick={() => setFormData(p => ({...p, bookingType: 'hourly'}))}
+                  className={`flex-1 py-3 px-4 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 ${formData.bookingType === 'hourly' ? 'bg-white text-primary shadow-sm scale-[1.02]' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  {t('client.rentHourly')}
+                </button>
+              </div>
+
+              {/* Route Section */}
+              <div className="space-y-6">
+                 <div className="flex items-center gap-4 mb-2">
+                    <div className="w-1.5 h-6 bg-primary rounded-full"></div>
+                    <h2 className="text-xl font-black text-gray-900 tracking-tight">{t('client.routeDetails')}</h2>
+                 </div>
+
+                 <div className="grid grid-cols-1 gap-6 relative">
+                   <div className="space-y-4">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('client.pickup')}</label>
+                      <LocationPicker 
+                        value={formData.pickupLocation} 
+                        onChange={handlePickupChange} 
+                        placeholder={t('client.wherePickingUp')}
+                        error={errors.pickup} 
+                      />
+                   </div>
+
+                   {formData.bookingType === 'point-to-point' && (
+                   <div className="space-y-4 relative">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('client.destination')}</label>
+                      <LocationPicker 
+                        value={formData.dropoffLocation} 
+                        onChange={handleDropoffChange} 
+                        placeholder={t('client.whereHeading')} 
+                        error={errors.dropoff} 
+                      />
+                      {/* Vertical line connector */}
+                      <div className="absolute left-[20px] -top-[40px] w-[2px] h-[30px] bg-gradient-to-b from-primary/20 to-transparent"></div>
+                   </div>
+                   )}
+
+                   {formData.bookingType === 'hourly' && pricingConfig?.hourly_rates && (
+                    <div className="space-y-4">
+                         <label className="text-[10px] font-black text-primary uppercase tracking-[0.3em] ml-1">{t('client.rentalDuration')}</label>
+                         <select 
+                          name="hourlyDuration" 
+                          value={formData.hourlyDuration} 
+                          onChange={handleInputChange} 
+                          className="w-full p-4 bg-primary/5 border-2 border-primary/10 rounded-[24px] focus:ring-0 outline-none font-black text-primary text-sm appearance-none cursor-pointer transition-all hover:bg-primary/10"
+                        >
+                          {Object.entries(pricingConfig.hourly_rates).map(([hours, rate]) => (
+                            <option key={hours} value={hours}>
+                              {hours} {t('common.period')} • {Number(rate).toLocaleString()} FCFA
+                            </option>
+                          ))}
+                        </select>
+                    </div>
+                  )}
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('client.tripDate')}</label>
+                       <input 
+                        type="date" 
+                        name="date" 
+                        value={formData.date} 
+                        onChange={handleInputChange} 
+                        className="w-full p-4 bg-gray-50/50 border border-gray-100 rounded-[24px] outline-none font-bold text-gray-800 text-sm focus:border-primary transition-all" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('client.tripTime')}</label>
+                       <input 
+                        type="time" 
+                        name="time" 
+                        value={formData.time} 
+                        onChange={handleInputChange} 
+                        className="w-full p-4 bg-gray-50/50 border border-gray-100 rounded-[24px] outline-none font-bold text-gray-800 text-sm focus:border-primary transition-all" 
+                      />
+                    </div>
+                 </div>
+              </div>
+
+              {/* Ride Options Section */}
+              <div className="space-y-6">
+                 <div className="flex items-center gap-4">
+                    <div className="w-1.5 h-6 bg-orange-500 rounded-full"></div>
+                    <h2 className="text-xl font-black text-gray-900 tracking-tight">{t('client.rideOptions')}</h2>
+                 </div>
+                 <div className="grid grid-cols-1 gap-6">
+                   <PassengerSelector size="lg" value={formData.passengers} onChange={(v) => setFormData(p => ({...p, passengers: v}))} maxPassengers={6} />
+                   <div className="space-y-4">
+                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('client.paymentFinalize')}</label>
+                     <PaymentSelector value={formData.paymentMethod} onChange={(m) => setFormData(p => ({...m, paymentMethod: m}))} />
+                   </div>
+                 </div>
+              </div>
+
+              {/* Terms & CTA Section */}
+              <div className="space-y-6 pt-4">
+                 <div className="bg-gray-50/50 p-6 rounded-[28px] border border-gray-100 group">
+                    <label className="flex items-start gap-4 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        name="termsAccepted" 
+                        checked={formData.termsAccepted} 
+                        onChange={handleInputChange} 
+                        className="w-5 h-5 text-primary rounded-lg border-gray-200 mt-0.5 focus:ring-0 transition-all cursor-pointer"
+                      />
+                      <span className="text-[13px] font-bold text-gray-400 leading-relaxed group-hover:text-gray-600 transition-colors">
+                        {t('client.termsAgreement')} <a href="#" className="text-primary hover:underline">{t('client.termsOfUse')}</a> {t('common.and')} <a href="#" className="text-primary hover:underline">{t('client.privacyPolicy')}</a>
+                      </span>
+                    </label>
+                    {errors.terms && <p className="text-red-500 text-[10px] font-black uppercase mt-3 ml-9 flex items-center gap-2 animate-bounce"><FiAlertCircle className="shrink-0" /> {errors.terms}</p>}
+                 </div>
+
+                 <div className="space-y-4">
+                    {fareEstimate && (
+                      <div className="animate-in slide-in-from-bottom-4 duration-700">
+                        <FareEstimate 
+                          estimate={fareEstimate} 
+                          bookingType={formData.bookingType} 
+                          passengers={formData.passengers} 
+                          isLoading={isEstimating} 
+                        />
+                      </div>
+                    )}
+
+                    <Button 
+                      variant={fareEstimate ? "primary" : "success"}
+                      fullWidth 
+                      size="lg" 
+                      className={`!py-4 !rounded-[28px] text-base font-black tracking-tight shadow-2xl active:scale-[0.98] transition-all duration-300 ${!fareEstimate ? 'bg-green-600 shadow-green-600/20' : 'shadow-primary/30'}`}
+                      onClick={fareEstimate ? handleProceedToConfirmation : handleEstimateFare}
+                      isLoading={isEstimating || isLoading}
+                      disabled={!formData.date || !formData.time || !formData.pickupLocation?.address}
+                    >
+                      {fareEstimate 
+                        ? t('client.reviewRide') 
+                        : (isEstimating ? t('client.calculating') : t('client.findBestFare'))}
+                    </Button>
+                    
+                    <div className="flex justify-center items-center gap-3">
+                       <FiCheck className="text-green-500 w-4 h-4" />
+                       <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">{t('client.reliableService')}</span>
+                    </div>
+                 </div>
+              </div>
             </div>
           </div>
         </div>
