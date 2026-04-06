@@ -184,7 +184,7 @@ export default function DriverDashboard({
   };
 
   const handleReject = async (requestId: string) => {
-    await request(() => apiClient.rejectRequest(requestId, "Too far away"));
+    await request(() => apiClient.rejectRequest(requestId, t("driver.tooFarAway")));
     fetchRequests(); // Refresh list after rejecting
   };
 
@@ -221,14 +221,14 @@ export default function DriverDashboard({
           value={`${stats.earnings.toLocaleString()} XOF`}
           icon={<FiDollarSign />}
           trend="up"
-          trendValue="Overall"
+          trendValue={t("common.overall")}
         />
         <StatsCard
           label={t("driver.rating")}
           value={stats.rating.toFixed(1)}
           icon={<FiStar />}
           trend="up"
-          trendValue="Average"
+          trendValue={t("common.average")}
         />
         <StatsCard
           label={t("driver.totalKm")}
@@ -242,7 +242,7 @@ export default function DriverDashboard({
           value={`${avgEarningPerTrip.toFixed(0)} XOF`}
           icon={<FiDollarSign />}
           trend="up"
-          trendValue="Average"
+          trendValue={t("common.average")}
         />
         <StatsCard
           label={t("driver.avgKmPerTrip")}

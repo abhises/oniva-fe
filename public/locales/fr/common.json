@@ -29,7 +29,10 @@
     "apply": "Appliquer",
     "days": "Jours",
     "period": "Période",
-    "status": "Statut"
+    "status": "Statut",
+    "overall": "Global",
+    "average": "Moyenne",
+    "thisWeek": "cette semaine"
   },
   "navigation": {
     "home": "Accueil",
@@ -166,7 +169,8 @@
     "fare": "Tarif",
     "decline": "Décliner",
     "requestNotFoundOrExpired": "Demande non trouvée ou expirée",
-    "backToDashboard": "Retour au Tableau de Bord"
+    "backToDashboard": "Retour au Tableau de Bord",
+    "tooFarAway": "Trop loin"
   },
   "admin": {
     "dashboard": "Tableau de Bord",
@@ -301,7 +305,12 @@
     "reportSummaryText_part4": "tandis que les chauffeurs ont gagné",
     "reportSummaryText_part5": ". Avec",
     "reportSummaryText_part6": "utilisateurs actifs et",
-    "reportSummaryText_part7": "chauffeurs actifs, la plateforme continue de croître régulièrement."
+    "reportSummaryText_part7": "chauffeurs actifs, la plateforme continue de croître régulièrement.",
+    "noPhone": "Pas de téléphone",
+    "unknown": "Inconnu",
+    "tripStatus": "Statut du trajet",
+    "noActiveTripsMap": "Aucun trajet actif ou avec localisation activée à afficher sur la carte",
+    "exportSoon": "La fonctionnalité d'exportation sera bientôt disponible"
   },
   "landing": {
     "heroTitle": "Votre Chauffeur Personnel de Confiance",

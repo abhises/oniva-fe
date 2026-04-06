@@ -29,7 +29,10 @@
     "period": "Period",
     "status": "Status",
     "startDate": "Start Date",
-    "endDate": "End Date"
+    "endDate": "End Date",
+    "overall": "Overall",
+    "average": "Average",
+    "thisWeek": "this week"
   },
   "navigation": {
     "home": "Home",
@@ -165,7 +168,8 @@
     "fare": "Fare",
     "decline": "Decline",
     "requestNotFoundOrExpired": "Request not found or expired",
-    "backToDashboard": "Back to Dashboard"
+    "backToDashboard": "Back to Dashboard",
+    "tooFarAway": "Too far away"
   },
   "admin": {
     "dashboard": "Dashboard",
@@ -305,7 +309,11 @@
     "reportSummaryText_part4": "while drivers earned",
     "reportSummaryText_part5": ". With",
     "reportSummaryText_part6": "active users and",
-    "reportSummaryText_part7": "active drivers, the platform continues to grow steadily."
+    "reportSummaryText_part7": "active drivers, the platform continues to grow steadily.",
+    "noPhone": "No phone",
+    "unknown": "Unknown",
+    "tripStatus": "Trip Status",
+    "exportSoon": "Export functionality coming soon"
   },
   "landing": {
     "heroTitle": "Your Trusted Personal Driver",

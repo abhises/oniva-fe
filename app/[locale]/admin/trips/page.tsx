@@ -190,7 +190,7 @@ export default function AdminTripsPage() {
           return {
             ...trip,
             driver: {
-              ...trip.driver,
+              ...trip.driver!,
               location: {
                 latitude: data.latitude,
                 longitude: data.longitude
@@ -209,7 +209,7 @@ export default function AdminTripsPage() {
           return {
             ...trip,
             driver: {
-              ...trip.driver,
+              ...trip.driver!,
               isOnline: data.isOnline
             }
           };
@@ -386,7 +386,7 @@ export default function AdminTripsPage() {
                               </div>
                               <div>
                                 <h3 className="font-bold text-gray-900 leading-tight">{trip.driver?.name || t('admin.unknown')}</h3>
-                                <p className="text-xs text-gray-500">{trip.driver?.phone || 'No phone'}</p>
+                                <p className="text-xs text-gray-500">{trip.driver?.phone || t('admin.noPhone')}</p>
                               </div>
                             </div>
                             

@@ -103,12 +103,12 @@ const fetchReport = async () => {
 fetchReport()
 }, [dateRange, request])
 const handleExportPDF = () => {
-  alert('PDF export functionality coming soon')
+  alert(t('admin.exportSoon'))
 }
 const handleExportCSV = () => {
   if (!reportData) return
   
-  const headers = ["Metric", "Value"]
+  const headers = [t('admin.metric'), t('admin.value')]
   const rows = [
     ["Total Trips", reportData.totalTrips],
     ["Total Platform Earnings", `${reportData.platformCommission} XOF`],
