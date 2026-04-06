@@ -151,8 +151,23 @@ export default function DriverDashboard({
   useEffect(() => {
     if (isOnline) {
       fetchRequests();
+      
+      // Set up periodic location updates (every 30 seconds)
+      const locationInterval = setInterval(() => {
+        updateLocation();
+      }, 30000);
+
+      // Set up periodic request fetching as a fallback to sockets
+      const requestInterval = setInterval(() => {
+        fetchRequests();
+      }, 10000);
+
+      return () => {
+        clearInterval(locationInterval);
+        clearInterval(requestInterval);
+      };
     }
-  }, [isOnline, fetchRequests]);
+  }, [isOnline, fetchRequests, updateLocation]);
 
   // Socket connection
   useEffect(() => {
