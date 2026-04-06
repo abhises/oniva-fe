@@ -29,7 +29,6 @@ html {
 /* Body Styling */
 body {
   @apply bg-white text-gray-900;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
