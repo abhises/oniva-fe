@@ -90,6 +90,9 @@ export const useAuth = () => {
     }
 
     // success path
+    if (response.data?.token) {
+      document.cookie = `token=${response.data.token}; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
+    }
     setAuth(response.data!.user);
     const message = response.messageKey
       ? t(response.messageKey)
@@ -109,6 +112,9 @@ export const useAuth = () => {
         const response = await apiClient.login({phone, password});
 
         if (response.success && response.data) {
+          if (response.data.token) {
+            document.cookie = `token=${response.data.token}; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
+          }
           setAuth(response.data.user);
           
           // Use messageKey from response
@@ -132,6 +138,7 @@ export const useAuth = () => {
     } catch (error) {
       // continue with client logout even if backend logout fails
     }
+    document.cookie = "token=; Path=/; Max-Age=0; SameSite=Lax; Secure";
     storeLogout()
     toast.success(t('common.logout'))
     router.push('/')
