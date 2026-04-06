@@ -37,14 +37,14 @@ export const useAuthStore = create<AuthState>()(
 
       // Methods
       setAuth: (user, token) =>
-        set({
+        set((state) => ({
           user: { ...user, role: (user.role as string).toLowerCase() as any },
-          token: token || null,
+          token: token || state.token,
           isAuthenticated: true,
           isInitialized: true,
           sessionChecked: true,
           isCheckingSession: false,
-        }),
+        })),
 
       logout: () =>
         set({

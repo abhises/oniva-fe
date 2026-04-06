@@ -47,9 +47,15 @@ class ApiClient {
 
     // Add authorization header from store
     this.instance.interceptors.request.use((config) => {
-      const token = useAuthStore.getState().token;
+      const state = useAuthStore.getState();
+      const token = state.token;
+      
       if (token) {
+        if (!config.headers) config.headers = {} as any;
         config.headers.Authorization = `Bearer ${token}`;
+        // console.log("🔑 Interceptor: Token found, added to headers");
+      } else {
+        // console.log("🚫 Interceptor: No token found in store");
       }
       return config;
     });

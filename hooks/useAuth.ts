@@ -25,6 +25,7 @@ export const useAuth = () => {
   const { t ,locale} = useTranslation()
   const { 
     user, 
+    token,
     isInitialized, 
     sessionChecked, 
     isCheckingSession,
@@ -40,8 +41,15 @@ export const useAuth = () => {
       // Don't check if we already checked session or currently checking
       if (sessionChecked || isCheckingSession) return
 
-      // If user is already set from store persistence
-      if (user) {
+      // If user is already set from store persistence BUT token is missing (old schema)
+      if (user && !token) {
+        storeLogout()
+        setSessionChecked(true)
+        return
+      }
+
+      // If both exist, we are good
+      if (user && token) {
         setSessionChecked(true)
         return
       }
@@ -63,7 +71,7 @@ export const useAuth = () => {
     }
 
     checkSession()
-  }, [sessionChecked, isCheckingSession, setAuth, storeLogout, user, setSessionChecked, setIsCheckingSession])
+  }, [sessionChecked, isCheckingSession, setAuth, storeLogout, user, token, setSessionChecked, setIsCheckingSession])
 
   const authReady = isInitialized && sessionChecked
 
