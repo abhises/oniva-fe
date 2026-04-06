@@ -79,8 +79,8 @@ export default function BookTripPage() {
   const [formData, setFormData] = useState<BookingFormData>({
     pickupLocation: { address: "", latitude: 0, longitude: 0 },
     dropoffLocation: { address: "", latitude: 0, longitude: 0 },
-    date: "",
-    time: "",
+    date: new Date().toISOString().split('T')[0],
+    time: new Date().toTimeString().slice(0, 5),
     bookingType: "point-to-point",
     hourlyDuration: 1, 
     passengers: 1,
@@ -517,7 +517,7 @@ export default function BookTripPage() {
                       className={`!py-4 !rounded-[28px] text-base font-black tracking-tight shadow-2xl active:scale-[0.98] transition-all duration-300 ${!fareEstimate ? 'bg-green-600 shadow-green-600/20' : 'shadow-primary/30'}`}
                       onClick={fareEstimate ? handleProceedToConfirmation : handleEstimateFare}
                       isLoading={isEstimating || isLoading}
-                      disabled={!formData.date || !formData.time || !formData.pickupLocation?.address}
+                      disabled={!formData.date || !formData.time || !formData.pickupLocation?.address || (formData.bookingType === 'point-to-point' && !formData.dropoffLocation?.address)}
                     >
                       {fareEstimate 
                         ? t('client.reviewRide') 

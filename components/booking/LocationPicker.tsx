@@ -66,7 +66,7 @@ export const LocationPicker = ({ value, onChange, placeholder = "Search location
       setIsSearching(false);
     };
 
-    if (debouncedSearch !== value.address) {
+    if (debouncedSearch !== value.address && debouncedSearch !== value.address.split(",")[0]) {
       fetchSuggestions();
     }
   }, [debouncedSearch, value.address]);
@@ -103,45 +103,48 @@ export const LocationPicker = ({ value, onChange, placeholder = "Search location
 
   return (
     <div className="relative space-y-3" ref={inputRef}>
-      <div className="relative flex items-center">
-        <FiMapPin className="absolute left-3 text-gray-400 w-5 h-5" />
+      <div className="relative flex items-center group">
+        <FiMapPin className="absolute left-5 text-gray-400 group-focus-within:text-primary transition-colors w-5 h-5" />
         <input
           type="text"
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => search.length > 0 && setShowSuggestions(true)}
           placeholder={placeholder}
-          className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-            error ? "border-red-500" : "border-gray-300"
+          className={`w-full pl-12 pr-12 py-4 bg-gray-50/50 rounded-[24px] outline-none font-bold text-gray-800 text-sm focus:bg-white focus:shadow-[0_8px_30px_rgba(0,0,0,0.04)] focus:border-primary transition-all ${
+            error ? "border-red-500 border-2" : "border-gray-100 border"
           }`}
         />
         {isSearching && (
-          <div className="absolute right-3 text-gray-400 animate-spin">
+          <div className="absolute right-5 text-gray-400 animate-spin">
             <FiLoader className="w-5 h-5" />
           </div>
         )}
         {search && !isSearching && (
-          <button onClick={handleClear} className="absolute right-3 text-gray-400 hover:text-gray-600 transition">
+          <button type="button" onClick={handleClear} className="absolute right-5 text-gray-400 hover:text-gray-600 transition bg-transparent border-none">
             <FiX className="w-5 h-5" />
           </button>
         )}
       </div>
 
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-xl mt-1 z-[1000] max-h-64 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border border-white/40 rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.08)] mt-2 z-[1000] max-h-[300px] overflow-y-auto p-2">
           {suggestions.map((place, index) => {
             const name = place.display_name.split(",")[0];
-            const region = place.display_name.split(",").slice(1, 3).join(",").trim();
+            const region = place.display_name.split(",").slice(1, 4).join(",").trim();
             return (
               <button
+                type="button"
                 key={index}
                 onClick={() => handleSelectSuggestion(place)}
-                className="w-full px-4 py-3 text-left hover:bg-blue-50 border-b last:border-b-0 transition flex items-start gap-3"
+                className="w-full px-4 py-3.5 text-left hover:bg-gray-50/80 rounded-[16px] transition flex items-center gap-4 group"
               >
-                <FiMapPin className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
-                <div className="min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{name}</p>
-                  <p className="text-xs text-gray-500 truncate">{region}</p>
+                <div className="w-10 h-10 rounded-[12px] bg-gray-100/50 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                  <FiMapPin className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-gray-900 truncate text-sm">{name}</p>
+                  <p className="text-[11px] font-medium text-gray-500 truncate mt-0.5">{region}</p>
                 </div>
               </button>
             );
