@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from '@/components/providers';
 import "leaflet/dist/leaflet.css";
-import { Inter } from 'next/font/google';
+import { Outfit } from 'next/font/google';
 
-const inter = Inter({
+const outfit = Outfit({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-outfit',
+  weight: ['300', '400', '500', '600'],
 });
 
 export const metadata: Metadata = {
@@ -21,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className={inter.className}>
+    <html lang="en" className={outfit.variable}>
+      <body className={outfit.className}>
         <Providers>{children}</Providers>
       </body>
     </html>

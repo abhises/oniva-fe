@@ -18,12 +18,12 @@ export const Header = ({ locale }: { locale: string }) => {
   if (!isReady) return null;
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="glass sticky top-0 z-[9999] transition-custom border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link
             href={`/${locale}`}
-            className="text-2xl font-bold text-primary"
+            className="text-2xl font-semibold text-primary tracking-tight"
             onClick={closeMenu}
           >
             ONIVA
