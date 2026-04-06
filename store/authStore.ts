@@ -11,11 +11,12 @@ interface User {
 
 interface AuthState {
   user: User | null
+  token: string | null
   isAuthenticated: boolean
   isInitialized: boolean
   sessionChecked: boolean
   isCheckingSession: boolean
-  setAuth: (user: User) => void
+  setAuth: (user: User, token?: string) => void
   logout: () => void
   setUser: (user: User) => void
   setInitialized: () => void
@@ -28,15 +29,17 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       // Initial state
       user: null,
+      token: null,
       isAuthenticated: false,
       isInitialized: false,
       sessionChecked: false,
       isCheckingSession: false,
 
       // Methods
-      setAuth: (user) =>
+      setAuth: (user, token) =>
         set({
           user: { ...user, role: (user.role as string).toLowerCase() as any },
+          token: token || null,
           isAuthenticated: true,
           isInitialized: true,
           sessionChecked: true,
@@ -46,6 +49,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () =>
         set({
           user: null,
+          token: null,
           isAuthenticated: false,
           isInitialized: true,
           sessionChecked: true,

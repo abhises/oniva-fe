@@ -45,6 +45,15 @@ class ApiClient {
       withCredentials: true,
     });
 
+    // Add authorization header from store
+    this.instance.interceptors.request.use((config) => {
+      const token = useAuthStore.getState().token;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+
     // Handle responses and errors
     this.instance.interceptors.response.use(
       (response) => response,
