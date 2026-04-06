@@ -475,7 +475,7 @@ export default function BookTripPage() {
                    <PassengerSelector size="lg" value={formData.passengers} onChange={(v) => setFormData(p => ({...p, passengers: v}))} maxPassengers={6} />
                    <div className="space-y-4">
                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('client.paymentFinalize')}</label>
-                     <PaymentSelector value={formData.paymentMethod} onChange={(m) => setFormData(p => ({...m, paymentMethod: m}))} />
+                     <PaymentSelector value={formData.paymentMethod} onChange={(m) => setFormData(p => ({...p, paymentMethod: m}))} />
                    </div>
                  </div>
               </div>
