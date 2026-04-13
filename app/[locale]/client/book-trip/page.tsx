@@ -375,16 +375,16 @@ export default function BookTripPage() {
             <div className="p-6 sm:p-8 space-y-6">
               
               {/* Type Selector */}
-              <div className="bg-gray-100/50 p-2 rounded-[28px] flex gap-2">
+              <div className="bg-gray-100/50 p-2 rounded-[28px] flex gap-2 border-none">
                 <button 
                   onClick={() => setFormData(p => ({...p, bookingType: 'point-to-point'}))}
-                  className={`flex-1 py-3 px-4 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 ${formData.bookingType === 'point-to-point' ? 'bg-white text-primary shadow-sm scale-[1.02]' : 'text-gray-400 hover:text-gray-600'}`}
+                  className={`flex-1 py-3 px-4 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 border-none outline-none focus:outline-none focus:ring-0 ${formData.bookingType === 'point-to-point' ? 'bg-white text-primary shadow-sm scale-[1.02]' : 'text-gray-400 hover:text-gray-600'}`}
                 >
                   {t('client.ride')}
                 </button>
                 <button 
                   onClick={() => setFormData(p => ({...p, bookingType: 'hourly'}))}
-                  className={`flex-1 py-3 px-4 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 ${formData.bookingType === 'hourly' ? 'bg-white text-primary shadow-sm scale-[1.02]' : 'text-gray-400 hover:text-gray-600'}`}
+                  className={`flex-1 py-3 px-4 rounded-[22px] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 border-none outline-none focus:outline-none focus:ring-0 ${formData.bookingType === 'hourly' ? 'bg-white text-primary shadow-sm scale-[1.02]' : 'text-gray-400 hover:text-gray-600'}`}
                 >
                   {t('client.rentHourly')}
                 </button>
@@ -429,7 +429,7 @@ export default function BookTripPage() {
                           name="hourlyDuration" 
                           value={formData.hourlyDuration} 
                           onChange={handleInputChange} 
-                          className="w-full p-4 bg-primary/5 border-2 border-primary/10 rounded-[24px] focus:ring-0 outline-none font-black text-primary text-sm appearance-none cursor-pointer transition-all hover:bg-primary/10"
+                          className="w-full p-4 bg-primary/5 border-none rounded-[24px] focus:ring-0 outline-none font-black text-primary text-sm appearance-none cursor-pointer transition-all hover:bg-primary/10"
                         >
                           {Object.entries(pricingConfig.hourly_rates).map(([hours, rate]) => (
                             <option key={hours} value={hours}>
