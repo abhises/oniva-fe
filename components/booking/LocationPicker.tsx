@@ -19,8 +19,9 @@ interface Props {
 async function searchLocation(query: string) {
   if (query.length < 2) return [];
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${query}&countrycodes=sn&limit=8`
+      `${baseUrl}/search?format=json&q=${query}&countrycodes=sn&limit=8`
     );
     return await res.json();
   } catch (error) {

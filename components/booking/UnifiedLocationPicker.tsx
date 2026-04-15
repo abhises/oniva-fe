@@ -114,8 +114,9 @@ function MapMarkers({ pickupLocation, dropoffLocation }: any) {
 
 async function reverseGeocode(lat: number, lng: number) {
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+      `${baseUrl}/reverse?lat=${lat}&lon=${lng}&format=json`,
     );
     const data = await res.json();
     return data.display_name || "Selected location";
@@ -129,8 +130,9 @@ async function searchLocation(query: string) {
   if (query.length < 2) return [];
 
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=8`,
+      `${baseUrl}/search?format=json&q=${query}&limit=8`,
     );
     const data = await res.json();
     return data;

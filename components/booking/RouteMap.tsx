@@ -45,8 +45,9 @@ function MapClickHandler({ onPickupChange, onDropoffChange, pickup, dropoff }: a
 
 async function reverseGeocode(lat: number, lng: number, onChange: any) {
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+      `${baseUrl}/reverse?lat=${lat}&lon=${lng}&format=json`
     )
     const data = await res.json()
     onChange({
