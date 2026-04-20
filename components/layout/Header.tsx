@@ -149,6 +149,9 @@ const NavLinks = ({ user, locale, t, onClick }: any) => {
           <Link href={`/${locale}/${user.role}/trips`} onClick={onClick}>
             {t("admin.trips")}
           </Link>
+          <Link href={`/${locale}/${user.role}/transactions`} onClick={onClick}>
+            {t("admin.transactions", "Transactions")}
+          </Link>
           <Link href={`/${locale}/${user.role}/settings`} onClick={onClick}>
             {t("navigation.settings") || "Settings"}
           </Link>

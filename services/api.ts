@@ -526,6 +526,20 @@ class ApiClient {
     return data;
   }
 
+  async getAdminTransactions(params: {
+    startDate?: string;
+    endDate?: string;
+    driverId?: string | number;
+    clientId?: string | number;
+    status?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  } = {}) {
+    const { data } = await this.instance.get<ApiResponse>("/api/admin/transactions", { params });
+    return data;
+  }
+
   async getAllTripDetails(tripId: string | number) {
     const { data } = await this.instance.get<ApiResponse>(
       `/api/trips/${tripId}`,

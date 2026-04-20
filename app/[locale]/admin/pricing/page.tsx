@@ -9,7 +9,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { Button } from '@/components/common/Button'
 import toast from 'react-hot-toast'
 import { useTranslation } from "react-i18next";
-import { FiArrowLeft, FiLoader, FiCheck, FiDollarSign, FiClock, FiRefreshCw, FiSave } from 'react-icons/fi'
+import { FiArrowLeft, FiLoader, FiCheck, FiDollarSign, FiClock, FiRefreshCw, FiSave, FiMapPin, FiMoon, FiPercent, FiTrendingUp } from 'react-icons/fi'
 
 // Backend structure
 interface HourlyRates {
@@ -259,16 +259,22 @@ export default function AdminPricingPage() {
             </Button>
           </div>
 
-          {/* Configuration Form */}
-          <div className="bg-white rounded-lg shadow-lg mb-8 overflow-hidden">
-             {/* Base Pricing */}
-            <div className="p-6 border-b border-gray-100">
-                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <div className="w-1 h-6 bg-blue-600 rounded"></div>
-                  {t('admin.pricing.sections.tariffs', 'Point-to-Point Tariffs')}
-                </h2>
+          {/* Configuration Grid */}
+          <div className="grid grid-cols-1 gap-6 mb-8">
+             {/* Base Pricing Card */}
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-gray-100/50 hover:shadow-md transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30">
+                    <FiTrendingUp className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
+                      {t('admin.pricing.sections.tariffs', 'Point-to-Point Tariffs')}
+                    </h2>
+                  </div>
+                </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('admin.pricing.fields.baseFare', 'Base Fare')}</label>
                     <div className="relative">
@@ -341,12 +347,18 @@ export default function AdminPricingPage() {
                 </div>
             </div>
 
-            {/* Hourly Packages */}
-            <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <div className="w-1 h-6 bg-purple-600 rounded"></div>
-                  {t('admin.pricing.sections.hourly', 'Hourly Packages')}
-                </h2>
+            {/* Hourly Packages Card */}
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-gray-100/50 hover:shadow-md transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-600 text-white shadow-lg shadow-purple-500/30">
+                    <FiClock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
+                      {t('admin.pricing.sections.hourly', 'Hourly Packages')}
+                    </h2>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('admin.pricing.fields.hourly1', '1 Hour Package')}</label>
@@ -396,12 +408,18 @@ export default function AdminPricingPage() {
                 </div>
             </div>
 
-            {/* Surcharges */}
-            <div className="p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <div className="w-1 h-6 bg-orange-600 rounded"></div>
-                  {t('admin.pricing.sections.surcharges', 'Surcharges')}
-                </h2>
+            {/* Surcharges Card */}
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-gray-100/50 hover:shadow-md transition-all duration-300">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-red-500 text-white shadow-lg shadow-orange-500/30">
+                    <FiMoon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
+                      {t('admin.pricing.sections.surcharges', 'Surcharges & Multipliers')}
+                    </h2>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">{t('admin.pricing.fields.nightSurcharge', 'Night Surcharge (22:00 - 06:00)')}</label>
@@ -437,8 +455,8 @@ export default function AdminPricingPage() {
                 </div>
             </div>
 
-            {/* Save Bar */}
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            {/* Save Bar Card */}
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-gray-100/50 flex flex-col sm:flex-row items-center justify-between gap-4">
               <span className="text-sm text-gray-500">
                 {hasChanges 
                   ? t('admin.pricing.status.unsaved', 'Unsaved changes detected') 
@@ -484,6 +502,9 @@ export default function AdminPricingPage() {
                     <th className="px-6 py-3">{t('admin.pricing.history.columns.date', 'Date')}</th>
                     <th className="px-6 py-3">{t('admin.pricing.history.columns.base', 'Base')}</th>
                     <th className="px-6 py-3">{t('admin.pricing.history.columns.perKm', 'Per KM')}</th>
+                    <th className="px-6 py-3">{t('admin.pricing.history.columns.minFare', 'Min Fare')}</th>
+                    <th className="px-6 py-3">{t('admin.pricing.history.columns.fee', 'Fee')}</th>
+                    <th className="px-6 py-3">{t('admin.pricing.history.columns.surcharges', 'Surcharges')}</th>
                     <th className="px-6 py-3">{t('admin.pricing.history.columns.packages', 'Packages (1h/4h/8h)')}</th>
                     <th className="px-6 py-3">{t('admin.pricing.history.columns.status', 'Status')}</th>
                     <th className="px-6 py-3">{t('admin.pricing.history.columns.action', 'Action')}</th>
@@ -500,6 +521,12 @@ export default function AdminPricingPage() {
                       </td>
                       <td className="px-6 py-4 text-sm font-medium  text-gray-800">{item.base_fare} CFA</td>
                       <td className="px-6 py-4 text-sm   text-gray-800">{item.per_km_rate} CFA</td>
+                      <td className="px-6 py-4 text-sm   text-gray-800">{item.minimum_fare} CFA</td>
+                      <td className="px-6 py-4 text-sm   text-blue-600 font-bold">{item.commission_percentage}%</td>
+                      <td className="px-6 py-4 text-sm text-orange-600 whitespace-nowrap">
+                        <span className="opacity-70 text-xs">N:</span> {item.night_surcharge_percentage}% <br />
+                        <span className="opacity-70 text-xs">L:</span> {item.long_distance_coefficient}x
+                      </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {item.hourly_rates ? (
                           `${item.hourly_rates["1"] || '-'} / ${item.hourly_rates["4"] || '-'} / ${item.hourly_rates["8"] || '-'}`
@@ -534,7 +561,7 @@ export default function AdminPricingPage() {
                   ))}
                   {pricingHistory.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-6 py-8 text-center text-gray-500 italic">
+                      <td colSpan={9} className="px-6 py-8 text-center text-gray-500 italic">
                         {t('admin.pricing.history.empty', 'No pricing history found. Save your first configuration above.')}
                       </td>
                     </tr>
