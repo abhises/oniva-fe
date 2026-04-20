@@ -44,6 +44,7 @@ interface Summary {
   totalCommission: number
   totalDriverEarnings: number
   count: number
+  activeCommission?: number
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -122,6 +123,7 @@ export default function AdminTransactionsPage() {
       'Base Price (CFA)': Math.round(tx.base_price || 0),
       'Total Fare (CFA)': Math.round(tx.final_price || tx.total_price || 0),
       'Platform Commission (CFA)': Math.round(tx.platform_commission || 0),
+      'Commission Rate (%)': tx.total_price > 0 || tx.final_price > 0 ? (((tx.platform_commission || 0) / (tx.final_price || tx.total_price || 1)) * 100).toFixed(1) : '0.0',
       'Driver Earnings (CFA)': Math.round(tx.driver_earnings || 0),
       'Status': tx.status || '-',
       'Completed At': tx.completed_at ? new Date(tx.completed_at).toLocaleString() : '-',
@@ -194,11 +196,12 @@ export default function AdminTransactionsPage() {
 
           {/* Summary Cards */}
           {summary && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
               {[
                 { label: t('admin.totalRevenue', 'Total Revenue'), value: summary.totalRevenue, color: 'from-blue-500 to-indigo-600', icon: <FiTrendingUp /> },
                 { label: t('admin.platformCommission', 'Platform Commission'), value: summary.totalCommission, color: 'from-purple-500 to-fuchsia-600', icon: <FiPercent /> },
                 { label: t('admin.driverEarnings', 'Driver Earnings'), value: summary.totalDriverEarnings, color: 'from-emerald-500 to-teal-600', icon: <FiUsers /> },
+                { label: t('admin.activeRate', 'Commission Rate'), value: summary.activeCommission ?? 25, color: 'from-amber-500 to-orange-600', icon: <FiPercent />, suffix: '%' },
                 { label: t('admin.totalTrips', 'Total Trips'), value: summary.count, color: 'from-orange-400 to-red-500', icon: <FiDollarSign />, isCurrency: false },
               ].map((card, i) => (
                 <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all">
@@ -207,9 +210,11 @@ export default function AdminTransactionsPage() {
                   </div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{card.label}</p>
                   <p className="text-xl font-bold text-gray-900">
-                    {(card as any).isCurrency === false
-                      ? card.value.toLocaleString()
-                      : `${Math.round(card.value).toLocaleString()} CFA`}
+                    {(card as any).suffix 
+                      ? `${card.value}${card.suffix}`
+                      : (card as any).isCurrency === false
+                        ? card.value.toLocaleString()
+                        : `${Math.round(card.value).toLocaleString()} CFA`}
                   </p>
                 </div>
               ))}
@@ -288,7 +293,8 @@ export default function AdminTransactionsPage() {
                         <th className="px-5 py-3">{t('admin.route', 'Route')}</th>
                         <th className="px-5 py-3">{t('admin.distance', 'Distance')}</th>
                         <th className="px-5 py-3 text-right">{t('admin.fare', 'Total Fare')}</th>
-                        <th className="px-5 py-3 text-right">{t('admin.platformCommission', 'Platform')}</th>
+                        <th className="px-5 py-3 text-right">{t('admin.platformCommission', 'Platform Fee')}</th>
+                        <th className="px-5 py-3 text-right">{t('admin.rate', 'Rate')}</th>
                         <th className="px-5 py-3 text-right">{t('admin.driverEarnings', 'Driver Earn.')}</th>
                         <th className="px-5 py-3">{t('admin.paymentMethod', 'Payment')}</th>
                         <th className="px-5 py-3">{t('common.status', 'Status')}</th>
@@ -322,6 +328,9 @@ export default function AdminTransactionsPage() {
                           </td>
                           <td className="px-5 py-4 text-right text-purple-700 font-semibold">
                             {Math.round(tx.platform_commission || 0).toLocaleString()} <span className="text-xs font-normal text-gray-400">CFA</span>
+                          </td>
+                          <td className="px-5 py-4 text-right text-blue-600 font-medium">
+                            {tx.final_price || tx.total_price ? (((tx.platform_commission || 0) / (tx.final_price || tx.total_price)) * 100).toFixed(1) : '0.0'}%
                           </td>
                           <td className="px-5 py-4 text-right text-emerald-700 font-semibold">
                             {Math.round(tx.driver_earnings || 0).toLocaleString()} <span className="text-xs font-normal text-gray-400">CFA</span>
