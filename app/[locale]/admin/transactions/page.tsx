@@ -177,8 +177,8 @@ export default function AdminTransactionsPage() {
                   <FiDollarSign className="w-6 h-6" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{t('admin.transactions', 'Transaction Ledger')}</h1>
-                  <p className="text-sm text-gray-500">{t('admin.transactionsDesc', 'Full financial history for all trips')}</p>
+                  <h1 className="text-2xl font-bold text-gray-900">{t('admin.transactions')}</h1>
+                  <p className="text-sm text-gray-500">{t('admin.transactionsDesc')}</p>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -188,7 +188,7 @@ export default function AdminTransactionsPage() {
                 </Button>
                 <Button variant="primary" size="sm" onClick={exportExcel} disabled={!transactions.length}>
                   <FiDownload className="w-4 h-4" />
-                  {t('common.export', 'Export CSV')}
+                  {t('admin.exportExcel', 'Export Excel')}
                 </Button>
               </div>
             </div>
@@ -225,7 +225,7 @@ export default function AdminTransactionsPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <FiFilter className="w-4 h-4 text-gray-500" />
-              <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Filters</h2>
+              <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">{t('admin.filterOptions', 'Filters')}</h2>
             </div>
             <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* Search */}

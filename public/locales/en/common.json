@@ -384,6 +384,14 @@
     "noPhone": "No phone",
     "unknown": "Unknown",
     "tripStatus": "Trip Status",
+    "transactions": "Transactions",
+    "transactionsDesc": "Full financial history for all trips",
+    "noTransactions": "No transactions found for the selected filters.",
+    "activeRate": "Commission Rate",
+    "paymentMethod": "Payment Method",
+    "rate": "Rate",
+    "viewTransactions": "View full transaction ledger",
+    "exportExcel": "Export Excel",
     "exportSoon": "Export functionality coming soon"
   },
   "landing": {
