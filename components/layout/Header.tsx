@@ -29,14 +29,14 @@ export const Header = ({ locale }: { locale: string }) => {
 
   return (
     <header 
-      className={`sticky top-0 left-0 right-0 z-[9999] transition-all duration-300 mb-6 ${
+      className={`sticky top-0 left-0 right-0 z-[9999] transition-all duration-300 mb-4 ${
         scrolled 
-          ? "py-2 bg-white shadow-md border-b border-gray-100" 
-          : "py-4 bg-white shadow-sm border-b border-gray-100"
+          ? "py-1 bg-white shadow-md border-b border-gray-100" 
+          : "py-1 bg-white shadow-sm border-b border-gray-100"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14">
           {/* Logo Section */}
           <Link
             href={`/${locale}`}
