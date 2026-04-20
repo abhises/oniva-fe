@@ -519,6 +519,13 @@ class ApiClient {
     return data;
   }
 
+  async unsuspendUser(userId: string | number) {
+    const { data } = await this.instance.post<ApiResponse>(
+      `/api/admin/users/${userId}/unsuspend`,
+    );
+    return data;
+  }
+
   async getAllTripDetails(tripId: string | number) {
     const { data } = await this.instance.get<ApiResponse>(
       `/api/trips/${tripId}`,

@@ -26,6 +26,11 @@ interface DashboardStats {
   totalTrips: number;
   pendingDriverApprovals: number;
   activeTrips: number;
+  newUsersThisWeek: number;
+  newDriversThisWeek: number;
+  tripsThisWeek: number;
+  revenueThisMonth: number;
+  revenueLastMonth: number;
 }
 // FIX: Default stats to use when API fails or returns empty
 const DEFAULT_STATS: DashboardStats = {
@@ -35,6 +40,11 @@ const DEFAULT_STATS: DashboardStats = {
   totalTrips: 0,
   pendingDriverApprovals: 0,
   activeTrips: 0,
+  newUsersThisWeek: 0,
+  newDriversThisWeek: 0,
+  tripsThisWeek: 0,
+  revenueThisMonth: 0,
+  revenueLastMonth: 0,
 };
 export default function AdminDashboard({ params }: AdminDashboardProps) {
   // FIX: Use React.use() to unwrap params
@@ -66,6 +76,11 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
             totalTrips: Number(data.completed_trips || 0),
             pendingDriverApprovals: Number(data.pending_drivers || 0),
             activeTrips: Number(data.active_trips || 0),
+            newUsersThisWeek: Number(data.new_users_this_week || 0),
+            newDriversThisWeek: Number(data.new_drivers_this_week || 0),
+            tripsThisWeek: Number(data.trips_this_week || 0),
+            revenueThisMonth: Number(data.revenue_this_month || 0),
+            revenueLastMonth: Number(data.revenue_last_month || 0),
           };
 
           setStats(validatedStats);
@@ -115,29 +130,29 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                 value={stats.totalUsers}
                 icon={<FiUsers />}
                 trend="up"
-                trendValue={`12 ${t('admin.newThisWeek')}`}
+                trendValue={`${stats.newUsersThisWeek} ${t('admin.newThisWeek')}`}
               />
               <StatsCard
                 label={t("admin.totalDrivers")}
                 value={stats.totalDrivers}
                 icon={<FiUsers />}
                 trend="up"
-                trendValue={`5 ${t('admin.newThisWeek')}`}
+                trendValue={`${stats.newDriversThisWeek} ${t('admin.newThisWeek')}`}
               />
               {/* FIX: Format earnings as string before passing to StatsCard */}
               <StatsCard
                 label={t("admin.totalEarnings")}
                 value={`${(stats.totalEarnings || 0).toLocaleString("en-US")} XOF`}
                 icon={<FiDollarSign />}
-                trend="up"
-                trendValue={`15% ${t('admin.fromLastMonth')}`}
+                trend={stats.revenueThisMonth >= stats.revenueLastMonth ? "up" : "down"}
+                trendValue={`${Math.abs(stats.revenueLastMonth > 0 ? Math.round(((stats.revenueThisMonth - stats.revenueLastMonth) / stats.revenueLastMonth) * 100) : (stats.revenueThisMonth > 0 ? 100 : 0))}% ${t('admin.fromLastMonth')}`}
               />
               <StatsCard
                 label={t("admin.totalTrips")}
                 value={stats.totalTrips}
                 icon={<FiTrendingUp />}
                 trend="up"
-                trendValue={`250 ${t('admin.thisWeek')}`}
+                trendValue={`${stats.tripsThisWeek} ${t('admin.thisWeek')}`}
               />
             </div>
 

@@ -9,6 +9,7 @@ import { VehicleInformation } from "@/components/driver/VehicleInformation";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 /* =========================
    Types
@@ -40,6 +41,7 @@ interface DriverRegistrationState {
 ========================= */
 
 export default function DriverSetupPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isLoading, request } = useApi({ showSuccess: true });
   const [step, setStep] = useState(1);
@@ -113,9 +115,9 @@ export default function DriverSetupPage() {
           {/* Progress Tracker */}
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Driver Onboarding
+              {t("driver.onboardingTitle", "Driver Onboarding")}
             </h1>
-            <p className="text-gray-500 mb-6 font-medium">Complete all 3 steps to start earning</p>
+            <p className="text-gray-500 mb-6 font-medium">{t("driver.onboardingDesc", "Complete all 3 steps to start earning")}</p>
             
             <div className="flex items-center justify-center space-x-4">
               {[1, 2, 3].map((s) => (
@@ -175,7 +177,7 @@ export default function DriverSetupPage() {
           </div>
           
           <p className="mt-8 text-center text-xs text-gray-400">
-            By continuing, you agree to Oniva's Driver Terms of Service.
+            {t("driver.onboardingTerms", "By continuing, you agree to Oniva's Driver Terms of Service.")}
           </p>
         </div>
       </div>

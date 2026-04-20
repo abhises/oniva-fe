@@ -122,7 +122,7 @@ export default function DriverTripsPage() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-0 border-gray-50">
-                      <Badge variant={getStatusColor(trip.status)} label={trip.status} />
+                      <Badge variant={getStatusColor(trip.status)} label={t(`common.${trip.status}`, trip.status) as string} />
                       <FiChevronRight className="text-gray-400 hidden sm:block" />
                     </div>
                   </div>

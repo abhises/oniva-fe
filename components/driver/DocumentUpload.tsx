@@ -6,6 +6,8 @@ import { FiUpload, FiCheck, FiArrowLeft, FiArrowRight, FiFileText, FiCamera } fr
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { apiClient } from '@/services/api'
+import { Button } from '@/components/common/Button'
+import { useTranslation } from 'react-i18next'
 
 /* =========================
    Types
@@ -39,6 +41,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
   isInitialSetup
 }) => {
   const { user } = useAuth()
+  const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState<string | null>(null)
 
   // Step 2: Added profilePhoto to the initial state
@@ -200,26 +203,24 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
 
       {isInitialSetup && (
         <div className="flex items-center justify-between pt-8 border-t border-gray-100 mt-8">
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={onBack}
-            className="flex items-center text-gray-500 hover:text-gray-900 font-bold text-sm transition"
+            className="flex items-center"
           >
-            <FiArrowLeft className="mr-2" /> PREVIOUS
-          </button>
+            <FiArrowLeft className="mr-2" /> {t('common.previous', 'Previous')}
+          </Button>
           
-          <button
+          <Button
             type="button"
+            variant="primary"
             disabled={!canContinue || !!isLoading}
             onClick={() => onSuccess(documents)}
-            className={`flex items-center px-10 py-3 rounded-xl font-bold transition shadow-lg ${
-              canContinue && !isLoading
-                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
-            }`}
+            className="px-10 py-3 shadow-lg"
           >
-            NEXT STEP <FiArrowRight className="ml-2" />
-          </button>
+            {t('common.nextStep', 'Next Step')} <FiArrowRight className="ml-2" />
+          </Button>
         </div>
       )}
     </div>

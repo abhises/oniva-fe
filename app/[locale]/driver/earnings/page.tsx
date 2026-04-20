@@ -176,10 +176,10 @@ export default function EarningsPage() {
                     {earnings.weeklyEarnings.length > 0 ? (
                       earnings.weeklyEarnings.map((amount, idx) => (
                         <tr key={idx} className="border-b last:border-0 hover:bg-gray-50 transition">
-                          <td className="p-4 font-medium text-gray-700">Week {idx + 1}</td>
+                          <td className="p-4 font-medium text-gray-700">{t("common.week", "Week")} {idx + 1}</td>
                           <td className="p-4 font-bold text-primary">{amount.toLocaleString()} XOF</td>
                           <td className="p-4 text-right">
-                            <Badge variant="success" label="Paid" />
+                            <Badge variant="success" label={t("common.paid", "Paid") as string} />
                           </td>
                         </tr>
                       ))

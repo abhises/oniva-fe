@@ -106,6 +106,9 @@ const NavLinks = ({ user, locale, t, onClick }: any) => {
           <Link href={`/${locale}/${user.role}/client-trips`} onClick={onClick}>
             {t("client.myTrips")}
           </Link>
+          <Link href={`/${locale}/${user.role}/settings`} onClick={onClick}>
+            {t("navigation.settings") || "Settings"}
+          </Link>
         </>
       )}
 
@@ -119,6 +122,9 @@ const NavLinks = ({ user, locale, t, onClick }: any) => {
           </Link>
           <Link href={`/${locale}/${user.role}/earnings`} onClick={onClick}>
             {t("driver.earnings")}
+          </Link>
+          <Link href={`/${locale}/${user.role}/settings`} onClick={onClick}>
+            {t("navigation.settings") || "Settings"}
           </Link>
         </>
       )}

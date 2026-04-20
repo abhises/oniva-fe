@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import { FiSave, FiTruck, FiArrowLeft, FiCheckCircle } from 'react-icons/fi'
 import { apiClient } from '@/services/api'
+import { Button } from '@/components/common/Button'
+import { useTranslation } from 'react-i18next'
 
 /* =========================
    Types
@@ -29,6 +31,7 @@ export const VehicleInformation: React.FC<VehicleInformationProps> = ({
   isInitialSetup = false,
   isLoading: isSubmitting = false
 }) => {
+  const { t } = useTranslation()
   const [errors, setErrors] = useState<Record<string, string>>({})
   
   const [formData, setFormData] = useState({
@@ -174,32 +177,29 @@ export const VehicleInformation: React.FC<VehicleInformationProps> = ({
       {/* Navigation Buttons */}
       <div className="flex items-center justify-between pt-8 border-t border-gray-100">
         {isInitialSetup && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={onBack}
-            className="flex items-center text-gray-500 hover:text-gray-800 font-semibold transition"
+            className="flex items-center"
           >
-            <FiArrowLeft className="mr-2" /> Previous Step
-          </button>
+            <FiArrowLeft className="mr-2" /> {t('common.previousStep', 'Previous Step')}
+          </Button>
         )}
 
-        <button
+        <Button
           type="submit"
+          variant="primary"
           disabled={isSubmitting}
-          className={`ml-auto px-10 py-3 rounded-xl font-bold flex items-center transition shadow-lg ${
-            isSubmitting 
-            ? 'bg-gray-400 cursor-not-allowed text-white' 
-            : 'bg-green-600 hover:bg-green-700 text-white shadow-green-100'
-          }`}
+          isLoading={isSubmitting}
+          className="ml-auto px-10 py-3 shadow-lg"
         >
-          {isSubmitting ? (
-            'Processing...'
-          ) : isInitialSetup ? (
-            <>Complete Registration <FiCheckCircle className="ml-2" /></>
+          {isInitialSetup ? (
+            <> {t('common.completeReg', 'Complete Registration')} <FiCheckCircle className="ml-2" /></>
           ) : (
-            <>Save Changes <FiSave className="ml-2" /></>
+            <> {t('common.saveChanges', 'Save Changes')} <FiSave className="ml-2" /></>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   )

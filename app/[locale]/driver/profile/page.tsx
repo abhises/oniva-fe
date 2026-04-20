@@ -13,7 +13,7 @@ import { apiClient } from "@/services/api";
 import { FiEdit2, FiUser, FiTruck, FiFileText, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { Button } from "@/components/common/Button";
-import { ChangePasswordForm } from "@/components/auth/ChangePasswordForm";
+
 
 /* =========================
    Component
@@ -224,11 +224,6 @@ export default function DriverProfilePage() {
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto mt-6 px-4">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-            <ChangePasswordForm />
-          </div>
-        </div>
       </div>
     </ProtectedRoute>
   );

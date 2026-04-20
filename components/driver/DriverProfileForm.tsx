@@ -5,6 +5,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import toast from 'react-hot-toast'
 import { FiSave, FiMail, FiPhone, FiUser, FiArrowRight, FiFileText, FiMapPin } from 'react-icons/fi'
 import { apiClient } from '@/services/api'
+import { Button } from '@/components/common/Button'
 
 /* =========================
    Types
@@ -193,17 +194,19 @@ export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
       </div>
 
       <div className="flex justify-end pt-6">
-        <button
+        <Button
           type="submit"
+          variant="primary"
           disabled={isLoading}
-          className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition flex items-center shadow-lg shadow-blue-200 disabled:opacity-50"
+          isLoading={isLoading}
+          className="shadow-lg px-8 py-3"
         >
           {isInitialSetup ? (
-            <> Continue <FiArrowRight className="ml-2" /> </>
+            <> {t('common.continue', 'Continue')} <FiArrowRight className="ml-2" /> </>
           ) : (
-            <> <FiSave className="mr-2" /> {isLoading ? 'Saving...' : 'Save Changes'} </>
+            <> <FiSave className="mr-2" /> {t('common.saveChanges', 'Save Changes')} </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   )

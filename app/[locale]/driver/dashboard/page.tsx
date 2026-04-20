@@ -266,21 +266,21 @@ export default function DriverDashboard({
           value={`${avgKmPerTrip.toFixed(1)} km`}
           icon={<FiMapPin />}
           trend="up"
-          trendValue="Average"
+          trendValue={t("common.average")}
         />
         <StatsCard
           label={t("driver.tripsThisWeek")}
           value={stats.tripsThisWeek}
           icon={<FiTrendingUp />}
           trend="up"
-          trendValue="This Week"
+          trendValue={t("common.thisWeek")}
         />
         <StatsCard
           label={t("driver.earningsThisWeek")}
           value={`${stats.earningsThisWeek.toLocaleString()} XOF`}
           icon={<FiDollarSign />}
           trend="up"
-          trendValue="This Week"
+          trendValue={t("common.thisWeek")}
         />
       </div>
 

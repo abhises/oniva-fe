@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { apiClient } from '@/services/api';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/common/Button';
-import { ChangePasswordForm } from '@/components/auth/ChangePasswordForm';
+
 import {
   FiUser, FiPhone, FiGlobe, FiEdit2,
   FiCheck, FiX, FiCamera, FiLoader,
@@ -294,10 +294,6 @@ export default function ClientProfilePage() {
           </div>
         </div>
 
-        {/* Change Password Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-          <ChangePasswordForm />
-        </div>
 
       </div>
     </ProtectedRoute>

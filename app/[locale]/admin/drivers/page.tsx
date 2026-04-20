@@ -9,7 +9,7 @@ import { Loader } from "@/components/common/Loader";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import { FiUser, FiCheck, FiX, FiPause, FiEye } from "react-icons/fi";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 interface Driver {
   id: number;
@@ -25,6 +25,8 @@ interface Driver {
 
 export default function AdminDriversPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params?.locale || "en";
   const { t } = useTranslation();
   const { isLoading, request } = useApi({ showSuccess: true });
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -126,13 +128,13 @@ export default function AdminDriversPage() {
 
               <div className="grid grid-cols-3 gap-4 mb-4 p-4 bg-gray-50 rounded-lg text-sm">
                 <div>
-                  <p className="text-gray-600">Status</p>
+                  <p className="text-gray-600">{t("common.status")}</p>
                   <p className="font-semibold">
-                    {driver.is_online ? "Online" : "Offline"}
+                    {driver.is_online ? t("admin.online") : t("admin.offline")}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-600">Rating</p>
+                  <p className="text-gray-600">{t("driver.rating")}</p>
                   <p className="font-semibold">
                     {typeof driver.rating === "number"
                       ? driver.rating.toFixed(1)
@@ -141,7 +143,7 @@ export default function AdminDriversPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-600">Trips</p>
+                  <p className="text-gray-600">{t("admin.trips")}</p>
                   <p className="font-semibold">{driver.total_trips}</p>
                 </div>
               </div>
@@ -150,7 +152,7 @@ export default function AdminDriversPage() {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => router.push(`/en/admin/drivers/${driver.user_id}`)}
+                  onClick={() => router.push(`/${locale}/admin/drivers/${driver.user_id}`)}
                 >
                   <FiEye size={16} /> {t("common.viewDetails")}
                 </Button>

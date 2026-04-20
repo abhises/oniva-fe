@@ -165,6 +165,29 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleUnsuspendClick = async (user: User) => {
+    try {
+      setSuspendingUserId(user.id);
+      const result = await request(async () => {
+        return await apiClient.unsuspendUser(user.id as string);
+      });
+
+      if (result) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === user.id ? { ...u, status: "active" } : u,
+          ),
+        );
+        toast.success(t('admin.userUnsuspended', 'User unsuspended effectively'));
+      }
+    } catch (error: any) {
+      toast.error(t('admin.failedUnsuspend', 'Failed to unsuspend user'));
+      console.error(error);
+    } finally {
+      setSuspendingUserId(null);
+    }
+  };
+
   const handleNextPage = () => {
     setPagination((prev) => ({
       ...prev,
@@ -429,10 +452,18 @@ export default function AdminUsersPage() {
                               )}
 
                               {user.status === "suspended" && (
-                                <span className="inline-flex items-center px-3 py-1 text-sm font-medium text-red-600 bg-red-50 rounded-lg">
-                                  <FiAlertCircle className="w-4 h-4 mr-1" />
-                                  {t('admin.suspended')}
-                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleUnsuspendClick(user)}
+                                  disabled={suspendingUserId === user.id || isApiLoading}
+                                  isLoading={suspendingUserId === user.id}
+                                  className="text-orange-600 bg-orange-50 hover:bg-orange-100"
+                                  title="Unsuspend user"
+                                >
+                                  {suspendingUserId !== user.id && <FiCheck className="w-4 h-4 mr-1" />}
+                                  {t('admin.unsuspend', 'Unsuspend')}
+                                </Button>
                               )}
 
                               <Button

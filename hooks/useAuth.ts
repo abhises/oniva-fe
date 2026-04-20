@@ -132,6 +132,11 @@ export const useAuth = () => {
           router.push(`/${locale}/${response.data.user.role.toLowerCase()}/dashboard`);
         }
       } catch (error: any) {
+        if (error.response?.data?.code === 'ACCOUNT_SUSPENDED') {
+          router.push(`/${locale}/suspended`);
+          return;
+        }
+        
         const errorKey = error.response?.data?.messageKey || 'errors.INVALID_CREDENTIALS';
         const errorMessage = t(errorKey) || error.response?.data?.message || 'Login failed';
         toast.error(errorMessage);
