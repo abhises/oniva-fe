@@ -163,20 +163,22 @@ return (
         />
 
         {/* Role Selection */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
+        <div className="w-full">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             {t('auth.registerAs')}
           </label>
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            disabled={isLoading}
-            className="w-full"
-          >
-            <option value="client">{t('auth.clientRoleDesc')}</option>
-            <option value="driver">{t('auth.driverRoleDesc')}</option>
-          </select>
+          <div className="relative">
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              disabled={isLoading}
+              className="w-full px-4 py-2.5 border-2 rounded-lg outline-none transition-all focus:border-primary border-gray-300 bg-white cursor-pointer"
+            >
+              <option value="client">{t('auth.clientRoleDesc')}</option>
+              <option value="driver">{t('auth.driverRoleDesc')}</option>
+            </select>
+          </div>
         </div>
 
         <Input
