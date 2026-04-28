@@ -324,7 +324,7 @@ export default function AdminDriverDetailsPage() {
                                 {trip.status}
                               </span>
                             </td>
-                            <td className="px-6 py-4 font-bold text-gray-900">${Number(trip.total_price || 0).toFixed(2)}</td>
+                            <td className="px-6 py-4 font-bold text-gray-900">{Number(trip.total_price || 0).toLocaleString("en-US")} XOF</td>
                             <td className="px-6 py-4 text-gray-500">{new Date(trip.created_at).toLocaleDateString()}</td>
                           </tr>
                         ))}
