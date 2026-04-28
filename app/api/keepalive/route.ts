@@ -2,11 +2,20 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    // This secretly pings Hugging Face with a proper GET request to keep it awake!
+    // Ping the actual /search route instead of /status to force the database to read from RAM.
+    // This keeps the PostgreSQL indexes "warm" and prevents the slow first search.
     const geocodingUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
-    await fetch(`${geocodingUrl}/status`, { method: "GET" });
     
-    return NextResponse.json({ status: "Awake" }, { status: 200 });
+    // We use a dummy search query like "Paris" or "Montreal".
+    await fetch(`${geocodingUrl}/search?q=Montreal&format=json&limit=1`, { 
+      method: "GET",
+      headers: {
+        // Some Hugging Face spaces respond better with a generic User-Agent
+        "User-Agent": "OnivaKeepAlive/1.0" 
+      }
+    });
+    
+    return NextResponse.json({ status: "Awake and Database Warmed" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ status: "Error pinging HF" }, { status: 500 });
   }
