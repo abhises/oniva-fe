@@ -188,14 +188,14 @@ export default function AdminDriverDetailsPage() {
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><FiMail /></div>
                     <div>
-                      <p className="text-xs text-gray-500 font-semibold uppercase">Email</p>
+                      <p className="text-xs text-gray-500 font-semibold uppercase">{t("driverProfile.emailAddress", "Email")}</p>
                       <p className="font-medium text-gray-900">{driverData.email || "N/A"}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><FiMapPin /></div>
                     <div>
-                      <p className="text-xs text-gray-500 font-semibold uppercase">Region</p>
+                      <p className="text-xs text-gray-500 font-semibold uppercase">{t("driverProfile.operatingRegion", "Region")}</p>
                       <p className="font-medium text-gray-900 capitalize">{driverData.region || "Global"}</p>
                     </div>
                   </div>
@@ -205,27 +205,27 @@ export default function AdminDriverDetailsPage() {
               {/* Vehicle Card */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FiTruck className="text-blue-500" /> Vehicle Information
+                  <FiTruck className="text-blue-500" /> {t("driverProfile.vehicleInfo", "Vehicle Information")}
                 </h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500 uppercase">Make</span>
+                    <span className="text-sm text-gray-500 uppercase">{t("driverProfile.vehicleMake", "Make")}</span>
                     <span className="font-medium text-gray-900">{vehicleInfo.make || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500 uppercase">Model</span>
+                    <span className="text-sm text-gray-500 uppercase">{t("driverProfile.vehicleModel", "Model")}</span>
                     <span className="font-medium text-gray-900">{vehicleInfo.model || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500 uppercase">Year</span>
+                    <span className="text-sm text-gray-500 uppercase">{t("driverProfile.year", "Year")}</span>
                     <span className="font-medium text-gray-900">{vehicleInfo.year || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500 uppercase">Color</span>
+                    <span className="text-sm text-gray-500 uppercase">{t("driverProfile.color", "Color")}</span>
                     <span className="font-medium text-gray-900">{vehicleInfo.color || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500 uppercase">License Plate</span>
+                    <span className="text-sm text-gray-500 uppercase">{t("driverProfile.plateNumber", "License Plate")}</span>
                     <span className="font-bold text-gray-900 bg-gray-100 px-2 rounded">{vehicleInfo.licensePlate || "N/A"}</span>
                   </div>
                 </div>
@@ -239,12 +239,12 @@ export default function AdminDriverDetailsPage() {
               {/* Documents Card */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FiFileText className="text-blue-500" /> Verification Documents
+                  <FiFileText className="text-blue-500" /> {t("driverProfile.verificationDocs", "Verification Documents")}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* National ID UI */}
                   <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                    <p className="text-sm font-bold text-gray-900 mb-1">National ID</p>
+                    <p className="text-sm font-bold text-gray-900 mb-1">{t("driverProfile.nationalIdCard", "National ID")}</p>
                     <p className="text-xs text-gray-500 font-mono mb-3 uppercase">NO: {driverData.national_id}</p>
                     {driverData.national_id_url ? (
                       <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 shadow-sm bg-gray-200">
@@ -257,14 +257,14 @@ export default function AdminDriverDetailsPage() {
                       </div>
                     ) : (
                       <div className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg bg-white">
-                        <p className="text-gray-400 text-sm">No image uploaded</p>
+                        <p className="text-gray-400 text-sm">{t("driverProfile.noImageAvailable", "No image uploaded")}</p>
                       </div>
                     )}
                   </div>
                   
                   {/* Driving License UI */}
                   <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                    <p className="text-sm font-bold text-gray-900 mb-1">Driving License</p>
+                    <p className="text-sm font-bold text-gray-900 mb-1">{t("driverProfile.drivingLicense", "Driving License")}</p>
                     <p className="text-xs text-gray-500 font-mono mb-3 uppercase">NO: {driverData.driving_license}</p>
                     {driverData.driving_license_url ? (
                       <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 shadow-sm bg-gray-200">
@@ -277,7 +277,7 @@ export default function AdminDriverDetailsPage() {
                       </div>
                     ) : (
                       <div className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg bg-white">
-                        <p className="text-gray-400 text-sm">No image uploaded</p>
+                        <p className="text-gray-400 text-sm">{t("driverProfile.noImageAvailable", "No image uploaded")}</p>
                       </div>
                     )}
                   </div>
@@ -288,16 +288,16 @@ export default function AdminDriverDetailsPage() {
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                   <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <FiCheckCircle className="text-blue-500" /> Recent Trips
+                    <FiCheckCircle className="text-blue-500" /> {t("common.recentActivity", "Recent Trips")}
                   </h3>
                   <span className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-medium">
-                    Total: {driverData.total_trips}
+                    {t("admin.total", "Total")}: {driverData.total_trips}
                   </span>
                 </div>
                 
                 {recentTrips.length === 0 ? (
                   <div className="p-8 text-center text-gray-500">
-                    {t("client.noTrips")}
+                    {t("client.noTrips", "No trips")}
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
