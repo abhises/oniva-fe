@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Loader } from "@/components/common/Loader";
@@ -22,6 +23,7 @@ import { Button } from "@/components/common/Button";
 export default function DriverProfilePage() {
   const params = useParams();
   const locale = (params?.locale as string) || "en";
+  const { t } = useTranslation("common");
   const { isLoading: isActionLoading, request } = useApi({ showSuccess: true });
   
   const [activeTab, setActiveTab] = useState<"profile" | "documents" | "vehicle">("profile");
@@ -59,9 +61,9 @@ export default function DriverProfilePage() {
   // Helper for Status Badge
   const StatusBadge = ({ status }: { status: string }) => {
     const config: any = {
-      approved: { color: "bg-green-100 text-green-700", icon: <FiCheckCircle />, label: "Verified" },
-      pending: { color: "bg-yellow-100 text-yellow-700", icon: <FiClock />, label: "Pending Verification" },
-      rejected: { color: "bg-red-100 text-red-700", icon: <FiAlertCircle />, label: "Rejected" },
+      approved: { color: "bg-green-100 text-green-700", icon: <FiCheckCircle />, label: t('common.approved') },
+      pending: { color: "bg-yellow-100 text-yellow-700", icon: <FiClock />, label: t('common.pending') },
+      rejected: { color: "bg-red-100 text-red-700", icon: <FiAlertCircle />, label: t('common.rejected') },
     };
     const s = config[status] || config.pending;
     return (
@@ -97,7 +99,7 @@ export default function DriverProfilePage() {
               <h1 className="text-2xl font-bold text-gray-900">{profileData?.full_name}</h1>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
                 <StatusBadge status={profileData?.verification_status} />
-                <span className="text-gray-500 text-sm flex items-center gap-1"><FiUser /> Driver ID: #{profileData?.user_id}</span>
+                <span className="text-gray-500 text-sm flex items-center gap-1"><FiUser /> {t('driverProfile.driverId')}: #{profileData?.user_id}</span>
               </div>
             </div>
             <Button
@@ -105,7 +107,7 @@ export default function DriverProfilePage() {
               size="sm"
               onClick={() => setIsEditMode(!isEditMode)}
             >
-              {isEditMode ? 'Cancel' : <><FiEdit2 /> Edit Profile</>}
+              {isEditMode ? t('driverProfile.cancel') : <><FiEdit2 /> {t('driverProfile.editProfile')}</>}
             </Button>
           </div>
         </div>
@@ -115,9 +117,9 @@ export default function DriverProfilePage() {
           {/* Horizontal Navigation */}
           <div className="flex flex-wrap gap-2 mb-2 p-1 bg-white rounded-xl border border-gray-200">
             {[
-              { id: "profile", label: "Personal Info", icon: <FiUser /> },
-              { id: "documents", label: "Verification Docs", icon: <FiFileText /> },
-              { id: "vehicle", label: "Vehicle Info", icon: <FiTruck /> },
+              { id: "profile", label: t('driverProfile.personalInfo'), icon: <FiUser /> },
+              { id: "documents", label: t('driverProfile.verificationDocs'), icon: <FiFileText /> },
+              { id: "vehicle", label: t('driverProfile.vehicleInfo'), icon: <FiTruck /> },
             ].map((tab) => (
               <Button
                 key={tab.id}
@@ -139,7 +141,7 @@ export default function DriverProfilePage() {
                 {isEditMode ? (
                   /* --- EDIT MODE --- */
                   <div className="animate-in fade-in duration-300">
-                    <h2 className="text-lg font-bold mb-6 text-gray-800 border-b pb-2">Updating Information</h2>
+                    <h2 className="text-lg font-bold mb-6 text-gray-800 border-b pb-2">{t('driverProfile.updatingInformation')}</h2>
                     {activeTab === "profile" && <DriverProfileForm initialData={profileData} onSuccess={handleUpdateSuccess} />}
                     {activeTab === "documents" && <DocumentUpload initialData={profileData} onSuccess={handleUpdateSuccess} />}
                     {activeTab === "vehicle" && <VehicleInformation initialData={profileData?.vehicle_info} onSuccess={handleUpdateSuccess} />}
@@ -149,12 +151,12 @@ export default function DriverProfilePage() {
                   <div className="animate-in slide-in-from-bottom-2 duration-300">
                     {activeTab === "profile" && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                        <DataRow label="Full Name" value={profileData?.full_name} />
-                        <DataRow label="Phone Number" value={profileData?.phone} />
-                        <DataRow label="Email Address" value={profileData?.email} />
-                        <DataRow label="Operating Region" value={profileData?.region} />
-                        <DataRow label="National ID Number" value={profileData?.national_id} />
-                        <DataRow label="License Number" value={profileData?.driving_license} />
+                        <DataRow label={t('driverProfile.fullName')} value={profileData?.full_name} />
+                        <DataRow label={t('driverProfile.phoneNumber')} value={profileData?.phone} />
+                        <DataRow label={t('driverProfile.emailAddress')} value={profileData?.email} />
+                        <DataRow label={t('driverProfile.operatingRegion')} value={profileData?.region} />
+                        <DataRow label={t('driverProfile.nationalIdNumber')} value={profileData?.national_id} />
+                        <DataRow label={t('driverProfile.licenseNumber')} value={profileData?.driving_license} />
                       </div>
                     )}
 
@@ -162,15 +164,15 @@ export default function DriverProfilePage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* National ID Card */}
                         <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-4">
-                           <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between">
                              <div className="flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><FiFileText /></div>
                                 <div>
-                                   <p className="font-bold text-sm">National ID Card</p>
-                                   <p className="text-[10px] text-gray-500 uppercase">Uploaded on {new Date(profileData?.created_at).toLocaleDateString()}</p>
+                                   <p className="font-bold text-sm">{t('driverProfile.nationalIdCard')}</p>
+                                   <p className="text-[10px] text-gray-500 uppercase">{t('driverProfile.uploadedOn')} {new Date(profileData?.created_at).toLocaleDateString()}</p>
                                 </div>
                              </div>
-                             <a href={profileData?.national_id_url} target="_blank" className="text-blue-600 font-bold text-xs hover:underline">Open Full</a>
+                             <a href={profileData?.national_id_url} target="_blank" className="text-blue-600 font-bold text-xs hover:underline">{t('driverProfile.openFull')}</a>
                            </div>
                            {profileData?.national_id_url ? (
                              <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
@@ -178,7 +180,7 @@ export default function DriverProfilePage() {
                              </div>
                            ) : (
                              <div className="w-full aspect-video bg-gray-100 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
-                               <span className="text-xs font-medium text-gray-400">No image available</span>
+                               <span className="text-xs font-medium text-gray-400">{t('driverProfile.noImageAvailable')}</span>
                              </div>
                            )}
                         </div>
@@ -189,11 +191,11 @@ export default function DriverProfilePage() {
                              <div className="flex items-center gap-3">
                                 <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><FiFileText /></div>
                                 <div>
-                                   <p className="font-bold text-sm">Driving License</p>
-                                   <p className="text-[10px] text-gray-500 uppercase">Uploaded on {new Date(profileData?.created_at).toLocaleDateString()}</p>
+                                   <p className="font-bold text-sm">{t('driverProfile.drivingLicense')}</p>
+                                   <p className="text-[10px] text-gray-500 uppercase">{t('driverProfile.uploadedOn')} {new Date(profileData?.created_at).toLocaleDateString()}</p>
                                 </div>
                              </div>
-                             <a href={profileData?.driving_license_url} target="_blank" className="text-blue-600 font-bold text-xs hover:underline">Open Full</a>
+                             <a href={profileData?.driving_license_url} target="_blank" className="text-blue-600 font-bold text-xs hover:underline">{t('driverProfile.openFull')}</a>
                            </div>
                            {profileData?.driving_license_url ? (
                              <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
@@ -201,7 +203,7 @@ export default function DriverProfilePage() {
                              </div>
                            ) : (
                              <div className="w-full aspect-video bg-gray-100 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
-                               <span className="text-xs font-medium text-gray-400">No image available</span>
+                               <span className="text-xs font-medium text-gray-400">{t('driverProfile.noImageAvailable')}</span>
                              </div>
                            )}
                         </div>
@@ -210,11 +212,11 @@ export default function DriverProfilePage() {
 
                     {activeTab === "vehicle" && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                        <DataRow label="Vehicle Make" value={profileData?.vehicle_info?.make} />
-                        <DataRow label="Vehicle Model" value={profileData?.vehicle_info?.model} />
-                        <DataRow label="Plate Number" value={profileData?.vehicle_info?.licensePlate} />
-                        <DataRow label="Color" value={profileData?.vehicle_info?.color} />
-                        <DataRow label="Year" value={profileData?.vehicle_info?.year} />
+                        <DataRow label={t('driverProfile.vehicleMake')} value={profileData?.vehicle_info?.make} />
+                        <DataRow label={t('driverProfile.vehicleModel')} value={profileData?.vehicle_info?.model} />
+                        <DataRow label={t('driverProfile.plateNumber')} value={profileData?.vehicle_info?.licensePlate} />
+                        <DataRow label={t('driverProfile.color')} value={profileData?.vehicle_info?.color} />
+                        <DataRow label={t('driverProfile.year')} value={profileData?.vehicle_info?.year} />
                       </div>
                     )}
                   </div>

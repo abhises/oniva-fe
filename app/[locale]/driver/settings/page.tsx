@@ -13,11 +13,11 @@ export default function DriverSettingsPage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8 flex items-center gap-2">
           <FiSettings className="text-primary" />
-          {t("common.settings", "Settings")}
+          {t("navigation.settings")}
         </h1>
 
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 max-w-2xl">
-          <h2 className="text-xl font-bold mb-6 text-gray-800">{t("common.changePassword", "Change Password")}</h2>
+          <h2 className="text-xl font-bold mb-6 text-gray-800">{t("auth.changePassword")}</h2>
           <ChangePasswordForm />
         </div>
       </div>

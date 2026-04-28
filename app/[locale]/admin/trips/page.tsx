@@ -368,6 +368,8 @@ export default function AdminTripsPage() {
                   {activeTrips.map((trip) => {
                     const driverLocation = trip.driver?.location
                     if (!driverLocation?.latitude || !driverLocation?.longitude) return null
+                    // Filter: Hide the pin completely if the driver is offline
+                    if (trip.driver?.isOnline === false) return null
 
                     return (
                       <Marker
