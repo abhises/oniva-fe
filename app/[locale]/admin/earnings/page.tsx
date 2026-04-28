@@ -109,21 +109,21 @@ export default function AdminEarningsPage({ params }: AdminEarningsPageProps) {
                 value={`${earnings.totalPlatformEarnings.toLocaleString()} XOF`}
                 icon={<FiDollarSign />}
                 trend="up"
-                trendValue={`12% ${t('admin.vsLastMonth')}`}
+                trendValue={t('admin.selectedPeriod', 'In selected period')}
               />
               <StatsCard
                 label={t('admin.driverEarnings')}
                 value={`${earnings.totalDriverEarnings.toLocaleString()} XOF`}
                 icon={<FiTrendingUp />}
                 trend="up"
-                trendValue={`18% ${t('admin.vsLastMonth')}`}
+                trendValue={t('admin.selectedPeriod', 'In selected period')}
               />
               <StatsCard
                 label={t('admin.totalRevenue')}
                 value={`${(earnings.totalPlatformEarnings + earnings.totalDriverEarnings).toLocaleString()} XOF`}
                 icon={<FiDollarSign />}
                 trend="up"
-                trendValue={`15% ${t('admin.vsLastMonth')}`}
+                trendValue={t('admin.selectedPeriod', 'In selected period')}
               />
             </div>
 

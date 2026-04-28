@@ -145,7 +145,7 @@ export default function AdminDashboard({ params }: AdminDashboardProps) {
                 value={`${(stats.totalEarnings || 0).toLocaleString("en-US")} XOF`}
                 icon={<FiDollarSign />}
                 trend={stats.revenueThisMonth >= stats.revenueLastMonth ? "up" : "down"}
-                trendValue={`${Math.abs(stats.revenueLastMonth > 0 ? Math.round(((stats.revenueThisMonth - stats.revenueLastMonth) / stats.revenueLastMonth) * 100) : (stats.revenueThisMonth > 0 ? 100 : 0))}% ${t('admin.fromLastMonth')}`}
+                trendValue={`${stats.revenueThisMonth >= stats.revenueLastMonth ? '+' : '-'}${Math.abs(stats.revenueThisMonth - stats.revenueLastMonth).toLocaleString("en-US")} XOF ${t('admin.fromLastMonth', 'vs last month')}`}
               />
               <StatsCard
                 label={t("admin.totalTrips")}
