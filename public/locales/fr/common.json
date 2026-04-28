@@ -186,6 +186,7 @@
     "destinationAddress": "Adresse de Destination",
     "openDestination": "Destination Libre",
     "navigate": "Naviguer",
+    "stopNavigation": "Arrêter la Navigation",
     "callClient": "Appeler le Client",
     "startTripVerification": "Vérification de Début de Trajet",
     "otpInstruction": "Demandez au client le code OTP à 6 chiffres pour commencer le trajet.",

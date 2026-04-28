@@ -185,6 +185,7 @@
     "destinationAddress": "Destination Address",
     "openDestination": "Open Destination",
     "navigate": "Navigate",
+    "stopNavigation": "Stop Navigation",
     "callClient": "Call Client",
     "startTripVerification": "Start Trip Verification",
     "otpInstruction": "Ask the client for the 6-digit OTP code to begin the ride.",

@@ -86,6 +86,7 @@ export default function ClientTripDetailPage() {
 
   const [trip, setTrip] = useState<Trip | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [driverLocation, setDriverLocation] = useState<[number, number] | null>(null);
 
   // Rating modal
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -144,6 +145,12 @@ export default function ClientTripDetailPage() {
           console.log(`Trip status changed to: ${data.status}`);
           loadTripDetails(false); 
         }
+      }
+    });
+
+    socket.on('driver_location_updated', (data) => {
+      if (String(data.tripId) === String(tripId)) {
+        setDriverLocation([data.latitude, data.longitude]);
       }
     });
 
@@ -377,6 +384,10 @@ export default function ClientTripDetailPage() {
               <MapRoute 
                 pickup={[parseFloat(trip.pickup_latitude.toString()), parseFloat(trip.pickup_longitude.toString())]}
                 destination={[parseFloat(trip.destination_latitude.toString()), parseFloat(trip.destination_longitude.toString())]}
+                pickupAddress={trip.pickup_address}
+                destinationAddress={trip.destination_address || undefined}
+                driverLocation={driverLocation || undefined}
+                tripStatus={trip.status}
               />
             </div>
           )}

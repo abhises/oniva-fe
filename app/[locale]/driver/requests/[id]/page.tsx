@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { 
   FiUser, 
   FiPhone, 
@@ -15,6 +16,15 @@ import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import { Card } from "@/components/common/Card";
 import { Button } from "@/components/common/Button";
+
+const MapRoute = dynamic(() => import('../../driver-trips/[tripId]/MapRoute'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[200px] w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center mb-4">
+      <div className="animate-spin text-primary w-6 h-6" />
+    </div>
+  )
+});
 
 export default function RequestDetailPage({ 
   params 
@@ -127,6 +137,18 @@ export default function RequestDetailPage({
           </a>
         </div>
       </Card>
+
+      {/* Map Display */}
+      {details.pickup_latitude && details.destination_latitude && (
+        <div className="w-full">
+          <MapRoute 
+            pickup={[parseFloat(details.pickup_latitude), parseFloat(details.pickup_longitude)]}
+            destination={[parseFloat(details.destination_latitude), parseFloat(details.destination_longitude)]}
+            pickupAddress={details.pickup_address}
+            destinationAddress={details.destination_address}
+          />
+        </div>
+      )}
 
       {/* Trip Details Card */}
       <Card>

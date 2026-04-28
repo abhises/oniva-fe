@@ -40,6 +40,8 @@ export default function DriverTripDetailPage() {
   const [trip, setTrip] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [otp, setOtp] = useState("");
+  const [isNavigating, setIsNavigating] = useState(false);
+  const socketRef = React.useRef<any>(null);
 
   const loadTripDetails = useCallback(async (showSpinner = true) => {
     if (!tripId) return;
@@ -54,8 +56,9 @@ export default function DriverTripDetailPage() {
 
   useEffect(() => {
     loadTripDetails(true);
-    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-    const socket = io(socketUrl);
+    const socketUrls = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const socket = io(socketUrls);
+    socketRef.current = socket;
 
     if (user?.id) {
       socket.emit('auth', { userId: user.id, userRole: 'driver' });
@@ -132,6 +135,18 @@ export default function DriverTripDetailPage() {
             <MapRoute 
               pickup={[parseFloat(trip.pickup_latitude), parseFloat(trip.pickup_longitude)]}
               destination={[parseFloat(trip.destination_latitude), parseFloat(trip.destination_longitude)]}
+              pickupAddress={trip.pickup_address}
+              destinationAddress={trip.destination_address}
+              isNavigating={isNavigating}
+              tripStatus={trip.status}
+              onLocationUpdate={(lat, lng) => {
+                socketRef.current?.emit('location_update', {
+                  tripId,
+                  latitude: lat,
+                  longitude: lng,
+                  accuracy: 10
+                });
+              }}
             />
           </div>
         )}
@@ -150,24 +165,26 @@ export default function DriverTripDetailPage() {
             </div>
           </div>
           
-          <div className="mt-6 flex gap-4">
-            <Button
-              variant="primary"
-              fullWidth
-              className="!py-2 md:!py-3 text-sm md:text-base"
-              onClick={() => window.open(`https://maps.google.com/?q=${trip.pickup_latitude},${trip.pickup_longitude}`)}
-            >
-              <FiNavigation /> {t("driver.navigate")}
-            </Button>
-            <Button
-              variant="success"
-              fullWidth
-              className="!py-2 md:!py-3 text-sm md:text-base"
-              onClick={() => window.location.href = `tel:${trip.client_phone}`}
-            >
-              <FiPhone /> {t("driver.callClient")}
-            </Button>
-          </div>
+          {trip.status !== 'completed' && trip.status !== 'cancelled' && (
+            <div className="mt-6 flex gap-4">
+              <Button
+                variant={isNavigating ? "secondary" : "primary"}
+                fullWidth
+                className="!py-2 md:!py-3 text-sm md:text-base"
+                onClick={() => setIsNavigating(!isNavigating)}
+              >
+                <FiNavigation /> {isNavigating ? t("driver.stopNavigation") : t("driver.navigate")}
+              </Button>
+              <Button
+                variant="success"
+                fullWidth
+                className="!py-2 md:!py-3 text-sm md:text-base"
+                onClick={() => window.location.href = `tel:${trip.client_phone}`}
+              >
+                <FiPhone /> {t("driver.callClient")}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Driver Actions (OTP) */}
