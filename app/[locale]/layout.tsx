@@ -27,10 +27,10 @@ export const metadata: Metadata = {
     description: 'Premium On-demand personal driver service.',
     siteName: 'ONIVA Transport',
     images: [{
-      url: ONIVA_FAVICON_SVG,
-      width: 800,
-      height: 600,
-      alt: 'ONIVA Brand Logo'
+      url: '/social-preview.png',
+      width: 1200,
+      height: 630,
+      alt: 'ONIVA App Preview'
     }]
   }
 };
