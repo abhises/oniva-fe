@@ -14,6 +14,9 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: 'ONIVA - Your Personal Driver',
   description: 'On-demand personal driver service',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

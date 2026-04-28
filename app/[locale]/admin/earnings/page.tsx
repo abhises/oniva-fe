@@ -106,7 +106,7 @@ export default function AdminEarningsPage({ params }: AdminEarningsPageProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <StatsCard
                 label={t('admin.platformCommission')}
-                value={`${earnings.totalPlatformEarnings.toLocaleString()} XOF`}
+                value={`${earnings.totalCommission.toLocaleString()} XOF`}
                 icon={<FiDollarSign />}
                 trend="up"
                 trendValue={t('admin.selectedPeriod', 'In selected period')}
@@ -120,7 +120,7 @@ export default function AdminEarningsPage({ params }: AdminEarningsPageProps) {
               />
               <StatsCard
                 label={t('admin.totalRevenue')}
-                value={`${(earnings.totalPlatformEarnings + earnings.totalDriverEarnings).toLocaleString()} XOF`}
+                value={`${earnings.totalPlatformEarnings.toLocaleString()} XOF`}
                 icon={<FiDollarSign />}
                 trend="up"
                 trendValue={t('admin.selectedPeriod', 'In selected period')}
