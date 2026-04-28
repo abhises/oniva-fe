@@ -8,6 +8,7 @@ import {
   Popup,
   Polyline,
   useMapEvents,
+  AttributionControl
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -421,6 +422,7 @@ export const UnifiedLocationPicker = ({
 
       {/* Map - Click to select locations */}
       <MapContainer
+        attributionControl={false}
         center={[14.7167, -17.4677]} // Dakar
         zoom={12}
         style={{
@@ -431,9 +433,10 @@ export const UnifiedLocationPicker = ({
         }}
         ref={mapRef}
       >
+        <AttributionControl position="bottomright" prefix={false} />
         <TileLayer
-          attribution="© OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url={process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+          attribution="&copy; Oniva Map"
         />
 
         {/* Handle map clicks */}

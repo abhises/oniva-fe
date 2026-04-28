@@ -24,7 +24,7 @@ import {
   FiCheckCircle,
   FiList,
 } from 'react-icons/fi'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, AttributionControl } from 'react-leaflet'
 import L from 'leaflet'
 
 const OnlineDriverIcon = new L.Icon({
@@ -351,6 +351,7 @@ export default function AdminTripsPage() {
             {activeTrips.length > 0 ? (
               <div className="h-80 rounded-lg overflow-hidden border border-gray-200">
                 <MapContainer
+                  attributionControl={false}
                   center={
                     activeTrips[0]?.driver?.location?.latitude && activeTrips[0]?.driver?.location?.longitude
                       ? [activeTrips[0].driver.location.latitude, activeTrips[0].driver.location.longitude]
@@ -359,9 +360,10 @@ export default function AdminTripsPage() {
                   zoom={12}
                   style={{ width: '100%', height: '100%' }}
                 >
+                  <AttributionControl position="bottomright" prefix={false} />
                   <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    url={process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+                    attribution="&copy; Oniva Map"
                   />
                   {activeTrips.map((trip) => {
                     const driverLocation = trip.driver?.location

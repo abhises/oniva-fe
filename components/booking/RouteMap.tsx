@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Polyline, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, AttributionControl } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -83,14 +83,16 @@ export const RouteMap = ({ pickup, dropoff, onPickupChange, onDropoffChange }: P
   return (
     <div style={{ height: '400px', width: '100%', marginBottom: '1rem' }}>
       <MapContainer
+        attributionControl={false}
         center={[14.7167, -17.4677]}
         zoom={12}
         style={{ height: '100%', width: '100%' }}
         ref={mapRef}
       >
+        <AttributionControl position="bottomright" prefix={false} />
         <TileLayer
-          attribution="© OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url={process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+          attribution="&copy; Oniva Map"
         />
 
         <MapClickHandler

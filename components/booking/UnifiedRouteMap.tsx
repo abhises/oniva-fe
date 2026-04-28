@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Polyline, useMap, AttributionControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -48,8 +48,12 @@ export default function UnifiedRouteMap({ pickup, dropoff, routeGeometry }: Unif
 
   return (
     <div className="w-full h-64 md:h-80 rounded-lg overflow-hidden shadow-md border border-gray-200 z-0 mb-6">
-      <MapContainer center={defaultCenter} zoom={13} className="w-full h-full">
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <MapContainer attributionControl={false} center={defaultCenter} zoom={13} className="w-full h-full">
+        <AttributionControl position="bottomright" prefix={false} />
+        <TileLayer 
+          url={process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"} 
+          attribution="&copy; Oniva Map"
+        />
         {pickup?.latitude ? <Marker position={[pickup.latitude, pickup.longitude]} /> : null}
         {dropoff?.latitude ? <Marker position={[dropoff.latitude, dropoff.longitude]} /> : null}
         {leafletPath && <Polyline positions={leafletPath} color="#2563eb" weight={5} opacity={0.8} />}

@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, AttributionControl } from "react-leaflet";
 import type { LatLngExpression, LatLngBoundsExpression } from "leaflet";
 import { useEffect, useState } from "react";
 import L from "leaflet";
@@ -170,15 +170,17 @@ function AnimatedCars() {
 export default function SenegalMap() {
   return (
     <MapContainer
+      attributionControl={false}
       center={center}
       zoom={13}
       maxBounds={bounds}
       maxBoundsViscosity={1.0}
       style={{ height: "100%", width: "100%" }}
     >
+      <AttributionControl position="bottomright" prefix={false} />
       <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
+        url={process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+        attribution="&copy; Oniva Map"
       />
 
       <Marker position={center} icon={pinCheckMarker}>

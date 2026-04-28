@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, useMap, AttributionControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -64,10 +64,11 @@ export default function MapRoute({ pickup, destination }: MapRouteProps) {
 
   return (
     <div className="h-[300px] w-full rounded-xl overflow-hidden shadow-md z-0 relative border border-gray-200">
-      <MapContainer bounds={bounds} style={{ height: '100%', width: '100%' }}>
+      <MapContainer attributionControl={false} bounds={bounds} style={{ height: '100%', width: '100%' }}>
+        <AttributionControl position="bottomright" prefix={false} />
         <TileLayer 
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
-          attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url={process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"} 
+          attribution="&copy; Oniva Map"
         />
         <Marker position={pickup} />
         <Marker position={destination} />
