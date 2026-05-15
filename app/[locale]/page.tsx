@@ -32,6 +32,8 @@ export default function LandingPage() {
     }
   }, [isAuthenticated, user, locale, router, isReady])
 
+  
+
   if (!isReady) return null;
 
   return (
