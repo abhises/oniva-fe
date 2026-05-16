@@ -75,6 +75,7 @@ export default function BookTripPage() {
   const [isEstimating, setIsEstimating] = useState(false);
   const [bookingStep, setBookingStep] = useState<"details" | "confirmation" | "success">("details");
   const [routeGeometry, setRouteGeometry] = useState<[number, number][] | null>(null);
+  const [activeField, setActiveField] = useState<"pickup" | "dropoff">("pickup");
 
   const [formData, setFormData] = useState<BookingFormData>({
     pickupLocation: { address: "", latitude: 0, longitude: 0 },
@@ -197,6 +198,31 @@ export default function BookTripPage() {
   const handleDropoffChange = (location: any) => {
     setFormData((prev) => ({ ...prev, dropoffLocation: location }));
     setRouteGeometry(null); setFareEstimate(null);
+  };
+
+  const handleMapClick = async (lat: number, lng: number) => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
+      const res = await fetch(`${baseUrl}/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await res.json();
+      
+      const address = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      const location = { address, latitude: lat, longitude: lng };
+      
+      if (activeField === "pickup") {
+        handlePickupChange(location);
+        // Switch to dropoff automatically if it's empty
+        if (!formData.dropoffLocation.address && formData.bookingType === 'point-to-point') {
+          setActiveField("dropoff");
+        }
+      } else {
+        handleDropoffChange(location);
+      }
+      toast.success(`${activeField === 'pickup' ? t('client.pickup') : t('client.destination')} set!`);
+    } catch (error) {
+      console.error("Map click error:", error);
+      toast.error("Failed to get address from map");
+    }
   };
 
   const handleInputChange = (e: any) => {
@@ -360,6 +386,7 @@ export default function BookTripPage() {
               pickup={formData.pickupLocation?.latitude ? formData.pickupLocation : null} 
               dropoff={formData.dropoffLocation?.latitude ? formData.dropoffLocation : null} 
               routeGeometry={routeGeometry} 
+              onMapClick={handleMapClick}
             />
             {/* Live Status Overlay */}
             <div className="absolute top-6 left-6 z-10">
@@ -399,10 +426,11 @@ export default function BookTripPage() {
 
                  <div className="grid grid-cols-1 gap-6 relative">
                    <div className="space-y-4">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('client.pickup')}</label>
+                      <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${activeField === 'pickup' ? 'text-primary' : 'text-gray-400'}`}>{t('client.pickup')}</label>
                       <LocationPicker 
                         value={formData.pickupLocation} 
                         onChange={handlePickupChange} 
+                        onFocus={() => setActiveField("pickup")}
                         placeholder={t('client.wherePickingUp')}
                         error={errors.pickup} 
                       />
@@ -410,10 +438,11 @@ export default function BookTripPage() {
 
                    {formData.bookingType === 'point-to-point' && (
                    <div className="space-y-4 relative">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{t('client.destination')}</label>
+                      <label className={`text-[10px] font-black uppercase tracking-widest ml-1 ${activeField === 'dropoff' ? 'text-primary' : 'text-gray-400'}`}>{t('client.destination')}</label>
                       <LocationPicker 
                         value={formData.dropoffLocation} 
                         onChange={handleDropoffChange} 
+                        onFocus={() => setActiveField("dropoff")}
                         placeholder={t('client.whereHeading')} 
                         error={errors.dropoff} 
                       />

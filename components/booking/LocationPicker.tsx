@@ -12,6 +12,7 @@ interface Location {
 interface Props {
   value: Location;
   onChange: (location: Location) => void;
+  onFocus?: () => void;
   placeholder?: string;
   error?: string;
 }
@@ -30,7 +31,7 @@ async function searchLocation(query: string) {
   }
 }
 
-export const LocationPicker = ({ value, onChange, placeholder = "Search location...", error }: Props) => {
+export const LocationPicker = ({ value, onChange, onFocus, placeholder = "Search location...", error }: Props) => {
   const [search, setSearch] = useState(value.address || "");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -127,6 +128,7 @@ export const LocationPicker = ({ value, onChange, placeholder = "Search location
             setShowSuggestions(true);
           }}
           onFocus={() => {
+            if (onFocus) onFocus();
             if (search.length > 0 && suggestions.length > 0) {
               setShowSuggestions(true);
             }
