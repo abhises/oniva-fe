@@ -31,6 +31,7 @@ export default function AdminDriversPage() {
   const { isLoading, request } = useApi({ showSuccess: true });
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [filter, setFilter] = useState("all");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDrivers = async () => {
@@ -105,11 +106,16 @@ export default function AdminDriversPage() {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4 flex-1">
                   {driver.profile_photo ? (
-                    <img
-                      src={driver.profile_photo}
-                      alt={driver.fullName}
-                      className="w-12 h-12 rounded-full object-cover border border-gray-200"
-                    />
+                    <div className="relative group cursor-pointer" onClick={() => setSelectedImage(driver.profile_photo || null)}>
+                      <img
+                        src={driver.profile_photo}
+                        alt={driver.fullName}
+                        className="w-12 h-12 rounded-full object-cover border border-gray-200 group-hover:scale-110 transition-transform"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
+                        <FiEye className="text-white w-4 h-4" />
+                      </div>
+                    </div>
                   ) : (
                     <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl">
                       {driver.fullName?.charAt(0).toUpperCase()}
@@ -180,6 +186,30 @@ export default function AdminDriversPage() {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+      {/* Image Zoom Modal/Lightbox */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button 
+            className="absolute top-6 right-6 text-white hover:text-gray-300 transition-colors z-[101]"
+            onClick={() => setSelectedImage(null)}
+          >
+            <FiX className="w-10 h-10" />
+          </button>
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+             <img 
+               src={selectedImage} 
+               alt="Zoomed" 
+               className="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300" 
+             />
+             <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium whitespace-nowrap">
+                Click anywhere outside to close
+             </div>
+          </div>
         </div>
       )}
     </div>

@@ -35,6 +35,7 @@ export default function AdminDriverDetailsPage() {
   const [driverData, setDriverData] = useState<any>(null);
   const [recentTrips, setRecentTrips] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const fetchDriverData = async () => {
     try {
@@ -165,11 +166,16 @@ export default function AdminDriverDetailsPage() {
               {/* Profile Card */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <div className="flex flex-col items-center">
-                  <img
-                    src={driverData.profile_photo || "/default-avatar.png"}
-                    alt="Driver Photo"
-                    className="w-32 h-32 rounded-full object-cover border-4 border-gray-50 shadow-sm mb-4"
-                  />
+                  <div className="relative group cursor-pointer" onClick={() => setSelectedImage(driverData.profile_photo || "/default-avatar.png")}>
+                    <img
+                      src={driverData.profile_photo || "/default-avatar.png"}
+                      alt="Driver Photo"
+                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-50 shadow-sm mb-4 transition-transform group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 rounded-full w-32 h-32">
+                      <FiEye className="text-white w-6 h-6" />
+                    </div>
+                  </div>
                   <h2 className="text-xl font-bold text-gray-900 mb-1">{driverData.full_name}</h2>
                   <p className="text-sm font-medium text-gray-500 mb-4 uppercase flex items-center gap-1">
                     <span className={`w-2 h-2 rounded-full ${driverData.is_online ? 'bg-green-500' : 'bg-gray-400'}`}></span>
@@ -247,13 +253,15 @@ export default function AdminDriverDetailsPage() {
                     <p className="text-sm font-bold text-gray-900 mb-1">{t("driverProfile.nationalIdCard", "National ID")}</p>
                     <p className="text-xs text-gray-500 font-mono mb-3 uppercase">NO: {driverData.national_id}</p>
                     {driverData.national_id_url ? (
-                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 shadow-sm bg-gray-200">
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 shadow-sm bg-gray-200 group cursor-pointer" onClick={() => setSelectedImage(driverData.national_id_url)}>
                         <img 
                           src={driverData.national_id_url} 
                           alt="National ID Preview" 
-                          className="object-cover w-full h-full hover:scale-105 transition-transform" 
-                          onClick={() => window.open(driverData.national_id_url, "_blank")}
+                          className="object-cover w-full h-full group-hover:scale-105 transition-transform" 
                         />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                           <FiEye className="text-white w-10 h-10" />
+                        </div>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg bg-white">
@@ -267,13 +275,15 @@ export default function AdminDriverDetailsPage() {
                     <p className="text-sm font-bold text-gray-900 mb-1">{t("driverProfile.drivingLicense", "Driving License")}</p>
                     <p className="text-xs text-gray-500 font-mono mb-3 uppercase">NO: {driverData.driving_license}</p>
                     {driverData.driving_license_url ? (
-                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 shadow-sm bg-gray-200">
+                      <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 shadow-sm bg-gray-200 group cursor-pointer" onClick={() => setSelectedImage(driverData.driving_license_url)}>
                         <img 
                           src={driverData.driving_license_url} 
                           alt="Driving License Preview" 
-                          className="object-cover w-full h-full hover:scale-105 transition-transform" 
-                          onClick={() => window.open(driverData.driving_license_url, "_blank")}
+                          className="object-cover w-full h-full group-hover:scale-105 transition-transform" 
                         />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                           <FiEye className="text-white w-10 h-10" />
+                        </div>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg bg-white">
@@ -337,6 +347,30 @@ export default function AdminDriverDetailsPage() {
             </div>
           </div>
         </div>
+        {/* Image Zoom Modal/Lightbox */}
+        {selectedImage && (
+          <div 
+            className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300"
+            onClick={() => setSelectedImage(null)}
+          >
+            <button 
+              className="absolute top-6 right-6 text-white hover:text-gray-300 transition-colors z-[101]"
+              onClick={() => setSelectedImage(null)}
+            >
+              <FiX className="w-10 h-10" />
+            </button>
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
+               <img 
+                 src={selectedImage} 
+                 alt="Zoomed" 
+                 className="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300" 
+               />
+               <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 text-white/70 text-sm font-medium whitespace-nowrap">
+                  Click anywhere outside to close
+               </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );
