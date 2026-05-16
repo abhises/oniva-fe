@@ -138,11 +138,13 @@ export default function BookTripPage() {
       if (formData.bookingType === "point-to-point") {
         const osrmBaseUrl = process.env.NEXT_PUBLIC_OSRM_URL || "http://localhost:5001";
         const coords = `${formData.pickupLocation.longitude},${formData.pickupLocation.latitude};${formData.dropoffLocation.longitude},${formData.dropoffLocation.latitude}`;
-        const res = await fetch(`${osrmBaseUrl}/route/v1/driving/${coords}?overview=full&geometries=geojson`);
+        const res = await fetch(`${osrmBaseUrl}/route/v1/driving/${coords}?overview=full&geometries=geojson&alternatives=true`);
         const data = await res.json();
         
         if (data.code === "Ok") {
-          const route = data.routes[0];
+          // Sort by distance to find the shortest road distance
+          const sortedRoutes = [...data.routes].sort((a, b) => a.distance - b.distance);
+          const route = sortedRoutes[0];
           setRouteGeometry(route.geometry.coordinates);
           distanceKm = route.distance / 1000;
           durationMins = Math.ceil(route.duration / 60);

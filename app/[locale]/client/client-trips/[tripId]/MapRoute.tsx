@@ -60,15 +60,19 @@ export default function MapRoute({ pickup, destination, pickupAddress, destinati
         const baseUrl = process.env.NEXT_PUBLIC_OSRM_URL || "https://router.project-osrm.org";
         
         // OSRM expects coordinates in [longitude, latitude] format
-        const res = await fetch(`${baseUrl}/route/v1/driving/${pickup[1]},${pickup[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson`);
+        const res = await fetch(`${baseUrl}/route/v1/driving/${pickup[1]},${pickup[0]};${destination[1]},${destination[0]}?overview=full&geometries=geojson&alternatives=true`);
         
         if (!res.ok) throw new Error("Failed to fetch route from OSRM");
         
         const data = await res.json();
         
-        if (data.routes && data.routes[0]) {
+        if (data.routes && data.routes.length > 0) {
+          // Sort by distance to find the shortest road distance
+          const sortedRoutes = [...data.routes].sort((a, b) => a.distance - b.distance);
+          const route = sortedRoutes[0];
+          
           // Convert OSRM [lon, lat] back to Leaflet [lat, lon] for the Polyline
-          const coords = data.routes[0].geometry.coordinates.map((c: any) => [c[1], c[0]]);
+          const coords = route.geometry.coordinates.map((c: any) => [c[1], c[0]]);
           setRoute(coords);
         }
       } catch (err) {
@@ -100,12 +104,14 @@ export default function MapRoute({ pickup, destination, pickupAddress, destinati
     const fetchDriverRoute = async () => {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_OSRM_URL || "https://router.project-osrm.org";
-        const res = await fetch(`${baseUrl}/route/v1/driving/${driverLocation[1]},${driverLocation[0]};${target[1]},${target[0]}?overview=full&geometries=geojson`);
+        const res = await fetch(`${baseUrl}/route/v1/driving/${driverLocation[1]},${driverLocation[0]};${target[1]},${target[0]}?overview=full&geometries=geojson&alternatives=true`);
         if (!res.ok) throw new Error("Failed to fetch driver route");
         
         const data = await res.json();
-        if (data.routes && data.routes[0]) {
-          const coords = data.routes[0].geometry.coordinates.map((c: any) => [c[1], c[0]]);
+        if (data.routes && data.routes.length > 0) {
+          const sortedRoutes = [...data.routes].sort((a, b) => a.distance - b.distance);
+          const route = sortedRoutes[0];
+          const coords = route.geometry.coordinates.map((c: any) => [c[1], c[0]]);
           setDriverRoute(coords);
           lastRoutedDriverPos.current = routeKey;
         }

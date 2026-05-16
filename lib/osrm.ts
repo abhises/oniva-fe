@@ -13,7 +13,7 @@ export interface DistanceResult {
   perMinRate: number
 }
 
-const OSRM_API = 'https://router.project-osrm.org/route/v1/driving'
+const getOsrmBaseUrl = () => process.env.NEXT_PUBLIC_OSRM_URL || 'https://router.project-osrm.org';
 
 export async function calculateDistance(
   pickup: { latitude: number; longitude: number },
@@ -21,11 +21,12 @@ export async function calculateDistance(
   bookingType: 'point-to-point' | 'hourly' = 'point-to-point'
 ): Promise<DistanceResult | null> {
   try {
+    const baseUrl = getOsrmBaseUrl();
     // OSRM expects coordinates as [longitude, latitude]
     const coordinates = `${pickup.longitude},${pickup.latitude};${dropoff.longitude},${dropoff.latitude}`
 
     const response = await fetch(
-      `${OSRM_API}/${coordinates}?overview=full&geometries=geojson`
+      `${baseUrl}/route/v1/driving/${coordinates}?overview=full&geometries=geojson&alternatives=true`
     )
 
     if (!response.ok) {
@@ -38,7 +39,10 @@ export async function calculateDistance(
       throw new Error('No route found')
     }
 
-    const route = data.routes[0]
+    // Pick the shortest distance route among alternatives
+    const sortedRoutes = [...data.routes].sort((a, b) => a.distance - b.distance);
+    const route = sortedRoutes[0];
+    
     const distanceInKm = route.distance / 1000
     const durationInMinutes = Math.ceil(route.duration / 60)
 
@@ -84,10 +88,11 @@ export async function getRouteDetails(
   dropoff: { latitude: number; longitude: number }
 ): Promise<OSRMRoute | null> {
   try {
+    const baseUrl = getOsrmBaseUrl();
     const coordinates = `${pickup.longitude},${pickup.latitude};${dropoff.longitude},${dropoff.latitude}`
 
     const response = await fetch(
-      `${OSRM_API}/${coordinates}?overview=full&geometries=geojson`
+      `${baseUrl}/route/v1/driving/${coordinates}?overview=full&geometries=geojson&alternatives=true`
     )
 
     const data = await response.json()
@@ -96,7 +101,9 @@ export async function getRouteDetails(
       return null
     }
 
-    const route = data.routes[0]
+    // Pick the shortest distance route among alternatives
+    const sortedRoutes = [...data.routes].sort((a, b) => a.distance - b.distance);
+    const route = sortedRoutes[0];
 
     return {
       distance: route.distance,
