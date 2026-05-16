@@ -44,39 +44,19 @@ function MapClickHandler({ onPickupChange, onDropoffChange, pickup, dropoff }: a
 }
 
 async function reverseGeocode(lat: number, lng: number, onChange: any) {
-  const retries = 3;
-  let backoff = 2000;
-  
-  for (let i = 0; i < retries; i++) {
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
-      const timestamp = Date.now();
-      const res = await fetch(
-        `${baseUrl}/reverse?lat=${lat}&lon=${lng}&format=json&t=${timestamp}`,
-        { signal: AbortSignal.timeout(10000) }
-      )
-      
-      if (res.ok) {
-        const data = await res.json()
-        onChange({
-          address: data.display_name || 'Selected location',
-          latitude: lat,
-          longitude: lng,
-        })
-        return;
-      }
-      
-      if (res.status === 503 || res.status === 504 || res.status === 502) {
-        console.log(`Geocoding service waking up (attempt ${i + 1}/${retries})...`);
-      } else {
-        throw new Error(`Status ${res.status}`);
-      }
-    } catch (err) {
-      if (i === retries - 1) console.error('Geocoding error after retries', err);
-    }
-    
-    await new Promise(resolve => setTimeout(resolve, backoff));
-    backoff *= 1.5;
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
+    const res = await fetch(
+      `${baseUrl}/reverse?lat=${lat}&lon=${lng}&format=json`
+    )
+    const data = await res.json()
+    onChange({
+      address: data.display_name || 'Selected location',
+      latitude: lat,
+      longitude: lng,
+    })
+  } catch (err) {
+    console.error('Geocoding error', err)
   }
 }
 

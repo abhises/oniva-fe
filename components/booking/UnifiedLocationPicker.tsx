@@ -113,32 +113,13 @@ function MapMarkers({ pickupLocation, dropoffLocation }: any) {
   );
 }
 
-async function fetchWithRetry(url: string, options = {}, retries = 3, backoff = 2000) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const res = await fetch(url, options);
-      if (res.ok) return await res.json();
-      
-      // If we get a 503 or 504, it might be the space waking up
-      if (res.status === 503 || res.status === 504 || res.status === 502) {
-        console.log(`Service waking up (attempt ${i + 1}/${retries})...`);
-      } else {
-        throw new Error(`Status ${res.status}`);
-      }
-    } catch (error) {
-      if (i === retries - 1) throw error;
-      console.log(`Fetch failed, retrying in ${backoff}ms...`, error);
-    }
-    await new Promise(resolve => setTimeout(resolve, backoff));
-    backoff *= 1.5; // Exponential backoff
-  }
-}
-
 async function reverseGeocode(lat: number, lng: number) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
-    const timestamp = Date.now();
-    const data = await fetchWithRetry(`${baseUrl}/reverse?lat=${lat}&lon=${lng}&format=json&t=${timestamp}`);
+    const res = await fetch(
+      `${baseUrl}/reverse?lat=${lat}&lon=${lng}&format=json`,
+    );
+    const data = await res.json();
     return data.display_name || "Selected location";
   } catch (error) {
     console.error("Geocoding error:", error);
@@ -151,8 +132,10 @@ async function searchLocation(query: string) {
 
   try {
     const baseUrl = process.env.NEXT_PUBLIC_GEOCODING_URL || "https://abhises-oniva-osm-search.hf.space";
-    const timestamp = Date.now();
-    const data = await fetchWithRetry(`${baseUrl}/search?format=json&q=${query}&limit=8&t=${timestamp}`);
+    const res = await fetch(
+      `${baseUrl}/search?format=json&q=${query}&limit=8`,
+    );
+    const data = await res.json();
     return data;
   } catch (error) {
     console.error("Search error:", error);
