@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { DriverProfileForm } from "@/components/driver/DriverProfileForm";
 import { DocumentUpload } from "@/components/driver/DocumentUpload";
-import { VehicleInformation } from "@/components/driver/VehicleInformation";
+
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
 import toast from "react-hot-toast";
@@ -22,23 +22,16 @@ export interface ProfileStepData {
   region: string;
 }
 
-export interface VehicleStepData {
-  make: string;
-  model: string;
-  year: number;
-  licensePlate: string;
-  color: string;
-}
+
 
 interface DriverRegistrationState {
   profile: ProfileStepData | null;
   documents: any | null; // Contains URLs from Step 2
-  vehicle: VehicleStepData | null;
 }
 
 /* =========================
    Component
-========================= */
+ ========================= */
 
 export default function DriverSetupPage() {
   const { t } = useTranslation();
@@ -49,7 +42,6 @@ export default function DriverSetupPage() {
   const [formData, setFormData] = useState<DriverRegistrationState>({
     profile: null,
     documents: null,
-    vehicle: null,
   });
 
   const handleProfileComplete = (data: ProfileStepData) => {
@@ -57,45 +49,37 @@ export default function DriverSetupPage() {
     setStep(2);
   };
 
-  const handleDocsComplete = (data: any) => {
-    setFormData((prev) => ({ ...prev, documents: data }));
-    setStep(3);
-  };
-
-  const handleFinalSubmit = async (vehicleData: VehicleStepData) => {
-    // Safety check
-    if (!formData.profile || !formData.documents) {
-      toast.error("Required information missing. Please check steps 1 and 2.");
+  const handleDocsComplete = async (data: any) => {
+    // 1. Submit Final Payload directly
+    if (!formData.profile) {
+      toast.error("Profile information missing.");
       setStep(1);
       return;
     }
 
-    // FINAL PAYLOAD: Separating Numbers from URLs
     const finalPayload = {
-      // 1. Identification Numbers (from Step 1)
+      // 1. Identification Numbers
       nationalId: formData.profile.nationalId,
       drivingLicense: formData.profile.drivingLicense,
 
-      // 2. Document Image URLs (from Supabase in Step 2)
-      nationalIdUrl: formData.documents.nationalId?.url,
-      drivingLicenseUrl: formData.documents.drivingLicense?.url,
-      profilePhoto: formData.documents.profilePhoto?.url,
+      // 2. Document Image URLs
+      nationalIdUrl: data.nationalId?.url,
+      drivingLicenseUrl: data.drivingLicense?.url,
+      profilePhoto: data.profilePhoto?.url,
 
-      // 3. Region & Expiry (from Step 1)
+      // 3. Region & Expiry
       licenseExpiry: formData.profile.licenseExpiry,
       region: formData.profile.region,
 
-      // 4. Vehicle Details (from Step 3)
+      // 4. Default Vehicle Details (Removed from UI)
       vehicleInfo: {
-        make: vehicleData.make,
-        model: vehicleData.model,
-        year: Number(vehicleData.year),
-        licensePlate: vehicleData.licensePlate,
-        color: vehicleData.color,
+        make: "N/A",
+        model: "N/A",
+        year: 0,
+        licensePlate: "N/A",
+        color: "N/A",
       },
     };
-
-    console.log("Submitting Final Payload:", finalPayload);
 
     const result = await request(() =>
       apiClient.createDriverProfile(finalPayload)
@@ -117,10 +101,10 @@ export default function DriverSetupPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               {t("driver.onboardingTitle", "Driver Onboarding")}
             </h1>
-            <p className="text-gray-500 mb-6 font-medium">{t("driver.onboardingDesc", "Complete all 3 steps to start earning")}</p>
+            <p className="text-gray-500 mb-6 font-medium">{t("driver.onboardingDesc", "Complete all steps to start earning")}</p>
             
             <div className="flex items-center justify-center space-x-4">
-              {[1, 2, 3].map((s) => (
+              {[1, 2].map((s) => (
                 <React.Fragment key={s}>
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-colors ${
@@ -131,7 +115,7 @@ export default function DriverSetupPage() {
                   >
                     {s}
                   </div>
-                  {s < 3 && (
+                  {s < 2 && (
                     <div
                       className={`w-12 h-0.5 transition-colors ${step > s ? "bg-blue-600" : "bg-gray-300"}`}
                     />
@@ -159,18 +143,6 @@ export default function DriverSetupPage() {
                   onBack={() => setStep(1)}
                   isInitialSetup={true}
                   initialData={formData.documents}
-                />
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <VehicleInformation
-                  onSuccess={handleFinalSubmit}
-                  onBack={() => setStep(2)}
-                  isInitialSetup={true}
-                  isLoading={isLoading}
-                  initialData={formData.vehicle}
                 />
               </div>
             )}

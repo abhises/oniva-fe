@@ -41,8 +41,8 @@ export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required'
-    if (!formData.phone.trim()) newErrors.phone = 'Phone is required'
+    if (!isInitialSetup && !formData.fullName.trim()) newErrors.fullName = 'Full name is required'
+    if (!isInitialSetup && !formData.phone.trim()) newErrors.phone = 'Phone is required'
     if (!formData.nationalId.trim()) newErrors.nationalId = 'National ID is required'
     if (!formData.drivingLicense.trim()) newErrors.drivingLicense = 'License number is required'
     if (!formData.licenseExpiry) newErrors.licenseExpiry = 'Expiry date is required'
@@ -97,35 +97,39 @@ export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Full Name */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            <FiUser className="inline mr-2" /> Full Name
-          </label>
-          <input
-            type="text"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
-              errors.fullName ? 'border-red-500' : 'border-gray-300'
-            }`}
-          />
-        </div>
+        {!isInitialSetup && (
+          <>
+            {/* Full Name */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <FiUser className="inline mr-2" /> Full Name
+              </label>
+              <input
+                type="text"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
+                  errors.fullName ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+            </div>
 
-        {/* Phone */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            <FiPhone className="inline mr-2" /> Phone
-          </label>
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <FiPhone className="inline mr-2" /> Phone
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </>
+        )}
 
         {/* National ID */}
         <div>
