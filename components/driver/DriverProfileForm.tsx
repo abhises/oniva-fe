@@ -108,10 +108,8 @@ export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
                 type="text"
                 name="fullName"
                 value={formData.fullName}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
-                  errors.fullName ? 'border-red-500' : 'border-gray-300'
-                }`}
+                readOnly
+                className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg text-gray-500 cursor-not-allowed outline-none"
               />
             </div>
 
@@ -124,10 +122,11 @@ export const DriverProfileForm: React.FC<DriverProfileFormProps> = ({
                 type="tel"
                 name="phone"
                 value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                readOnly
+                className="w-full px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg text-gray-500 cursor-not-allowed outline-none"
               />
             </div>
+
           </>
         )}
 

@@ -11,7 +11,7 @@ import { DocumentUpload } from "@/components/driver/DocumentUpload";
 import { VehicleInformation } from "@/components/driver/VehicleInformation";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/services/api";
-import { FiEdit2, FiUser, FiTruck, FiFileText, FiCheckCircle, FiClock, FiAlertCircle } from "react-icons/fi";
+import { FiEdit2, FiUser, FiTruck, FiFileText, FiCheckCircle, FiClock, FiAlertCircle, FiEye, FiX } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { Button } from "@/components/common/Button";
 
@@ -26,10 +26,11 @@ export default function DriverProfilePage() {
   const { t } = useTranslation("common");
   const { isLoading: isActionLoading, request } = useApi({ showSuccess: true });
   
-  const [activeTab, setActiveTab] = useState<"profile" | "documents" | "vehicle">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "documents">("profile");
   const [profileData, setProfileData] = useState<any>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   useEffect(() => {
     loadProfile();
@@ -87,12 +88,18 @@ export default function DriverProfilePage() {
         {/* Top Profile Header */}
         <div className="bg-white border-b border-gray-200 pt-10 pb-6 px-4">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-6">
-            <div className="relative">
+            <div 
+              className="relative group cursor-zoom-in"
+              onClick={() => setZoomedImage(profileData?.profile_photo || "/default-avatar.png")}
+            >
               <img 
                 src={profileData?.profile_photo || "/default-avatar.png"} 
-                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md transition-transform group-hover:scale-105"
                 alt="Profile"
               />
+              <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                <FiEye className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
               <div className="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-2 border-white" />
             </div>
             <div className="text-center md:text-left flex-1">
@@ -119,7 +126,6 @@ export default function DriverProfilePage() {
             {[
               { id: "profile", label: t('driverProfile.personalInfo'), icon: <FiUser /> },
               { id: "documents", label: t('driverProfile.verificationDocs'), icon: <FiFileText /> },
-              { id: "vehicle", label: t('driverProfile.vehicleInfo'), icon: <FiTruck /> },
             ].map((tab) => (
               <Button
                 key={tab.id}
@@ -144,7 +150,6 @@ export default function DriverProfilePage() {
                     <h2 className="text-lg font-bold mb-6 text-gray-800 border-b pb-2">{t('driverProfile.updatingInformation')}</h2>
                     {activeTab === "profile" && <DriverProfileForm initialData={profileData} onSuccess={handleUpdateSuccess} />}
                     {activeTab === "documents" && <DocumentUpload initialData={profileData} onSuccess={handleUpdateSuccess} />}
-                    {activeTab === "vehicle" && <VehicleInformation initialData={profileData?.vehicle_info} onSuccess={handleUpdateSuccess} />}
                   </div>
                 ) : (
                   /* --- VIEW MODE --- */
@@ -172,11 +177,16 @@ export default function DriverProfilePage() {
                                    <p className="text-[10px] text-gray-500 uppercase">{t('driverProfile.uploadedOn')} {new Date(profileData?.created_at).toLocaleDateString()}</p>
                                 </div>
                              </div>
-                             <a href={profileData?.national_id_url} target="_blank" className="text-blue-600 font-bold text-xs hover:underline">{t('driverProfile.openFull')}</a>
                            </div>
                            {profileData?.national_id_url ? (
-                             <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
-                               <img src={profileData.national_id_url} alt="National ID" className="w-full h-full object-cover hover:object-contain transition-all" />
+                             <div 
+                              className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-300 group cursor-zoom-in"
+                              onClick={() => setZoomedImage(profileData.national_id_url)}
+                             >
+                               <img src={profileData.national_id_url} alt="National ID" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                  <FiEye className="text-white w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity" />
+                               </div>
                              </div>
                            ) : (
                              <div className="w-full aspect-video bg-gray-100 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
@@ -195,11 +205,16 @@ export default function DriverProfilePage() {
                                    <p className="text-[10px] text-gray-500 uppercase">{t('driverProfile.uploadedOn')} {new Date(profileData?.created_at).toLocaleDateString()}</p>
                                 </div>
                              </div>
-                             <a href={profileData?.driving_license_url} target="_blank" className="text-blue-600 font-bold text-xs hover:underline">{t('driverProfile.openFull')}</a>
                            </div>
                            {profileData?.driving_license_url ? (
-                             <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
-                               <img src={profileData.driving_license_url} alt="Driving License" className="w-full h-full object-cover hover:object-contain transition-all" />
+                             <div 
+                              className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden border border-gray-300 group cursor-zoom-in"
+                              onClick={() => setZoomedImage(profileData.driving_license_url)}
+                             >
+                               <img src={profileData.driving_license_url} alt="Driving License" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                  <FiEye className="text-white w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity" />
+                               </div>
                              </div>
                            ) : (
                              <div className="w-full aspect-video bg-gray-100 rounded-lg flex items-center justify-center border border-dashed border-gray-300">
@@ -209,22 +224,32 @@ export default function DriverProfilePage() {
                         </div>
                       </div>
                     )}
-
-                    {activeTab === "vehicle" && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                        <DataRow label={t('driverProfile.vehicleMake')} value={profileData?.vehicle_info?.make} />
-                        <DataRow label={t('driverProfile.vehicleModel')} value={profileData?.vehicle_info?.model} />
-                        <DataRow label={t('driverProfile.plateNumber')} value={profileData?.vehicle_info?.licensePlate} />
-                        <DataRow label={t('driverProfile.color')} value={profileData?.vehicle_info?.color} />
-                        <DataRow label={t('driverProfile.year')} value={profileData?.vehicle_info?.year} />
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Zoom Modal */}
+        {zoomedImage && (
+          <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-zoom-out animate-in fade-in duration-300"
+            onClick={() => setZoomedImage(null)}
+          >
+            <button className="absolute top-6 right-6 text-white bg-white/10 p-2 rounded-full">
+              <FiX className="w-8 h-8" />
+            </button>
+            <div className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center">
+              <img 
+                src={zoomedImage} 
+                alt="Zoomed document" 
+                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in duration-300"
+                onClick={(e) => e.stopPropagation()} 
+              />
+            </div>
+          </div>
+        )}
 
       </div>
     </ProtectedRoute>
