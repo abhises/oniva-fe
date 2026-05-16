@@ -145,8 +145,16 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
           {doc ? (
             <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
               <div className="overflow-hidden flex items-center space-x-3">
-                {type === 'profilePhoto' && (
-                   <img src={doc.url} alt="Preview" className="w-8 h-8 rounded-full object-cover border border-green-200" />
+                {doc.url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                   <img 
+                    src={doc.url} 
+                    alt="Preview" 
+                    className={`w-10 h-10 ${type === 'profilePhoto' ? 'rounded-full' : 'rounded-lg'} object-cover border border-green-200 shadow-sm`} 
+                   />
+                ) : (
+                  <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600 border border-green-200">
+                    <FiFileText size={20} />
+                  </div>
                 )}
                 <div className="overflow-hidden">
                   <p className="text-xs font-semibold text-green-900 truncate max-w-[120px]">{doc.fileName}</p>
